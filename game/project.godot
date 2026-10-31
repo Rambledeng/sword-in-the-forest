@@ -9,6 +9,9 @@ config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
 
 [autoload]
 
+Clock="*res://scripts/Core/GameClock.cs"
+Sfx="*res://scripts/Core/Sfx.cs"
+Telemetry="*res://scripts/Core/Telemetry.cs"
 Cli="*res://scripts/Cli.cs"
 
 [display]
@@ -29,6 +32,13 @@ project/assembly_name="SwordInTheForest"
 
 locale/translations=PackedStringArray("res://localization/strings.en.translation", "res://localization/strings.nl.translation", "res://localization/strings.zh_CN.translation")
 locale/fallback="en"
+
+[gui]
+
+theme/custom="res://ui/theme.tres"
+theme/default_font_antialiasing=0
+theme/default_font_hinting=0
+theme/default_font_subpixel_positioning=0
 
 [input]
 
@@ -66,7 +76,7 @@ aim_down={
 }
 attack={
 "deadzone": 0.2,
-"events": [Object(InputEventMouseButton,"button_index":1), Object(InputEventKey,"physical_keycode":74), Object(InputEventJoypadButton,"device":-1,"button_index":10)]
+"events": [Object(InputEventMouseButton,"button_index":1), Object(InputEventKey,"physical_keycode":74), Object(InputEventJoypadButton,"device":-1,"button_index":2), Object(InputEventJoypadButton,"device":-1,"button_index":10)]
 }
 guard={
 "deadzone": 0.2,
@@ -74,11 +84,11 @@ guard={
 }
 roll={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":32), Object(InputEventKey,"physical_keycode":76), Object(InputEventJoypadButton,"device":-1,"button_index":1)]
+"events": [Object(InputEventKey,"physical_keycode":32), Object(InputEventKey,"physical_keycode":76), Object(InputEventJoypadButton,"device":-1,"button_index":0)]
 }
 interact={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":69), Object(InputEventJoypadButton,"device":-1,"button_index":0)]
+"events": [Object(InputEventKey,"physical_keycode":69), Object(InputEventJoypadButton,"device":-1,"button_index":1)]
 }
 drink={
 "deadzone": 0.2,

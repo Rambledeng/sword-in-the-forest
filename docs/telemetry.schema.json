@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sword in the Forest telemetry line",
+  "description": "One JSON line per enemy attack aimed at the player, written to user://telemetry/.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run", "t", "attack", "glint", "lead_ms", "press_ms", "response", "outcome"],
+  "properties": {
+    "run": { "type": "string", "minLength": 1, "description": "Run id." },
+    "t": { "type": "number", "minimum": 0, "description": "Game time of the glint, seconds since the run started." },
+    "attack": { "type": "string", "pattern": "^[a-z0-9_]+$", "description": "Attack id, e.g. saber_chop." },
+    "glint": { "enum": ["white", "red"] },
+    "lead_ms": { "type": "integer", "minimum": 1, "maximum": 5000, "description": "Glint to impact." },
+    "press_ms": { "type": ["integer", "null"], "minimum": 0, "description": "First guard or roll press after the glint; a press after the impact still counts; null when there was none." },
+    "response": { "enum": ["deflect", "block", "roll", "guard", "none"] },
+    "outcome": { "enum": ["success", "blocked", "evaded", "hit", "whiff"] }
+  }
+}

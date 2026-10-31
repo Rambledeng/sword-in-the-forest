@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CombatTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/CombatTuning.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+LatePressGraceMs = 400
+FixedLeadOverrideMs = 0
+ArenaEnemies = 1
+RespawnDelayMs = 2000

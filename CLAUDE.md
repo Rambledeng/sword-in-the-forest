@@ -13,14 +13,17 @@ milestone named in the kickoff message, and stop at its "Done when" list.
 - New scenario: a scene in game/scenes/scenarios/<name>.tscn whose root script
   derives from `SwordInTheForest.Scenarios.Scenario` (override `Step(frame)`, use `Check`).
 - Screenshots (this cloud machine can render via Xvfb + Mesa):
-  `tools/screenshot.sh <scene> [locale]` -> docs/screens/<scene>.png
+  `tools/screenshot.sh <scene> [locale] [frames] [name]` -> docs/screens/<name or scene>.png
   (scene path is relative to game/scenes without .tscn; output is the 480x270 viewport).
+  `tools/screenshot.sh screens/Showcase "" 6000 x` stages a seeded fight and saves combat_*.png.
+  Viewport readback lags one frame: capture one frame after the moment you want.
 - Other CLI flags after `--`: `--locale en|nl|zh_CN`.
 - Toolchain here: Godot 4.7.2 .NET at `godot`, .NET SDK 8. Godot.NET.Sdk 4.7.2 targets net8.0.
 
 ## Conventions
 - C# with nullable reference types on; one public type per file.
-- src/Director targets .NET Standard 2.1 (C# 9) and never references Godot.
+- src/Director and src/Combat target .NET Standard 2.1 (C# 9) and never reference Godot.
+  Combat rules (response window, roll frames, AttackRunner, telemetry format) live in src/Combat.
 - Player-facing text is a key in game/localization/strings.csv (en, nl, zh_CN).
   tests/Localization.Tests fails on missing languages, mismatched placeholders,
   bad key prefixes, or scene text that is not a key.

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/AttackData.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+Id = "test_thrust_red"
+Red = true
+WindupMinMs = 500
+WindupMaxMs = 800
+LeadDefaultMs = 450
+LeadMinMs = 350
+LeadMaxMs = 550
+SwingMs = 60
+RecoveryMs = 700
+Damage = 3
+PostureDamage = 0.0
+DeflectPostureDamage = 0.0
+ReachPx = 40.0
+ArcDeg = 50.0
+LungePx = 16.0
