@@ -27,9 +27,9 @@
   `ui.title.name`.
 
 ### Status of "Done when"
-- [x] `dotnet build` and `dotnet test` pass in the session (7 tests). CI: see the PR checks.
-- [x] Headless scenarios pass in the session. CI: see the PR checks.
-- [x] One screenshot renders in the session.
+- [x] `dotnet build` and `dotnet test` pass in the session (7 tests) and in CI.
+- [x] Headless scenarios pass in the session and in CI.
+- [x] One screenshot renders in the session (and in CI, uploaded as an artifact).
 - [x] One label shows its text in all three languages and under pseudolocalization.
 
 ### Next (M1 · Combat core)
