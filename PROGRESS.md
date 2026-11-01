@@ -49,6 +49,20 @@ Your six notes, in order. Each has a test.
    than a timing miss. Tests: `bot_guard_back`, unit tests in `ResponseWindowTests` and
    `TelemetryTests`.
 
+### CI and Windows follow-ups
+- **FloorSoak in CI:** the soak passed on the runner (its `soak_floor.png` was green), but
+  `tools/screenshot.sh` demanded a `SCREENSHOT` line and the soak printed only `SOAK PASS`, so
+  the step exited 1. Godot's exit code now decides (a deliberately broken floor still fails
+  with exit 1), and CI uploads `.logs/` (upload-artifact skipped the hidden folder).
+- **Windows editor "modified" files:** line endings only. Git for Windows checked text out as
+  CRLF and the Godot editor rewrites `project.godot` and every `.import` with LF when it opens
+  the project. `.gitattributes` (`* text=auto eol=lf`, `.sln` CRLF) fixes it, and the index is
+  renormalized. `project.godot` is now committed in the editor's own format. The CI job
+  `windows-editor-clean` opens a fresh clone in the Windows Godot 4.7.2 .NET editor and fails
+  if git is not clean.
+  - An existing Windows clone keeps its CRLF files: run `git rm --cached -r -q .` then
+    `git reset --hard` once, after committing or stashing local work.
+
 ### Numbers to tune in F1 (new)
 - `player.tres`: AttackPostureCost 6, GuardArcDeg 220, MouseAimIdleMs 2000, AimAssistDeg 120,
   AimAssistExplicitDeg 40, AimAssistRangePx 56.
