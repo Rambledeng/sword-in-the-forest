@@ -33,6 +33,13 @@ public partial class BootScenario : Scenario
                 Check(hasPc && hasPad, $"{action} needs keyboard/mouse and gamepad bindings");
             }
         }
+        if (frame == 30)
+        {
+            // The arena loads too, with its HUD, a bandit and the tuning panel.
+            var arena = GD.Load<PackedScene>("res://scenes/Arena.tscn").Instantiate<Arena>();
+            arena.PlayMusic = false;
+            AddChild(arena);
+        }
         Check(IsInstanceValid(_title) && _title!.IsInsideTree(), "title scene left the tree");
         Check(GetViewport().GetVisibleRect().Size == new Vector2(480, 270), "base resolution is not 480x270");
     }

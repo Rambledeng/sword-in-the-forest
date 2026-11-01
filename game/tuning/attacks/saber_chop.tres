@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/AttackData.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+Id = "saber_chop"
+Red = false
+WindupMinMs = 700
+WindupMaxMs = 1200
+LeadDefaultMs = 520
+LeadMinMs = 400
+LeadMaxMs = 600
+SwingMs = 80
+RecoveryMs = 900
+Damage = 3
+PostureDamage = 32.0
+DeflectPostureDamage = 40.0
+ReachPx = 34.0
+ArcDeg = 80.0
+LungePx = 14.0

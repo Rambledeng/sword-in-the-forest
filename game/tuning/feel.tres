@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="FeelTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/FeelTuning.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+HitStopHitMs = 60
+HitStopDeflectMs = 90
+HitStopBlockMs = 40
+HitStopPlayerHurtMs = 80
+HitStopFinisherMs = 180
+ShakeHit = 0.25
+ShakeDeflect = 0.35
+ShakeBlock = 0.15
+ShakePlayerHurt = 0.5
+ShakeFinisher = 0.7
+ShakeMaxPx = 4.0
+ShakeDecayPerSec = 2.5
+KnockbackEnemyHit = 90.0
+KnockbackDeflect = 140.0
+KnockbackBlock = 110.0
+KnockbackPlayerHurt = 160.0
+KnockbackDecay = 1400.0
+FlashMs = 90
+GlintVisibleMs = 220
+SfxVolume = 0.8
+MusicVolume = 0.35

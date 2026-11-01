@@ -1,0 +1,53 @@
+[gd_resource type="Resource" script_class="PlayerTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/PlayerTuning.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+MaxHealth = 10
+GourdSips = 3
+GourdHeal = 4
+DrinkMs = 1100
+DrinkHealAtMs = 750
+DrinkMoveSpeed = 22.0
+MoveSpeed = 82.0
+GuardMoveSpeed = 40.0
+Acceleration = 900.0
+Friction = 1100.0
+Attack1WindupMs = 70
+Attack1RecoveryMs = 230
+Attack1Damage = 1
+Attack1Posture = 9
+Attack2WindupMs = 70
+Attack2RecoveryMs = 230
+Attack2Damage = 1
+Attack2Posture = 9
+Attack3WindupMs = 140
+Attack3RecoveryMs = 380
+Attack3Damage = 2
+Attack3Posture = 16
+ComboCancelFromMs = 90
+AttackReachPx = 26.0
+AttackArcDeg = 120.0
+AttackLungePx = 6.0
+FinisherLungePx = 10.0
+AttackPostureCost = 6.0
+MouseAimIdleMs = 2000
+AimAssistDeg = 120.0
+AimAssistExplicitDeg = 40.0
+AimAssistRangePx = 56.0
+RollDurationMs = 400
+RollInvulnStartMs = 40
+RollInvulnEndMs = 340
+RollDistancePx = 60.0
+MaxPosture = 100.0
+PostureDrainPerSec = 28.0
+PostureDrainDelayMs = 500.0
+DeflectPostureFactor = 0.25
+GuardArcDeg = 220.0
+HitPostureFactor = 0.4
+BrokenMs = 1000
+HurtMs = 260
+InputBufferMs = 100
+DeflectMashLockoutMs = 200

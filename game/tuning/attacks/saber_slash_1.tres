@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/AttackData.cs" id="1_script"]
+[ext_resource type="Resource" path="res://tuning/attacks/saber_slash_2.tres" id="2_next"]
+
+[resource]
+script = ExtResource("1_script")
+Id = "saber_slash_1"
+Red = false
+WindupMinMs = 450
+WindupMaxMs = 900
+LeadDefaultMs = 420
+LeadMinMs = 350
+LeadMaxMs = 550
+SwingMs = 60
+RecoveryMs = 140
+Damage = 2
+PostureDamage = 18.0
+DeflectPostureDamage = 25.0
+ReachPx = 30.0
+ArcDeg = 110.0
+LungePx = 8.0
+Next = ExtResource("2_next")

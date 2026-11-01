@@ -7,5 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\src\Director\Director.csproj" />
+    <ProjectReference Include="..\src\Combat\Combat.csproj" />
   </ItemGroup>
 </Project>

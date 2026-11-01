@@ -12,8 +12,17 @@ public partial class Scenario : Node
 {
     [Export] public int Frames { get; set; } = 60;
 
+    /// <summary>Scenarios that end themselves with <see cref="Pass"/> fail if they run out of frames.</summary>
+    protected virtual bool FailOnTimeout => false;
+
     private int _frame;
     private bool _done;
+
+    public override void _EnterTree()
+    {
+        // Keep counting frames while the game is paused (e.g. the F1 panel is open).
+        ProcessMode = ProcessModeEnum.Always;
+    }
 
     public override void _Process(double delta)
     {
@@ -27,7 +36,8 @@ public partial class Scenario : Node
             Fail(e.ToString());
             return;
         }
-        if (++_frame >= Frames) Finish(null);
+        if (_frame % 50 == 0 && OS.HasEnvironment("SCENARIO_TRACE")) GD.Print($"  frame {_frame} paused={GetTree().Paused}");
+        if (++_frame >= Frames) Finish(FailOnTimeout ? $"timed out after {Frames} frames" : null);
     }
 
     /// <summary>Called once per frame; throw or call <see cref="Fail"/> to fail.</summary>
@@ -39,6 +49,11 @@ public partial class Scenario : Node
     }
 
     protected void Fail(string reason) => Finish(reason);
+
+    /// <summary>Ends the scenario early as passed.</summary>
+    protected void Pass() => Finish(null);
+
+    protected bool Done => _done;
 
     private void Finish(string? failure)
     {

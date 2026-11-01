@@ -1,2 +1,6 @@
 keys,en,nl,zh_CN
 ui.title.name,Sword in the Forest,Zwaard in het Woud,林中剑
+ui.title.press_start,Press attack to begin,Druk op aanvallen om te beginnen,按攻击键开始
+ui.hud.gourd_sips,×{sips},×{sips},×{sips}
+ui.arena.fallen,You have fallen. The sword waits.,Je bent gevallen. Het zwaard wacht.,你倒下了。剑在等你。
+ui.arena.hint,F1 tuning · Esc title,F1 afstellen · Esc titel,F1 调参 · Esc 返回标题
