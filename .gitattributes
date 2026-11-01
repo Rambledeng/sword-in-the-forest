@@ -1,0 +1,19 @@
+# Text files are LF in the repository AND in every working tree, on every OS.
+# Godot writes project.godot, *.import, *.tscn, *.tres etc. with LF on all platforms. Without
+# this, Git for Windows (core.autocrlf=true) checked them out as CRLF and every file the
+# editor rewrote on open showed as modified, although only the line endings changed.
+* text=auto eol=lf
+
+# Visual Studio and `dotnet sln` write solutions with CRLF; keep them that way.
+*.sln text eol=crlf
+
+# Binary assets: never convert, never diff as text.
+*.png binary
+*.jpg binary
+*.gif binary
+*.wav binary
+*.ogg binary
+*.mp3 binary
+*.ttf binary
+*.otf binary
+*.zip binary

@@ -77,8 +77,9 @@ jobs:
           if-no-files-found: ignore
           include-hidden-files: true  # .logs/ is hidden; without this the logs were never uploaded
 
-  # A fresh clone opened in the Godot .NET editor on Windows must leave git clean
-  # (the editor rewrites project.godot and .import files in its own canonical form).
+  # A fresh clone opened in the Godot .NET editor on Windows must leave git clean. The editor
+  # rewrites project.godot and every .import file on open, always with LF; .gitattributes keeps
+  # the working tree LF so Git for Windows (core.autocrlf=true) sees no change.
   windows-editor-clean:
     runs-on: windows-latest
     timeout-minutes: 30
