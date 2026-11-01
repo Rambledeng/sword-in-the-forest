@@ -16,6 +16,7 @@ public partial class Hud : CanvasLayer
     private Label _sips = null!;
     private Label _fallen = null!;
     private Label _hint = null!;
+    private Label _attunement = null!;
     private Control _canvas = null!;
 
     public Player? Player { get; set; }
@@ -37,6 +38,8 @@ public partial class Hud : CanvasLayer
         _hint.GrowHorizontal = Control.GrowDirection.Begin;
         _hint.Position = new Vector2(-4, 2);
         _canvas.AddChild(_hint);
+        _attunement = new Label { Text = "ui.hud.attunement", Position = new Vector2(4, 38), Modulate = new Color(1, 1, 1, 0.8f) };
+        _canvas.AddChild(_attunement);
         _fallen = new Label { Text = "ui.arena.fallen", HorizontalAlignment = HorizontalAlignment.Center, Visible = false };
         _fallen.SetAnchorsPreset(Control.LayoutPreset.Center);
         _fallen.GrowHorizontal = Control.GrowDirection.Both;
@@ -65,6 +68,7 @@ public partial class Hud : CanvasLayer
             _canvas.DrawTextureRectRegion(_heart, new Rect2(4 + i * 15, 4, 16, 16), new Rect2(frame * 16, 0, 16, 16));
         }
         _canvas.DrawTexture(_gourd, new Vector2(6, 24), Player.Sips > 0 ? Colors.White : new Color(1, 1, 1, 0.35f));
+        DrawAttunement();
 
         // Posture bar.
         var size = _canvas.Size;
@@ -86,5 +90,21 @@ public partial class Hud : CanvasLayer
             _canvas.DrawRect(new Rect2(size.X / 2 - half, y, half * 2, 1), new Color(1f, 1f, 0.85f, 0.5f));
         }
         _canvas.DrawRect(new Rect2(Mathf.Round(size.X / 2) - 0.5f, y - 2, 1, 7), new Color(1, 1, 1, 0.35f));
+    }
+
+    /// <summary>The attunement meter (人剑合一): how sure the sword is about the player's reaction time.</summary>
+    private void DrawAttunement()
+    {
+        var director = DirectorService.Instance;
+        _attunement.Visible = director != null;
+        if (director == null) return;
+        var a = (float)director.Director.Estimate().Attunement;
+        const float w = 44;
+        var y = _attunement.Position.Y + _attunement.Size.Y + 1;
+        _canvas.DrawRect(new Rect2(4, y, w + 2, 5), new Color(0.05f, 0.05f, 0.07f, 0.8f));
+        var fill = Mathf.Round(w * a);
+        if (fill > 0) _canvas.DrawRect(new Rect2(5, y + 1, fill, 3), new Color(0.55f, 0.85f, 1f).Lerp(new Color(1f, 0.95f, 0.7f), a));
+        var off = director.Leads.Adaptive ? 1f : 0.4f;
+        _canvas.DrawRect(new Rect2(4, y, w + 2, 5), new Color(0.6f, 0.7f, 0.75f, 0.6f * off), false);
     }
 }

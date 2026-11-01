@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/scenarios/DirectorScenario.cs" id="1"]
+
+[node name="director_on" type="Node"]
+script = ExtResource("1")
+Frames = 9000
+Adaptive = true
