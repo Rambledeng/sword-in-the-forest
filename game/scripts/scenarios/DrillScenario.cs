@@ -38,6 +38,8 @@ public abstract partial class DrillScenario : Scenario
     /// <summary>Bots that press continuously never leave the queue empty.</summary>
     protected virtual bool IgnorePendingPresses => false;
     protected abstract BotPolicy Policy { get; }
+    /// <summary>Where the bot aims (the bandit stands above the player).</summary>
+    protected virtual Vector2 PlayerAim => Vector2.Up;
     protected virtual double ResponseDelayMs => 150;
     protected abstract IEnumerable<int> LeadTimes { get; }
     protected abstract IEnumerable<string> AttackIds { get; }
@@ -101,7 +103,7 @@ public abstract partial class DrillScenario : Scenario
         Player.Velocity = Vector2.Zero;
         Bandit.GlobalPosition = Arena.Center;
         Bandit.Velocity = Vector2.Zero;
-        Controls.AimInput = Vector2.Up;
+        Controls.AimInput = PlayerAim;
         Player.RefillForDrill();
         Bandit.RefillForDrill();
     }

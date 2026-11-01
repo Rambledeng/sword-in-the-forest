@@ -67,6 +67,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
     public int Deflects { get; private set; }
     public int Blocks { get; private set; }
     public int Finishers { get; private set; }
+    public int StrikesBlocked { get; private set; }
 
     public event Action<Player>? Died;
 
@@ -228,6 +229,30 @@ public partial class Player : CharacterBody2D, IThreatTarget
         return move.LengthSquared() > 0.04f ? move.Normalized() : Facing;
     }
 
+    /// <summary>
+    /// The aim (mouse or right stick, else movement, else facing), nudged toward the nearest
+    /// enemy in front: a wide cone when aiming by movement or facing, a narrow one otherwise.
+    /// Free-angle, so diagonals and everything between work.
+    /// </summary>
+    public Vector2 AssistedAim()
+    {
+        var explicitAim = Controls.Aim(this) != Vector2.Zero;
+        var aim = AimOrFacing();
+        var halfCone = Mathf.DegToRad((explicitAim ? T.AimAssistExplicitDeg : T.AimAssistDeg) / 2f);
+        Enemy? best = null;
+        var bestDist = float.MaxValue;
+        foreach (var e in Enemy.All(this))
+        {
+            if (!e.CanBeHit) continue;
+            var to = e.BodyGlobal - BodyGlobal;
+            var d = to.Length();
+            if (d > T.AimAssistRangePx + Enemy.Radius || d < 0.01f) continue;
+            if (Mathf.Abs(aim.AngleTo(to)) > halfCone) continue;
+            if (d < bestDist) { bestDist = d; best = e; }
+        }
+        return best != null ? (best.BodyGlobal - BodyGlobal).Normalized() : aim;
+    }
+
     private bool AnyThreatInWindow(double now) => _threats.Any(t => t.Result == null && t.InWindow(now));
 
     private bool TryRoll(double now)
@@ -264,7 +289,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
             _deflecting.Add(t);
         }
         _lastDeflectInputMs = now;
-        Facing = AimOrFacing();
+        Facing = AssistedAim();
         if (Current != State.Deflect) Enter(State.Deflect);
     }
 
@@ -317,7 +342,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
             EnterAttack(1, now);
             return Vector2.Zero;
         }
-        Facing = AimOrFacing();
+        Facing = AssistedAim();
         return Controls.Move * T.GuardMoveSpeed;
     }
 
@@ -344,25 +369,15 @@ public partial class Player : CharacterBody2D, IThreatTarget
 
     private void EnterAttack(int step, double now)
     {
-        var aim = AimOrFacing();
-        // Light aim assist: snap to an enemy just off the aim line, so a stick feels as good as a mouse.
-        Enemy? best = null;
-        var bestAngle = Mathf.DegToRad(40);
-        foreach (var e in Enemy.All(this))
-        {
-            if (!e.CanBeHit) continue;
-            var to = e.BodyGlobal - BodyGlobal;
-            if (to.Length() > T.AttackReachPx * 1.7f + Enemy.Radius) continue;
-            var angle = Mathf.Abs(aim.AngleTo(to));
-            if (angle < bestAngle) { bestAngle = angle; best = e; }
-        }
-        if (best != null) aim = (best.BodyGlobal - BodyGlobal).Normalized();
+        var aim = AssistedAim();
         AttackDir = aim;
         Facing = aim;
         Enter(State.Attack);
         ComboStep = step;
         _attackHitDone = false;
         _swingSoundDone = false;
+        // Stamina is posture: every swing costs a little, so endless spam breaks your own guard.
+        if (Posture.Add(T.AttackPostureCost)) BreakPosture();
     }
 
     private Vector2 UpdateAttack(double now)
@@ -403,6 +418,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
         var origin = BodyGlobal;
         var halfArc = Mathf.DegToRad(T.AttackArcDeg / 2);
         var anyHit = false;
+        var blocked = false;
         var finisher = false;
         foreach (var e in Enemy.All(this))
         {
@@ -412,6 +428,11 @@ public partial class Player : CharacterBody2D, IThreatTarget
             if (to.Length() > 6 && Mathf.Abs(AttackDir.AngleTo(to)) > halfArc) continue;
             var result = e.TakeHit(damage, posture, AttackDir);
             if (result == Enemy.HitResult.Ignored) continue;
+            if (result == Enemy.HitResult.Blocked)
+            {
+                blocked = true;
+                continue;
+            }
             anyHit = true;
             if (result == Enemy.HitResult.Finisher) { finisher = true; Finishers++; }
             SparkFx.Hit(origin + to * 0.7f);
@@ -432,6 +453,14 @@ public partial class Player : CharacterBody2D, IThreatTarget
         {
             Clock.HitStop(feel.HitStopHitMs);
             ShakeCamera.Shake(feel.ShakeHit);
+        }
+        else if (blocked)
+        {
+            // Caught on the bandit's saber: a short jolt back.
+            Clock.HitStop(feel.HitStopBlockMs);
+            ShakeCamera.Shake(feel.ShakeBlock);
+            _knockback = -AttackDir * feel.KnockbackBlock * 0.6f;
+            StrikesBlocked++;
         }
     }
 

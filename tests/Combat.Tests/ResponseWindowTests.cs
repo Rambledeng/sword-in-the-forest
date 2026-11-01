@@ -117,6 +117,31 @@ public class ResponseWindowTests
     }
 
     [Fact]
+    public void Deflect_FromOutsideTheGuardArc_IsHit_AndRecordsTheAngle()
+    {
+        var w = new ThreatWindow(White, 1000, 420);
+        w.RecordAction(DefenseAction.Guard, 1150);
+        var r = w.Resolve(new ImpactState(inReach: true, invulnerable: false, guarding: true, guardCovers: false, angleDeg: 160));
+        Assert.Equal("Deflect/Hit", r.ToString());
+        Assert.Equal(160, w.AngleDeg);
+    }
+
+    [Fact]
+    public void Block_FromOutsideTheGuardArc_IsHit()
+    {
+        var w = new ThreatWindow(White, 1000, 420);
+        Assert.Equal("Block/Hit", w.Resolve(new ImpactState(true, false, true, guardCovers: false, angleDeg: 170)).ToString());
+    }
+
+    [Fact]
+    public void Roll_FromBehind_StillEvades()
+    {
+        var w = new ThreatWindow(Red, 1000, 450);
+        w.RecordAction(DefenseAction.Roll, 1100);
+        Assert.Equal("Roll/Success", w.Resolve(new ImpactState(true, false, false, guardCovers: false, angleDeg: 180)).ToString());
+    }
+
+    [Fact]
     public void LatestActionInWindow_Wins()
     {
         var w = new ThreatWindow(White, 1000, 420);

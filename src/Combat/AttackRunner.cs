@@ -63,8 +63,24 @@ namespace SwordInTheForest.Combat
             _swung = false;
         }
 
+        /// <summary>
+        /// Ends the windup now: the glint shows on the next <see cref="Advance"/>, and the lead time
+        /// is unchanged, so the response window stays fair. Returns false outside the windup.
+        /// </summary>
+        public bool SkipToGlint(double nowMs)
+        {
+            if (Current == null || Phase != AttackPhase.Windup) return false;
+            var elapsed = (int)Math.Max(0, Math.Floor(nowMs - StartMs));
+            Timeline = new AttackTimeline(Math.Min(elapsed, Timeline.WindupMs), Timeline.LeadMs, Timeline.RecoveryMs);
+            return true;
+        }
+
         /// <summary>Lengthens the current recovery (e.g. after being deflected).</summary>
         public void ExtendRecovery(double ms) => _extraRecoveryMs += Math.Max(0, ms);
+
+        /// <summary>Scales the current recovery (e.g. shorter after the attack hit the player).</summary>
+        public void ScaleRecovery(double factor) =>
+            _extraRecoveryMs -= Timeline.RecoveryMs * (1 - Math.Max(0, Math.Min(1, factor)));
 
         /// <summary>Call once per frame with the current game time.</summary>
         public void Advance(double nowMs)

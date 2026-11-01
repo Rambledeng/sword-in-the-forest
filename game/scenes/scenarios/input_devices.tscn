@@ -4,4 +4,4 @@
 
 [node name="input_devices" type="Node"]
 script = ExtResource("1")
-Frames = 1200
+Frames = 1600

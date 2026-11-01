@@ -129,6 +129,56 @@ public partial class InputDevicesScenario : Scenario
         At(792, () => { Check(_arena.Tuning!.IsOpen && GetTree().Paused, "F1 should open the tuning panel and pause"); Send(KeyEvent(Key.F1, false)); });
         At(794, () => Send(KeyEvent(Key.F1, true)));
         At(796, () => { Check(!_arena.Tuning!.IsOpen && !GetTree().Paused, "F1 again should close the panel"); Send(KeyEvent(Key.F1, false)); });
+
+        // ---- Diagonals (8-way / free-angle) and aim without a mouse ----
+        At(800, () => { foreach (var e in _arena.Enemies.ToList()) e.QueueFree(); });
+        At(810, () => { _mark = P.GlobalPosition; Send(PadAxis(JoyAxis.LeftX, 0.7f)); Send(PadAxis(JoyAxis.LeftY, 0.7f)); });
+        At(830, () =>
+        {
+            var d = P.GlobalPosition - _mark;
+            Check(d.X > 10 && d.Y > 10 && Mathf.Abs(d.X - d.Y) < 3, $"a diagonal stick should move diagonally, moved {d}");
+            Send(PadButton(JoyButton.X, true));
+        });
+        At(832, () =>
+        {
+            Check(Mathf.Abs(P.AttackDir.AngleTo(new Vector2(1, 1))) < 0.05f, $"without the right stick the attack follows the movement diagonal, dir {P.AttackDir}");
+            Send(PadButton(JoyButton.X, false));
+            Send(PadAxis(JoyAxis.LeftX, 0f));
+            Send(PadAxis(JoyAxis.LeftY, 0f));
+        });
+        At(860, () => { _mark = P.GlobalPosition; Send(KeyEvent(Key.W, true)); Send(KeyEvent(Key.A, true)); });
+        At(880, () =>
+        {
+            var d = P.GlobalPosition - _mark;
+            Check(!_device.MouseActive, "the mouse has been idle; it should not aim");
+            Check(d.X < -10 && d.Y < -10 && Mathf.Abs(d.X - d.Y) < 3, $"W+A should move diagonally, moved {d}");
+            Send(KeyEvent(Key.J, true));
+        });
+        At(882, () =>
+        {
+            Check(Mathf.Abs(P.AttackDir.AngleTo(new Vector2(-1, -1))) < 0.05f, $"keyboard attack should follow the diagonal, dir {P.AttackDir}");
+            Send(KeyEvent(Key.J, false));
+            Send(KeyEvent(Key.W, false));
+            Send(KeyEvent(Key.A, false));
+        });
+        // Moving the mouse makes it aim again...
+        At(920, () => Send(new InputEventMouseMotion { Relative = new Vector2(12, 0), Position = new Vector2(400, 135) }));
+        At(922, () => { Check(_device.MouseActive, "a mouse motion should make the mouse aim"); Send(KeyEvent(Key.J, true)); });
+        At(924, () =>
+        {
+            var toMouse = (P.GetGlobalMousePosition() - P.BodyGlobal).Normalized();
+            Check(Mathf.Abs(P.AttackDir.AngleTo(toMouse)) < 0.05f, $"the attack should follow the mouse, dir {P.AttackDir}, mouse {toMouse}");
+            Send(KeyEvent(Key.J, false));
+        });
+        // ...until it rests longer than MouseAimIdleMs: then the facing aims again.
+        At(924 + 60 * Tunables.Player.MouseAimIdleMs / 1000 + 10, () => { Check(!_device.MouseActive, "the mouse should go idle"); Send(KeyEvent(Key.D, true)); });
+        At(924 + 60 * Tunables.Player.MouseAimIdleMs / 1000 + 20, () => Send(KeyEvent(Key.J, true)));
+        At(924 + 60 * Tunables.Player.MouseAimIdleMs / 1000 + 22, () =>
+        {
+            Check(Mathf.Abs(P.AttackDir.AngleTo(Vector2.Right)) < 0.05f, $"with the mouse idle, D+J should attack right, dir {P.AttackDir}");
+            Send(KeyEvent(Key.J, false));
+            Send(KeyEvent(Key.D, false));
+        });
     }
 
     private void SpawnChop(Func<InputEvent> press, Func<InputEvent> release)

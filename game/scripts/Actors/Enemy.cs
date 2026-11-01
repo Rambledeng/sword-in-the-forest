@@ -17,7 +17,7 @@ namespace SwordInTheForest.Actors;
 public abstract partial class Enemy : CharacterBody2D
 {
     public enum State { Approach, Circle, Attack, Recover, Stagger, Kneel, Dead }
-    public enum HitResult { Ignored, Hit, Kneel, Finisher }
+    public enum HitResult { Ignored, Hit, Blocked, Kneel, Finisher }
 
     public static readonly Vector2 BodyCenter = new(0, -7);
     public const float Radius = 6f;
@@ -40,6 +40,9 @@ public abstract partial class Enemy : CharacterBody2D
     private double _lastHitMs = -1e9;
     private double _swingStartMs = -1;
     private double _recoilUntilMs;
+    private int _blockChain;
+    private double _lastBlockMs = -1e9;
+    private double _guardPoseUntilMs;
     private AttackData? _attack;
     private readonly Queue<AttackData> _drill = new();
 
@@ -77,6 +80,19 @@ public abstract partial class Enemy : CharacterBody2D
 
     /// <summary>The brain: choose the next attack to start.</summary>
     protected abstract AttackData ChooseAttack();
+
+    /// <summary>The fast attack it answers a string of blocked strikes with (null = none).</summary>
+    protected virtual AttackData? CounterAttack => null;
+
+    // Counters for the scenarios.
+    public int BlockedHits { get; private set; }
+    public int Counters { get; private set; }
+
+    /// <summary>
+    /// Blocks the player's strikes while it is free to (approaching or circling); open while it
+    /// attacks, recovers from an attack (the player's opening), is staggered or kneels.
+    /// </summary>
+    public bool IsBlocking => Current is State.Approach or State.Circle;
 
     public static IEnumerable<Enemy> All(Node from) => from.GetTree().GetNodesInGroup(Group).OfType<Enemy>();
 
@@ -170,7 +186,12 @@ public abstract partial class Enemy : CharacterBody2D
             case State.Stagger:
                 if (StateElapsedMs >= t.StaggerMs)
                 {
-                    if (_staggerChain >= t.MaxStaggerChain && targetAlive && !DrillMode) StartAttack(ChooseAttack());
+                    if (_staggerChain >= t.MaxStaggerChain && targetAlive && !DrillMode)
+                    {
+                        _staggerChain = 0;
+                        Counters++;
+                        StartAttack(CounterAttack ?? ChooseAttack());
+                    }
                     else Enter(State.Circle);
                 }
                 break;
@@ -214,9 +235,11 @@ public abstract partial class Enemy : CharacterBody2D
         if (!targetAlive) { _walkMs = 0; return Vector2.Zero; }
         Facing = toTarget.Normalized();
         if (dist > Tuning.CircleDistancePx * 1.8f) { Enter(State.Approach); return Vector2.Zero; }
-        if (StateElapsedMs >= _circleMs)
+        // A posture-broken player is punished at once with the fast counter.
+        var punish = Target!.Current == Player.State.Broken && CounterAttack != null && dist <= Tuning.AttackRangePx * 1.5f;
+        if (StateElapsedMs >= _circleMs || punish)
         {
-            StartAttack(ChooseAttack());
+            StartAttack(punish ? CounterAttack! : ChooseAttack());
             return Vector2.Zero;
         }
         _walkMs += Clock.DeltaMs;
@@ -300,11 +323,20 @@ public abstract partial class Enemy : CharacterBody2D
         var to = target.BodyGlobal - BodyGlobal;
         var inReach = to.Length() <= attack.ReachPx + Player.Radius &&
                       (to.Length() < 6 || Mathf.Abs(AimDir.AngleTo(to)) <= Mathf.DegToRad(attack.ArcDeg / 2));
-        var r = threat.Resolve(new ImpactState(inReach, target.IsInvulnerable, target.IsGuarding));
+        // Guard and deflect only cover the player's front arc; rolls evade from any direction.
+        var toAttacker = -to;
+        var angleDeg = toAttacker.LengthSquared() > 0.01f
+            ? Mathf.RoundToInt(Mathf.RadToDeg(Mathf.Abs(target.Facing.AngleTo(toAttacker))))
+            : 0;
+        var covers = angleDeg <= Tunables.Player.GuardArcDeg / 2f;
+        var r = threat.Resolve(new ImpactState(inReach, target.IsInvulnerable, target.IsGuarding, covers, angleDeg));
         if (!inReach) return; // a whiff, or a right response that also left the reach: no contact
         var contact = BodyGlobal + to * 0.6f;
         target.ReceiveAttack(attack, r, to.LengthSquared() > 0 ? to.Normalized() : AimDir, contact);
         if (r.Response == Response.Deflect && r.Outcome == Outcome.Success) OnDeflected(attack);
+        // The full opening after an impact is earned by defending: after a clean hit on the
+        // player the bandit recovers faster.
+        else if (r.Outcome == Outcome.Hit) Runner.ScaleRecovery(Tuning.RecoveryAfterHitFactor);
     }
 
     private void OnDeflected(AttackData attack)
@@ -348,16 +380,27 @@ public abstract partial class Enemy : CharacterBody2D
             return HitResult.Finisher;
         }
 
+        if (IsBlocking)
+        {
+            Block(posture, dir);
+            return Current == State.Kneel ? HitResult.Kneel : HitResult.Blocked;
+        }
+
         Health = Mathf.Max(0, Health - damage);
         Sfx.Play("enemy_hit", 0.08f);
         var armored = Current == State.Attack;
         _knockback = dir * feel.KnockbackEnemyHit * (armored ? 0.3f : 1f);
-        if (Posture.Add(posture) || Health == 0)
+        // Trading into a windup is a poor deal: the hit lands but barely moves its posture,
+        // and the bandit strikes at once (its glint shows next frame, with the usual lead).
+        var postureDamage = armored ? posture * Tuning.ArmoredPostureFactor : posture;
+        if (armored && Tuning.HitInWindupStrikesNow) Runner.SkipToGlint(Clock.NowMs);
+        if (Posture.Add(postureDamage) || Health == 0)
         {
             EnterKneel();
             return HitResult.Kneel;
         }
-        if (!armored && !DrillMode)
+        // A stagger is not extended by further hits; once it ends the bandit guards again.
+        if (!armored && !DrillMode && Current != State.Stagger)
         {
             _staggerChain++;
             Runner.Abort();
@@ -365,6 +408,34 @@ public abstract partial class Enemy : CharacterBody2D
             Enter(State.Stagger);
         }
         return HitResult.Hit;
+    }
+
+    /// <summary>A strike caught on the saber: reduced posture damage, no health damage; enough in a row and it counters.</summary>
+    private void Block(int posture, Vector2 dir)
+    {
+        var t = Tuning;
+        var now = Clock.NowMs;
+        BlockedHits++;
+        _blockChain = now - _lastBlockMs > t.BlockChainResetMs ? 1 : _blockChain + 1;
+        _lastBlockMs = now;
+        _guardPoseUntilMs = now + 220;
+        Facing = -dir;
+        _knockback = dir * Tunables.Feel.KnockbackEnemyHit * 0.4f;
+        Sfx.Play("block", 0.08f);
+        SparkFx.Block(BodyGlobal - dir * 5);
+        if (Posture.Add(posture * t.BlockPostureFactor))
+        {
+            EnterKneel();
+            return;
+        }
+        var counter = CounterAttack;
+        if (counter != null && !DrillMode && t.BlocksBeforeCounter > 0 && _blockChain >= t.BlocksBeforeCounter)
+        {
+            _blockChain = 0;
+            Counters++;
+            AimDir = Facing;
+            StartAttack(counter);
+        }
     }
 
     private void EnterKneel()
@@ -468,6 +539,13 @@ public abstract partial class Enemy : CharacterBody2D
                 var fade = Mathf.Clamp(1f - (float)(StateElapsedMs - 500) / 700f, 0f, 1f);
                 _body.Modulate = new Color(1, 1, 1, fade);
                 break;
+        }
+        if (now < _guardPoseUntilMs && Current is State.Approach or State.Circle)
+        {
+            pivot = BodyCenter + Facing * 5 + side * 2;
+            blade = Facing.Angle() - Mathf.Pi / 2 + 0.25f;
+            row = CharacterSprite.RowAttack;
+            col = CharacterSprite.Column(Facing);
         }
         _body.Pose(col, row);
         _weapon.Point(pivot, blade);

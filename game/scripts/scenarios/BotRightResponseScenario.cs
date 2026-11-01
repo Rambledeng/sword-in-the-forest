@@ -18,6 +18,7 @@ public partial class BotRightResponseScenario : DrillScenario
         Check(S(line, "outcome") == "success", $"expected success: {raw}");
         var expected = S(line, "glint") == "red" ? "roll" : "deflect";
         Check(S(line, "response") == expected, $"expected {expected}: {raw}");
+        if (S(line, "glint") == "white") Check((double)line["angle_deg"]! <= 30, $"the bot faces the bandit: {raw}");
         var press = (double)line["press_ms"]!;
         Check(press >= 150 - 0.5 && press <= 167, $"press should be ~150 ms after the glint: {raw}");
     }

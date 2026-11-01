@@ -24,5 +24,18 @@ public partial class TuningPanelScenario : Scenario
         if (frame == 7) Check(_arena.Tuning!.IsOpen && GetTree().Paused, "panel should be open and the game paused");
         if (frame == 30) _arena.Tuning!.Toggle();
         if (frame == 32) Check(!GetTree().Paused, "closing the panel should unpause");
+        if (frame == 33)
+        {
+            // Live edits must survive garbage collection (Godot's resource cache is weak).
+            var t = Core.Tunables.Player;
+            var old = t.MoveSpeed;
+            t.MoveSpeed = 123;
+            t = null!;
+            System.GC.Collect();
+            System.GC.WaitForPendingFinalizers();
+            System.GC.Collect();
+            Check(Core.Tunables.Player.MoveSpeed == 123, "an F1 edit was lost after garbage collection");
+            Core.Tunables.Player.MoveSpeed = old;
+        }
     }
 }

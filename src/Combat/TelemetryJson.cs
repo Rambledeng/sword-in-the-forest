@@ -17,6 +17,7 @@ namespace SwordInTheForest.Combat
             sb.Append(",\"press_ms\":").Append(r.PressMs == null ? "null" : r.PressMs.Value.ToString(CultureInfo.InvariantCulture));
             sb.Append(",\"response\":").Append(Quote(Name(r.Response)));
             sb.Append(",\"outcome\":").Append(Quote(Name(r.Outcome)));
+            sb.Append(",\"angle_deg\":").Append(r.AngleDeg == null ? "null" : r.AngleDeg.Value.ToString(CultureInfo.InvariantCulture));
             sb.Append('}');
             return sb.ToString();
         }

@@ -4,7 +4,7 @@
   "description": "One JSON line per enemy attack aimed at the player, written to user://telemetry/.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["run", "t", "attack", "glint", "lead_ms", "press_ms", "response", "outcome"],
+  "required": ["run", "t", "attack", "glint", "lead_ms", "press_ms", "response", "outcome", "angle_deg"],
   "properties": {
     "run": { "type": "string", "minLength": 1, "description": "Run id." },
     "t": { "type": "number", "minimum": 0, "description": "Game time of the glint, seconds since the run started." },
@@ -13,6 +13,7 @@
     "lead_ms": { "type": "integer", "minimum": 1, "maximum": 5000, "description": "Glint to impact." },
     "press_ms": { "type": ["integer", "null"], "minimum": 0, "description": "First guard or roll press after the glint; a press after the impact still counts; null when there was none." },
     "response": { "enum": ["deflect", "block", "roll", "guard", "none"] },
-    "outcome": { "enum": ["success", "blocked", "evaded", "hit", "whiff"] }
+    "outcome": { "enum": ["success", "blocked", "evaded", "hit", "whiff"] },
+    "angle_deg": { "type": ["integer", "null"], "minimum": 0, "maximum": 180, "description": "Angle between the player's facing and the attacker at the impact: 0 = facing it, 180 = back turned. A guard or deflect only works inside the guard arc, so a large angle marks a positioning miss, not a timing miss." }
   }
 }

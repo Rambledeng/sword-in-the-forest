@@ -79,6 +79,7 @@ public partial class Arena : Node2D
     {
         var e = new T { Position = at, Target = Player };
         e.Died += OnEnemyDied;
+        e.TreeExiting += () => _enemies.Remove(e); // freed without dying (tests, scene change)
         _enemies.Add(e);
         Actors.AddChild(e);
         return e;

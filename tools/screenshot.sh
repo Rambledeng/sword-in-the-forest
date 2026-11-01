@@ -12,5 +12,5 @@ args=(--screenshot "$1")
 [ $# -ge 2 ] && [ -n "$2" ] && args+=(--locale "$2")
 [ $# -ge 3 ] && args+=(--frames "$3")
 [ $# -ge 4 ] && args+=(--shot-name "$4")
-timeout 120 xvfb-run -a "${GODOT:-godot}" --path game --fixed-fps 60 -- "${args[@]}" > .logs/screenshot.log 2>&1 || { tail -15 .logs/screenshot.log; exit 1; }
+timeout 300 xvfb-run -a "${GODOT:-godot}" --path game --fixed-fps 60 -- "${args[@]}" > .logs/screenshot.log 2>&1 || { tail -15 .logs/screenshot.log; exit 1; }
 grep '^SCREENSHOT' .logs/screenshot.log

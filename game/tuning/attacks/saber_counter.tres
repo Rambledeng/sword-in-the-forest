@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/AttackData.cs" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+Id = "saber_counter"
+Red = false
+WindupMinMs = 100
+WindupMaxMs = 180
+LeadDefaultMs = 380
+LeadMinMs = 350
+LeadMaxMs = 480
+SwingMs = 50
+RecoveryMs = 650
+Damage = 2
+PostureDamage = 20.0
+DeflectPostureDamage = 26.0
+ReachPx = 32.0
+ArcDeg = 120.0
+LungePx = 12.0

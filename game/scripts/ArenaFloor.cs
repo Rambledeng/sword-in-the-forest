@@ -12,11 +12,20 @@ public partial class ArenaFloor : Node2D
     public Vector2I SizeTiles { get; set; }
     public int Seed { get; set; } = 7;
 
-    public override void _Ready() => ZIndex = -100;
+    // Held for the node's lifetime. Draw commands keep only the texture's RID, so a texture
+    // loaded into a local inside _Draw was freed when the GC collected its C# wrapper, and the
+    // floor turned white after a while of play (M1 playtest bug).
+    private Texture2D _tiles = null!;
+
+    public override void _Ready()
+    {
+        ZIndex = -100;
+        _tiles = GD.Load<Texture2D>($"{TileDir}/tileset_floor.png");
+    }
 
     public override void _Draw()
     {
-        var tex = GD.Load<Texture2D>($"{TileDir}/tileset_floor.png");
+        var tex = _tiles;
         var rng = new RandomNumberGenerator { Seed = (ulong)Seed };
         for (var y = 0; y < SizeTiles.Y; y++)
         for (var x = 0; x < SizeTiles.X; x++)

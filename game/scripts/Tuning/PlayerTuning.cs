@@ -38,6 +38,17 @@ public partial class PlayerTuning : Resource
     [Export(PropertyHint.Range, "10,360,5")] public float AttackArcDeg { get; set; }
     [Export(PropertyHint.Range, "0,40,1")] public float AttackLungePx { get; set; }
     [Export(PropertyHint.Range, "0,40,1")] public float FinisherLungePx { get; set; }
+    /// <summary>Posture each of your own swings costs (stamina is posture): spam breaks your guard.</summary>
+    [Export(PropertyHint.Range, "0,50,1")] public float AttackPostureCost { get; set; }
+
+    [ExportGroup("Aim")]
+    /// <summary>The mouse aims only while it moved or clicked this recently; otherwise movement/facing aims.</summary>
+    [Export(PropertyHint.Range, "0,10000,100")] public int MouseAimIdleMs { get; set; }
+    /// <summary>Aim assist cone (full angle) when aiming by movement or facing.</summary>
+    [Export(PropertyHint.Range, "0,180,5")] public float AimAssistDeg { get; set; }
+    /// <summary>Aim assist cone (full angle) for mouse or right-stick aim.</summary>
+    [Export(PropertyHint.Range, "0,180,5")] public float AimAssistExplicitDeg { get; set; }
+    [Export(PropertyHint.Range, "0,200,1")] public float AimAssistRangePx { get; set; }
 
     [ExportGroup("Roll")]
     [Export(PropertyHint.Range, "100,1000,10")] public int RollDurationMs { get; set; }
@@ -50,6 +61,8 @@ public partial class PlayerTuning : Resource
     [Export(PropertyHint.Range, "0,200,1")] public float PostureDrainPerSec { get; set; }
     [Export(PropertyHint.Range, "0,3000,10")] public float PostureDrainDelayMs { get; set; }
     [Export(PropertyHint.Range, "0,1,0.05")] public float DeflectPostureFactor { get; set; }
+    /// <summary>Guard and deflect only catch attacks from within this arc around your facing (full angle). Rolls evade from anywhere.</summary>
+    [Export(PropertyHint.Range, "30,360,5")] public float GuardArcDeg { get; set; }
     [Export(PropertyHint.Range, "0,1,0.05")] public float HitPostureFactor { get; set; }
     [Export(PropertyHint.Range, "100,3000,10")] public int BrokenMs { get; set; }
     [Export(PropertyHint.Range, "0,1000,10")] public int HurtMs { get; set; }

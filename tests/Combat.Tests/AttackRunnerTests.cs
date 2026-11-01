@@ -129,6 +129,37 @@ public class AttackRunnerTests
     private static int _frame;
 
     [Fact]
+    public void ScaleRecovery_ShortensTheRecovery()
+    {
+        var bot = new Bot(Policy.Never, 0);
+        var runner = new AttackRunner(new FixedLeadTimeSource(300), seed: 2) { Target = bot };
+        double impact = -1, finished = -1;
+        var f = 0;
+        runner.Impact += t => { impact = Frames.Ms(f); t.Resolve(bot.State()); runner.ScaleRecovery(0.5); };
+        runner.Finished += _ => finished = Frames.Ms(f);
+        runner.Start(White, 0); // recovery 300 ms
+        for (; f < 300 && finished < 0; f++) runner.Advance(Frames.Ms(f));
+        Assert.InRange(finished - impact, 150 - 1e-6, 150 + 1000.0 / 60);
+    }
+
+    [Fact]
+    public void SkipToGlint_GlintsNextFrame_WithTheSameLead()
+    {
+        var bot = new Bot(Policy.Never, 0);
+        var runner = new AttackRunner(new FixedLeadTimeSource(400), seed: 2) { Target = bot };
+        double? glint = null;
+        runner.Glint += t => glint = t.GlintMs;
+        runner.Start(White, 0); // windup 450-900 ms
+        for (var f = 0; f <= 6; f++) runner.Advance(Frames.Ms(f));
+        Assert.Null(glint);
+        Assert.True(runner.SkipToGlint(Frames.Ms(6)));
+        runner.Advance(Frames.Ms(7));
+        Assert.Equal(Frames.Ms(7), glint!.Value, 6);
+        Assert.Equal(400, runner.Threat!.LeadMs);
+        Assert.False(runner.SkipToGlint(Frames.Ms(8)));
+    }
+
+    [Fact]
     public void Abort_BeforeImpact_ClosesWithoutTelemetry()
     {
         var bot = new Bot(Policy.Never, 0);

@@ -1,16 +1,26 @@
 using Godot;
+using SwordInTheForest.Core;
 
 namespace SwordInTheForest.Actors;
 
 /// <summary>
-/// Keyboard, mouse and gamepad through the input map. Aim follows the device used last:
-/// the mouse cursor, or the right stick (falling back to movement when the stick rests).
+/// Keyboard, mouse and gamepad through the input map. Aim: the right stick on a gamepad; the
+/// mouse cursor only while the mouse is in use (moved or clicked within MouseAimIdleMs).
+/// Otherwise there is no explicit aim and the player aims along movement or facing.
 /// </summary>
 public partial class DeviceControls : Node, IPlayerControls
 {
     private const float StickAimDeadzone = 0.35f;
 
+    private double _mouseUsedAtMs = double.NegativeInfinity;
+
     public bool UsingPad { get; private set; }
+
+    /// <summary>The mouse moved or clicked recently enough to aim.</summary>
+    public bool MouseActive =>
+        !UsingPad && Now - _mouseUsedAtMs <= Tunables.Player.MouseAimIdleMs;
+
+    private static double Now => GameClock.Instance?.NowMs ?? 0;
 
     public void Tick(double nowMs) { }
 
@@ -23,6 +33,7 @@ public partial class DeviceControls : Node, IPlayerControls
             var stick = Input.GetVector("aim_left", "aim_right", "aim_up", "aim_down");
             return stick.Length() >= StickAimDeadzone ? stick.Normalized() : Vector2.Zero;
         }
+        if (!MouseActive) return Vector2.Zero;
         var toMouse = player.GetGlobalMousePosition() - (player.GlobalPosition + Player.BodyCenter);
         return toMouse.LengthSquared() > 4 ? toMouse.Normalized() : Vector2.Zero;
     }
@@ -41,11 +52,15 @@ public partial class DeviceControls : Node, IPlayerControls
                 UsingPad = true;
                 break;
             case InputEventKey:
+                UsingPad = false;
+                break;
             case InputEventMouseButton:
                 UsingPad = false;
+                _mouseUsedAtMs = Now;
                 break;
             case InputEventMouseMotion mm when mm.Relative.LengthSquared() > 4:
                 UsingPad = false;
+                _mouseUsedAtMs = Now;
                 break;
         }
     }

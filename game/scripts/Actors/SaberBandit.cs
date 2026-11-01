@@ -14,6 +14,8 @@ public partial class SaberBandit : Enemy
     protected override string SheetPath => "res://assets/third_party/ninja_adventure/actors/camouflage_red.png";
     protected override string WeaponPath => "res://assets/third_party/ninja_adventure/weapons/big_sword_in_hand.png";
 
+    protected override AttackData? CounterAttack => Tunables.Attack("saber_counter");
+
     protected override AttackData ChooseAttack() =>
         GD.Randf() < Tuning.ChopChance ? Tunables.Attack("saber_chop") : Tunables.Attack("saber_slash_1");
 }
