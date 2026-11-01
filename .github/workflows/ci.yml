@@ -75,3 +75,68 @@ jobs:
             .logs/
             docs/screens/
           if-no-files-found: ignore
+          include-hidden-files: true  # .logs/ is hidden; without this the logs were never uploaded
+
+  # A fresh clone opened in the Godot .NET editor on Windows must leave git clean
+  # (the editor rewrites project.godot and .import files in its own canonical form).
+  windows-editor-clean:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Cache Godot (Windows)
+        id: godot-win-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-win
+          key: godot-${{ env.GODOT_VERSION }}-mono-win64
+
+      - name: Install Godot (Windows)
+        if: steps.godot-win-cache.outputs.cache-hit != 'true'
+        run: |
+          name="Godot_v${GODOT_VERSION}-stable_mono_win64"
+          mkdir -p ~/godot-win && cd ~/godot-win
+          for repo in godot-builds godot; do
+            curl -fsSL -o godot.zip "https://github.com/godotengine/${repo}/releases/download/${GODOT_VERSION}-stable/${name}.zip" && break
+          done
+          unzip -q godot.zip && rm godot.zip
+
+      - name: Git settings
+        run: |
+          git config --show-origin --get-all core.autocrlf || echo "core.autocrlf unset"
+          git config --show-origin --get-all core.eol || echo "core.eol unset"
+
+      - name: Build
+        run: dotnet build game/SwordInTheForest.csproj -nologo -v q
+
+      - name: Open the project in the editor
+        run: |
+          exe=$(ls ~/godot-win/Godot_v${GODOT_VERSION}-stable_mono_win64/*_console.exe | head -1)
+          mkdir -p .logs
+          timeout 600 "$exe" --editor --path game --quit-after 1500 --rendering-driver opengl3_angle > .logs/windows-editor.log 2>&1 || echo "editor exit $?"
+          tail -20 .logs/windows-editor.log
+
+      - name: Git must be clean
+        run: |
+          git status --porcelain | tee .logs/windows-status.txt
+          git diff > .logs/windows-diff.patch
+          git ls-files --eol $(git diff --name-only) > .logs/windows-eol.txt 2>/dev/null || true
+          head -60 .logs/windows-diff.patch
+          test ! -s .logs/windows-status.txt
+
+      - name: Upload editor logs and diff
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-editor
+          path: .logs/
+          include-hidden-files: true
+          if-no-files-found: ignore

@@ -13,4 +13,6 @@ args=(--screenshot "$1")
 [ $# -ge 3 ] && args+=(--frames "$3")
 [ $# -ge 4 ] && args+=(--shot-name "$4")
 timeout 300 xvfb-run -a "${GODOT:-godot}" --path game --fixed-fps 60 -- "${args[@]}" > .logs/screenshot.log 2>&1 || { tail -15 .logs/screenshot.log; exit 1; }
-grep '^SCREENSHOT' .logs/screenshot.log
+# Godot's exit code decides pass/fail (checks such as FloorSoak exit 1 on failure); then
+# require at least one result line, so a run that silently saved nothing also fails.
+grep -E '^(SCREENSHOT|SOAK) ' .logs/screenshot.log || { echo "no SCREENSHOT or SOAK line in .logs/screenshot.log"; tail -15 .logs/screenshot.log; exit 1; }

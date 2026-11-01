@@ -38,7 +38,9 @@ public partial class FloorSoak : Node2D
         var image = GetViewport().GetTexture().GetImage();
         var dir = Path.GetFullPath(Path.Combine(ProjectSettings.GlobalizePath("res://"), "..", "docs", "screens"));
         Directory.CreateDirectory(dir);
-        image.SavePng(Path.Combine(dir, "soak_floor.png"));
+        var file = Path.Combine(dir, "soak_floor.png");
+        image.SavePng(file);
+        GD.Print($"SCREENSHOT {file}");
         // Sample the floor in a band around the screen centre, away from HUD and bamboo.
         int white = 0, green = 0, total = 0;
         for (var y = 60; y < 220; y += 3)
