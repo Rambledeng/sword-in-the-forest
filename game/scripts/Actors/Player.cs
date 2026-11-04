@@ -427,7 +427,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
         _attackHitDone = false;
         _swingSoundDone = false;
         // Stamina is posture: every swing costs a little, so endless spam breaks your own guard.
-        if (Posture.Add(T.AttackPostureCost)) BreakPosture();
+        if (AddPosture(T.AttackPostureCost)) BreakPosture();
     }
 
     private Vector2 UpdateAttack(double now)
@@ -573,12 +573,12 @@ public partial class Player : CharacterBody2D, IThreatTarget
                 Clock.HitStop(feel.HitStopDeflectMs);
                 ShakeCamera.Shake(feel.ShakeDeflect);
                 _knockback = dir * feel.KnockbackDeflect * 0.35f;
-                if (Posture.Add(data.PostureDamage * T.DeflectPostureFactor)) BreakPosture();
+                if (AddPosture(data.PostureDamage * T.DeflectPostureFactor)) BreakPosture();
                 break;
             case Outcome.Blocked:
                 Blocks++;
                 _knockback = dir * feel.KnockbackBlock;
-                if (Posture.Add(data.PostureDamage))
+                if (AddPosture(data.PostureDamage))
                 {
                     BreakPosture();
                     break;
@@ -593,6 +593,17 @@ public partial class Player : CharacterBody2D, IThreatTarget
                 TakeDamage(data.Damage, data.PostureDamage * T.HitPostureFactor, dir);
                 break;
         }
+    }
+
+    /// <summary>Fills posture; true when it breaks. God mode (<see cref="Invulnerable"/>) never breaks.</summary>
+    private bool AddPosture(float amount) => !Invulnerable && Posture.Add(amount);
+
+    /// <summary>Developer and tests: falls at once.</summary>
+    public void Kill()
+    {
+        if (IsDead) return;
+        Invulnerable = false;
+        TakeDamage(Health, 0, Vector2.Down);
     }
 
     private void TakeDamage(int damage, float posture, Vector2 dir)
@@ -614,7 +625,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
             Died?.Invoke(this);
             return;
         }
-        if (Posture.Add(posture)) BreakPosture();
+        if (AddPosture(posture)) BreakPosture();
         else Enter(State.Hurt);
     }
 

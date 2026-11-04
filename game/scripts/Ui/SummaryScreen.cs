@@ -19,10 +19,12 @@ public partial class SummaryScreen : CanvasLayer
     private readonly bool _adaptive;
     private readonly int _soulsFallen;
     private readonly int _totalRooms;
+    private readonly Area? _nextArea;
     private Button _retry = null!;
 
-    public SummaryScreen(RunStats stats, Estimate estimate, bool adaptive, int soulsFallen, int totalRooms)
+    public SummaryScreen(RunStats stats, Estimate estimate, bool adaptive, int soulsFallen, int totalRooms, Area? nextArea = null)
     {
+        _nextArea = nextArea;
         _stats = stats;
         _estimate = estimate;
         _adaptive = adaptive;
@@ -71,6 +73,11 @@ public partial class SummaryScreen : CanvasLayer
         Add(stack, Fill("summary.reading", ("median", (int)Math.Round(e.MedianMs)), ("low", (int)Math.Round(e.LowMs)), ("high", (int)Math.Round(e.HighMs))), new Color(0.7f, 0.9f, 1f));
         Add(stack, Fill("summary.attunement", ("pct", (int)Math.Round(e.Attunement * 100)), ("n", e.Observations)), new Color(0.7f, 0.9f, 1f));
         if (!_adaptive) Add(stack, Tr("summary.adaptive_off"), new Color(1f, 0.7f, 0.5f));
+        if (_nextArea is Area area)
+        {
+            stack.AddChild(new Control { CustomMinimumSize = new Vector2(0, 4) });
+            Add(stack, Tr("summary.next_soul").Replace("{area}", Tr($"ui.area.{AreaKey(area)}")), new Color(1f, 0.85f, 0.6f));
+        }
         stack.AddChild(new Control { CustomMinimumSize = new Vector2(0, 4) });
 
         var buttons = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
@@ -84,6 +91,14 @@ public partial class SummaryScreen : CanvasLayer
         buttons.AddChild(title);
         _retry.CallDeferred(Control.MethodName.GrabFocus);
     }
+
+    public static string AreaKey(Area area) => area switch
+    {
+        Area.Bamboo => "bamboo",
+        Area.Outside => "outside",
+        Area.Tavern => "tavern",
+        _ => "tutorial",
+    };
 
     private string Fill(string key, params (string Name, int Value)[] args)
     {

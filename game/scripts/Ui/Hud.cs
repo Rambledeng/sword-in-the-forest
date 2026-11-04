@@ -65,6 +65,8 @@ public partial class Hud : CanvasLayer
         _canvas.AddChild(_area);
         _bossName = new Label { Text = "combat.boss.name", HorizontalAlignment = HorizontalAlignment.Center, Visible = false, Modulate = new Color(1f, 0.85f, 0.8f) };
         _bossName.GrowHorizontal = Control.GrowDirection.Both;
+        _bossName.AddThemeConstantOverride("outline_size", 3);
+        _bossName.AddThemeColorOverride("font_outline_color", new Color(0.08f, 0.04f, 0.03f));
         _bossName.Position = new Vector2(0, 2);
         _canvas.AddChild(_bossName);
     }
@@ -141,16 +143,23 @@ public partial class Hud : CanvasLayer
     private void DrawBoss(Vector2 size)
     {
         if (Boss == null || !IsInstanceValid(Boss) || Boss.IsGone) return;
+        // A fixed frame; the fills scale inside it and never leave it.
         const float w = 200;
         var x0 = Mathf.Round(size.X / 2 - w / 2);
-        var y = _bossName.Position.Y + _bossName.Size.Y + 1;
-        _canvas.DrawRect(new Rect2(x0 - 1, y - 1, w + 2, 6), new Color(0.05f, 0.05f, 0.07f, 0.85f));
-        var hp = Mathf.Clamp(Boss.Health / (float)Boss.MaxHealth, 0f, 1f);
-        _canvas.DrawRect(new Rect2(x0, y, Mathf.Round(w * hp), 3), new Color(0.85f, 0.2f, 0.18f));
-        var half = Mathf.Round(w * (float)Boss.Posture.Fraction / 2);
-        if (half > 0) _canvas.DrawRect(new Rect2(size.X / 2 - half, y + 3, half * 2, 1), new Color(1f, 0.78f, 0.25f));
-        // Phase marker at half health.
-        _canvas.DrawRect(new Rect2(x0 + Mathf.Round(w * Tunables.Run.BossPhase2At), y - 1, 1, 5), new Color(1, 1, 1, 0.6f));
+        var y = Mathf.Round(_bossName.Position.Y + _bossName.Size.Y + 1);
+        var frame = new Rect2(x0, y, w, 7);
+        var inner = frame.Grow(-1);
+        _canvas.DrawRect(frame, new Color(0.05f, 0.05f, 0.07f, 0.85f));
+        var hp = Mathf.Clamp(Boss.Health / (float)Mathf.Max(1.0, Boss.MaxHealth), 0f, 1f);
+        var fill = Mathf.Round(inner.Size.X * hp);
+        if (fill > 0) _canvas.DrawRect(new Rect2(inner.Position, new Vector2(fill, 3)), new Color(0.85f, 0.2f, 0.18f));
+        var posture = Mathf.Clamp((float)Boss.Posture.Fraction, 0f, 1f);
+        var half = Mathf.Round(inner.Size.X * posture / 2);
+        if (half > 0) _canvas.DrawRect(new Rect2(inner.Position.X + inner.Size.X / 2 - half, inner.Position.Y + 4, half * 2, 1), new Color(1f, 0.78f, 0.25f));
+        // Phase marker at half health, inside the frame.
+        var mark = inner.Position.X + Mathf.Round(inner.Size.X * Mathf.Clamp(Tunables.Run.BossPhase2At, 0f, 1f));
+        _canvas.DrawRect(new Rect2(mark, inner.Position.Y, 1, 3), new Color(1, 1, 1, 0.6f));
+        _canvas.DrawRect(frame, new Color(0.6f, 0.45f, 0.4f, 0.8f), false, 1f);
     }
 
     /// <summary>The attunement meter (人剑合一): how sure the sword is about the player's reaction time.</summary>

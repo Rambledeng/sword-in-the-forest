@@ -32,6 +32,13 @@ public sealed class RunBot
     public void Attach() => _glints.Attach();
     public void Detach() => _glints.Detach();
 
+    /// <summary>The bot's decision for a beggar, asked of <see cref="SparePolicy"/> once.</summary>
+    private bool Decide(Enemy e)
+    {
+        if (!_decisions.TryGetValue(e, out var spare)) _decisions[e] = spare = SparePolicy(e);
+        return spare;
+    }
+
     public void Step()
     {
         if (_run.Upgrades != null)
@@ -53,22 +60,33 @@ public sealed class RunBot
             if (room.IsClear) _controls.MoveInput = room.Steer(p.GlobalPosition, room.ExitGlobal);
             return;
         }
+        // Spare first: a cut to finish one beggar could also catch one it means to spare.
+        if (target.IsBegging && !Decide(target))
+        {
+            var spare = room.Alive.FirstOrDefault(e => GodotObject.IsInstanceValid(e) && e.IsBegging && Decide(e));
+            if (spare != null) target = spare;
+        }
         var to = target.BodyGlobal - p.BodyGlobal;
         var dist = to.Length();
         _controls.AimInput = to.Normalized();
         var free = p.Current is Player.State.Free or Player.State.Attack;
         if (target.IsBegging)
         {
-            if (dist > Tunables.Run.SpareRangePx - 12) _controls.MoveInput = room.Steer(p.GlobalPosition, target.GlobalPosition);
+            // Spare only acts on the nearest beggar: get closer until that is this one.
+            var wrongOne = Decide(target) && p.SpareCandidate() != target;
+            if (dist > Tunables.Run.SpareRangePx - 12 || (wrongOne && dist > 8)) _controls.MoveInput = room.Steer(p.GlobalPosition, target.GlobalPosition);
             else if (p.Current == Player.State.Free && _controls.Pending == 0)
             {
-                if (!_decisions.TryGetValue(target, out var spare)) _decisions[target] = spare = SparePolicy(target);
-                _controls.Press(spare ? PlayerAction.Interact : PlayerAction.Attack, now, 30);
+                _controls.Press(Decide(target) ? PlayerAction.Interact : PlayerAction.Attack, now, 30);
             }
             return;
         }
         var threatened = p.OpenThreats.Count > 0 || (target.Current == Enemy.State.Attack && target is not Archer && dist < 60);
         if (!threatened && dist > 20) _controls.MoveInput = room.Steer(p.GlobalPosition, target.GlobalPosition);
+        // Never cut while a beggar it means to spare stands within reach (the cut would finish it).
+        var shielding = room.Alive.Any(e => GodotObject.IsInstanceValid(e) && e.IsBegging && Decide(e) &&
+                                            e.BodyGlobal.DistanceTo(p.BodyGlobal) < Tunables.Player.AttackReachPx + Enemy.Radius + 6);
+        if (shielding) return;
         var open = target.Current is Enemy.State.Recover or Enemy.State.Stagger or Enemy.State.Kneel ||
                    (!target.IsBlocking && target.Current != Enemy.State.Attack);
         if (open && dist < 30 && free && p.OpenThreats.Count == 0 && _controls.Pending == 0)

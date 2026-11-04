@@ -56,6 +56,8 @@ public partial class RunBotScenario : Scenario
                 SurrenderOverride = Mode == "mercy" ? 1f : null,
             };
             AddChild(_run);
+            // Fakes have their own scenario (run_fake); here every beggar is genuine.
+            if (Mode == "mercy") _run.Mercy.FakeChance = 0;
             _bot = new RunBot(_run, _controls);
             var spared = 0;
             _bot.SparePolicy = _ => spared++ % 2 == 0;
@@ -68,8 +70,11 @@ public partial class RunBotScenario : Scenario
             _steps = _run.StepIndex;
             GD.Print($"  frame {frame}: step {_steps} {(_run.Step.Room?.Template.Id ?? "upgrade")}");
         }
-        if (_service!.Leads.Mode == DirectorMode.Calibrate && _run.Step.Room?.Area == Area.Tutorial) _sawCalibrate = true;
+        if (_service!.Leads.Mode == DirectorMode.Calibrate) _sawCalibrate = true;
         if (_run.Boss != null && GodotObject.IsInstanceValid(_run.Boss) && _run.Boss.Phase == 2) _sawPhase2 = true;
+        if (frame % 1200 == 0 && _run.Room != null && OS.HasEnvironment("SCENARIO_TRACE"))
+            GD.Print($"  frame {frame}: player {_run.Player.GlobalPosition.Round()} {_run.Player.Current}; " +
+                     string.Join(", ", _run.Room.Spawned.Where(GodotObject.IsInstanceValid).Select(e => $"{e.GetType().Name} {e.Current}{(e.IsFake ? " fake" : "")}{(e.Revealed ? " revealed" : "")} {e.GlobalPosition.Round()}")));
         if (Mode == "mercy") { CheckMercy(frame); return; }
         _bot.Step();
         if (_run.Summary == null) return;
@@ -92,8 +97,12 @@ public partial class RunBotScenario : Scenario
             Check(s.RoomsCleared == 7, $"cleared {s.RoomsCleared} of 7 rooms");
             Check(_rooms.Count == 7, $"visited {_rooms.Count} rooms");
             Check(_bot.UpgradesChosen == 2 && s.Upgrades.Count == 2, "expected two upgrade choices");
-            Check(_sawCalibrate, "the tutorial ghost never calibrated");
-            Check(_service.Leads.Mode == DirectorMode.Control, "still calibrating after the tutorial");
+            Check(!_sawCalibrate, "the director calibrated (it must control from the first attack)");
+            var tutorialAttacks = lines.Where(l => (string)l["attack"]! == "ghost_slash").ToList();
+            Check(tutorialAttacks.All(l => (string)l["glint"]! == "white"), "a red attack in the tutorial");
+            var firstRed = lines.FirstOrDefault(l => (string)l["glint"]! == "red");
+            Check(firstRed != null && Convert.ToDouble(firstRed["lead_ms"]) >= Tunables.Run.FirstRedLeadMs, "the first red attack did not get the generous lead");
+            Check(spoken.Contains("sword.first_spear"), "the sword never introduced the spearman's red");
             foreach (var id in new[] { "ghost_slash", "saber_slash_1", "archer_shot" })
                 Check(attacks.Contains(id), $"no {id} in telemetry");
             Check(attacks.Contains("spear_thrust") || attacks.Contains("spear_sweep"), "no spearman attacks");
@@ -118,8 +127,23 @@ public partial class RunBotScenario : Scenario
 
     private void CheckMercy(int frame)
     {
-        _bot.Step();
+        // Once the room is clear the bot waits, so the spared enemy can walk out before the room goes.
+        if (_mercyStage == 0) _bot.Step();
+        else _controls.MoveInput = Vector2.Zero;
         var s = _run.Stats;
+        if (frame % 600 == 0 && _run.Room != null)
+            GD.Print($"  frame {frame}: player {_run.Player.GlobalPosition.Round()} {_run.Player.Current}; " +
+                     string.Join(", ", _run.Room.Spawned.Where(GodotObject.IsInstanceValid).Select(e => $"{e.GetType().Name} {e.Current} {e.GlobalPosition.Round()}")));
+        if (_run.Room != null)
+        {
+            _leavePoint = _run.Room.LeavePoint;
+            foreach (var e in _run.Room.Spawned.Where(e => GodotObject.IsInstanceValid(e) && e.IsLeaving))
+            {
+                if (!_leavers.Contains(e)) _leavers.Add(e);
+                Check(!e.CanBeHit, "a leaving enemy can still be hit");
+                _closest[e.GetInstanceId()] = Mathf.Min(_closest.GetValueOrDefault(e.GetInstanceId(), float.MaxValue), e.GlobalPosition.DistanceTo(_leavePoint));
+            }
+        }
         if (_run.Room is { IsClear: true } && _mercyStage == 0)
         {
             _mercyStage = 1;
@@ -134,7 +158,20 @@ public partial class RunBotScenario : Scenario
                 Check(spoken.Contains(key), $"the sword never said {key}");
             if (n >= 2) Check(spoken.Contains("sword.first_karma"), "the sword never said sword.first_karma");
             Check(_run.Room.Spawned.All(e => !GodotObject.IsInstanceValid(e) || e.WasSpared || e.DiedBegging), "an enemy kneeled instead of begging");
+            Check(_leavers.Count == s.Spared, $"{s.Spared} spared but {_leavers.Count} seen walking out");
+            return;
+        }
+        if (_mercyStage == 1)
+        {
+            // Spared enemies walk to the entrance and only then disappear.
+            if (_leavers.Any(GodotObject.IsInstanceValid)) return;
+            GD.Print($"  spared enemies left at frame {frame}; closest to the entrance: {string.Join(", ", _closest.Values.Select(v => v.ToString("0")))} px");
+            Check(_closest.Count == _leavers.Count && _closest.Values.All(v => v < 12), "a spared enemy faded before reaching the entrance");
             Pass();
         }
     }
+
+    private List<Enemy> _leavers = new();
+    private Vector2 _leavePoint;
+    private readonly Dictionary<ulong, float> _closest = new();
 }

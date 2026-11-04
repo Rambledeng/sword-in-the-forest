@@ -20,10 +20,10 @@ public partial class TitleStartScenario : Scenario
         switch (frame)
         {
             case 0: Fresh(); break;
-            case 2: Input.ParseInputEvent(new InputEventMouseButton { ButtonIndex = MouseButton.Left, Pressed = true, Position = new Vector2(240, 135), ButtonMask = MouseButtonMask.Left }); break;
+            case 2: Input.ParseInputEvent(new InputEventMouseButton { ButtonIndex = MouseButton.Left, Pressed = true, Position = new Vector2(360, 135), ButtonMask = MouseButtonMask.Left }); break;
             case 4:
                 Check(_title!.StartRequested, "left click should start the game");
-                Input.ParseInputEvent(new InputEventMouseButton { ButtonIndex = MouseButton.Left, Pressed = false, Position = new Vector2(240, 135) });
+                Input.ParseInputEvent(new InputEventMouseButton { ButtonIndex = MouseButton.Left, Pressed = false, Position = new Vector2(360, 135) });
                 Fresh();
                 break;
             case 6: Input.ParseInputEvent(new InputEventKey { PhysicalKeycode = Key.J, Keycode = Key.J, Pressed = true }); break;

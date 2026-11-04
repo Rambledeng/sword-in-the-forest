@@ -47,6 +47,12 @@ public partial class Archer : Enemy
             if (StateElapsedMs >= 2500) StartAttack(ChooseAttack());
             return dir * Tuning.MoveSpeed;
         }
+        if (!SeesTarget())
+        {
+            // No clear shot: walk around the cover toward the player.
+            AddWalk();
+            return SteerTo(Target!.GlobalPosition) * Tuning.CircleSpeed;
+        }
         if (CircleDone)
         {
             StartAttack(ChooseAttack());

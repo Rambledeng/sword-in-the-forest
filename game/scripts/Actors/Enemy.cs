@@ -17,7 +17,7 @@ namespace SwordInTheForest.Actors;
 /// </summary>
 public abstract partial class Enemy : CharacterBody2D
 {
-    public enum State { Approach, Circle, Attack, Recover, Stagger, Kneel, Surrender, Dead }
+    public enum State { Approach, Circle, Attack, Recover, Stagger, Kneel, Surrender, Leave, Dead }
     public enum HitResult { Ignored, Hit, Blocked, Kneel, Finisher }
 
     public static readonly Vector2 BodyCenter = new(0, -7);
@@ -50,6 +50,9 @@ public abstract partial class Enemy : CharacterBody2D
     private Telegraph _telegraph = null!;
     private Vector2 _areaTarget;
     private Projectile? _projectile;
+    /// <summary>How far the current shot can fly along its aim before a wall or obstacle stops it.</summary>
+    private float _shotRangePx = float.MaxValue;
+    private Vector2 _leaveFrom;
 
     protected Enemy()
     {
@@ -79,6 +82,20 @@ public abstract partial class Enemy : CharacterBody2D
 
     /// <summary>Chance it begs instead of kneeling when its posture breaks (0 in the test arena).</summary>
     public float SurrenderChance { get; set; }
+    /// <summary>Where its lead times come from (null: the game's, through <see cref="CombatServices"/>).</summary>
+    public ILeadTimeSource? LeadTimesOverride { get; set; }
+    /// <summary>The run's mercy rules decide kneel, beg or fake beg at a posture break (null: roll <see cref="SurrenderChance"/>).</summary>
+    public Func<Enemy, BegKind>? BegRoll { get; set; }
+    /// <summary>Its begging is a trick (only meaningful while it begs).</summary>
+    public bool IsFake { get; private set; }
+    /// <summary>A fake beggar that dropped the act and attacked; it never begs again.</summary>
+    public bool Revealed { get; private set; }
+    /// <summary>It was cut down while only pretending to beg (no karma).</summary>
+    public bool DiedFaking { get; private set; }
+    /// <summary>A fake beggar attacks (spared, or the player turned away).</summary>
+    public event Action<Enemy>? Betrayed;
+    /// <summary>A random number in [0, 1) from the enemy's own generator (the run's mercy rules use it).</summary>
+    public double NextRoll() => Rng.NextDouble();
     /// <summary>Colour variant tint for the body (random per spawn).</summary>
     public Color Tint { get; set; } = Colors.White;
     /// <summary>Steering around obstacles (null: walk straight).</summary>
@@ -92,7 +109,9 @@ public abstract partial class Enemy : CharacterBody2D
     public bool WasSpared { get; private set; }
     public bool IsBegging => Current == State.Surrender;
 
-    public bool CanBeHit => Current != State.Dead;
+    public bool CanBeHit => Current is not (State.Dead or State.Leave);
+    /// <summary>Spared, it stands up and walks out through the room's entrance.</summary>
+    public bool IsLeaving => Current == State.Leave;
     public bool IsKneeling => Current == State.Kneel;
     public bool IsGone => Current == State.Dead;
     /// <summary>Where a thrown attack lands: the player's position at the glint.</summary>
@@ -163,7 +182,7 @@ public abstract partial class Enemy : CharacterBody2D
 
         Health = Tuning.MaxHealth;
         Posture.Max = Tuning.MaxPosture;
-        Runner.LeadTimes = CombatServices.LeadTimes;
+        Runner.LeadTimes = LeadTimesOverride ?? CombatServices.LeadTimes;
         Runner.Glint += OnGlint;
         Runner.Swing += OnSwing;
         Runner.Impact += OnImpact;
@@ -258,6 +277,10 @@ public abstract partial class Enemy : CharacterBody2D
                 }
                 break;
             case State.Surrender:
+                if (IsFake && targetAlive && !DrillMode && TurnedAway(toTarget, dist)) Betray();
+                break;
+            case State.Leave:
+                velocity = UpdateLeave();
                 break;
             case State.Dead:
                 if (StateElapsedMs >= 1200) QueueFree();
@@ -290,6 +313,53 @@ public abstract partial class Enemy : CharacterBody2D
         var d = Nav.Steer(GlobalPosition, globalPoint);
         return d == Vector2.Zero ? straight : d;
     }
+
+    /// <summary>Spared: stand up, then walk to the entrance and fade out there.</summary>
+    private Vector2 UpdateLeave()
+    {
+        var r = Tunables.Run;
+        if (StateElapsedMs < r.SpareStandMs) return Vector2.Zero;
+        var to = Nav?.LeavePoint ?? _leaveFrom + Vector2.Down * 200;
+        var arrived = GlobalPosition.DistanceTo(to) < 6;
+        if (arrived || StateElapsedMs >= r.SpareLeaveMaxMs)
+        {
+            if (LeaveFadeElapsed < 0) _leaveFadeStartMs = Clock.NowMs;
+            if (LeaveFadeElapsed >= 500) QueueFree();
+            return Vector2.Zero;
+        }
+        _walkMs += Clock.DeltaMs;
+        var dir = SteerTo(to);
+        Facing = dir;
+        return dir * Tuning.MoveSpeed * r.SpareLeaveSpeedFactor;
+    }
+
+    private double _turnedAwayMs;
+
+    /// <summary>A fake beggar's chance: the player has had its back to it, close by, for a moment.</summary>
+    private bool TurnedAway(Vector2 toTarget, float dist)
+    {
+        var r = Tunables.Run;
+        var away = dist <= r.FakeStrikeRangePx && StateElapsedMs >= r.FakeMinBegMs &&
+                   Mathf.RadToDeg(Mathf.Abs(Target!.Facing.AngleTo(-toTarget))) >= r.FakeTurnAwayDeg;
+        _turnedAwayMs = away ? _turnedAwayMs + Clock.DeltaMs : 0;
+        return _turnedAwayMs >= r.FakeTurnAwayMs;
+    }
+
+    /// <summary>The fake drops the act: weapon back in hand, and it strikes at once (with the usual glint and lead).</summary>
+    private void Betray()
+    {
+        IsFake = false;
+        Revealed = true;
+        _turnedAwayMs = 0;
+        Posture.Reset(Posture.Max * Tunables.Run.FakePostureAfter);
+        if (Target != null && IsInstanceValid(Target)) Facing = AimDir = (Target.BodyGlobal - BodyGlobal).Normalized();
+        Sfx.Play("swing", 0.1f, 1.3f);
+        StartAttack(CounterAttack ?? ChooseAttack());
+        Betrayed?.Invoke(this);
+    }
+
+    private double _leaveFadeStartMs = -1;
+    private double LeaveFadeElapsed => _leaveFadeStartMs < 0 ? -1 : Clock.NowMs - _leaveFadeStartMs;
 
     protected void BeginCircle()
     {
@@ -378,7 +448,7 @@ public abstract partial class Enemy : CharacterBody2D
     {
         _attack = attack;
         _swingStartMs = -1;
-        Runner.LeadTimes = CombatServices.LeadTimes;
+        Runner.LeadTimes = LeadTimesOverride ?? CombatServices.LeadTimes;
         Runner.Start(attack.ToSpec(WindupFactor), Clock.NowMs, attack.SwingMs);
         Enter(State.Attack);
     }
@@ -395,6 +465,7 @@ public abstract partial class Enemy : CharacterBody2D
     private void OnSwing(ThreatWindow threat)
     {
         _swingStartMs = Clock.NowMs;
+        _shotRangePx = float.MaxValue;
         var a = _attack;
         if (a != null && a.Projectile != "")
         {
@@ -402,10 +473,40 @@ public abstract partial class Enemy : CharacterBody2D
             var from = _weapon.GlobalPosition;
             var along = Target != null && IsInstanceValid(Target) ? (Target.BodyGlobal - BodyGlobal).Dot(AimDir) : a.ReachPx;
             var to = a.IsArea ? _areaTarget : BodyGlobal + AimDir * Mathf.Clamp(along, 8, a.ReachPx);
+            var stuck = false;
+            if (!a.IsArea)
+            {
+                // Arrows stop at walls and obstacles.
+                _shotRangePx = ShotRange(a.ReachPx);
+                if (_shotRangePx < Mathf.Clamp(along, 8, a.ReachPx))
+                {
+                    to = BodyGlobal + AimDir * Mathf.Max(4, _shotRangePx);
+                    stuck = true;
+                }
+            }
             _projectile = Projectile.Launch(a.Projectile, from, to, a.SwingMs, a.IsArea);
+            _projectile.Stuck = stuck;
             return;
         }
         Sfx.Play("swing", 0.1f, 0.7f);
+    }
+
+    /// <summary>How far a shot along <see cref="AimDir"/> flies before a wall or obstacle stops it (at most <paramref name="reach"/>).</summary>
+    public float ShotRange(float reach) => ShotRangeFor(AimDir, reach);
+
+    /// <summary>The same along any direction (the aim line while it still tracks).</summary>
+    public float ShotRangeFor(Vector2 dir, float reach)
+    {
+        if (Nav == null) return reach;
+        var end = Nav.ShotEnd(BodyGlobal, BodyGlobal + dir * reach);
+        return Mathf.Min(reach, BodyGlobal.DistanceTo(end));
+    }
+
+    /// <summary>A clear straight line from this enemy to the player's body (no wall or obstacle between).</summary>
+    public bool SeesTarget()
+    {
+        if (Nav == null || Target == null || !IsInstanceValid(Target)) return true;
+        return Nav.ShotEnd(BodyGlobal, Target.BodyGlobal).DistanceTo(Target.BodyGlobal) < 1f;
     }
 
     /// <summary>Whether the player's body is inside this attack's hit area at the impact.</summary>
@@ -416,6 +517,8 @@ public abstract partial class Enemy : CharacterBody2D
         if (attack.IsLine)
         {
             var along = to.Dot(AimDir);
+            // A shot that met a wall or obstacle never reaches anything behind it.
+            if (attack.Projectile != "" && along > _shotRangePx) return false;
             var across = Mathf.Abs(to.Dot(AimDir.Orthogonal()));
             return along >= -Player.Radius && along <= attack.ReachPx + Player.Radius && across <= attack.WidthPx + Player.Radius;
         }
@@ -493,6 +596,8 @@ public abstract partial class Enemy : CharacterBody2D
     public HitResult TakeHit(int damage, int posture, Vector2 dir)
     {
         if (Current == State.Dead) return HitResult.Ignored;
+        // The rest of a combo must not cut down an enemy that has only just begun to beg.
+        if (Current == State.Surrender && StateElapsedMs < Tunables.Run.BegGraceMs) return HitResult.Ignored;
         var feel = Tunables.Feel;
         _lastHitMs = Clock.NowMs;
         Flash(Colors.White, feel.FlashMs);
@@ -503,7 +608,8 @@ public abstract partial class Enemy : CharacterBody2D
                 OnPhaseFinisher(dir);
                 return HitResult.Finisher;
             }
-            Die(dir, begging: Current == State.Surrender);
+            DiedFaking = Current == State.Surrender && IsFake;
+            Die(dir, begging: Current == State.Surrender && !IsFake);
             return HitResult.Finisher;
         }
 
@@ -588,13 +694,21 @@ public abstract partial class Enemy : CharacterBody2D
     public bool Spare()
     {
         if (Current != State.Surrender) return false;
+        if (IsFake)
+        {
+            // It was never sorry.
+            Betray();
+            return true;
+        }
         WasSpared = true;
         Runner.Flush();
-        Enter(State.Dead);
+        _attack = null;
+        Enter(State.Leave);
+        _leaveFrom = GlobalPosition;
+        _leaveFadeStartMs = -1;
         CollisionLayer = 0;
-        CollisionMask = 0;
+        CollisionMask = Player.LayerWorld;
         Sfx.Play("spare", 0.03f);
-        SheetFx.Spawn("smoke", 6, 14, BodyGlobal, z: 10);
         Spared?.Invoke(this);
         return true;
     }
@@ -611,8 +725,12 @@ public abstract partial class Enemy : CharacterBody2D
         }
         Runner.Abort();
         _attack = null;
-        if (!DrillMode && SurrenderChance > 0 && Roll() < SurrenderChance)
+        var beg = DrillMode || Revealed ? BegKind.None
+            : BegRoll != null ? BegRoll(this)
+            : SurrenderChance > 0 && Roll() < SurrenderChance ? BegKind.Genuine : BegKind.None;
+        if (beg != BegKind.None)
         {
+            IsFake = beg == BegKind.Fake;
             Enter(State.Surrender);
             Posture.Reset(Posture.Max);
             Sfx.Play("posture_break", 0.03f);
@@ -658,6 +776,14 @@ public abstract partial class Enemy : CharacterBody2D
         SparkFx.Finisher(BodyGlobal);
         SheetFx.Spawn("cut_x", 4, 18, BodyGlobal, z: 16);
         Died?.Invoke(this);
+    }
+
+    /// <summary>Developer: dies at once, counted as a plain kill.</summary>
+    public void Kill()
+    {
+        if (Current is State.Dead or State.Leave) return;
+        Health = 0;
+        Die(Vector2.Down);
     }
 
     private void Flash(Color c, double ms)
@@ -721,17 +847,31 @@ public abstract partial class Enemy : CharacterBody2D
                 _body.Position = new Vector2(Mathf.Round(Mathf.Sin((float)now * 0.08f)), 0);
                 break;
             case State.Surrender:
-                // Weapon dropped, bowing low: begging for its life.
+                // Weapon dropped, bowing low: begging for its life. The tell of a fake: it does
+                // not tremble, and its eyes follow you instead of staying on the ground.
                 row = CharacterSprite.RowCrouch;
                 col = 0;
                 _weapon.Visible = false;
-                _body.Position = new Vector2(0, (int)(now / 260) % 2);
+                if (IsFake && Target != null && IsInstanceValid(Target))
+                    col = CharacterSprite.Column(Target.BodyGlobal - BodyGlobal);
+                else _body.Position = new Vector2(0, (int)(now / 260) % 2);
                 break;
             case State.Kneel:
                 row = CharacterSprite.RowCrouch;
                 col = 0;
                 blade = Mathf.Pi / 2 - 0.5f;
                 pivot = BodyCenter + new Vector2(-6, 5);
+                break;
+            case State.Leave:
+                _weapon.Visible = false;
+                if (StateElapsedMs < Tunables.Run.SpareStandMs)
+                {
+                    // Getting up slowly, still bowed.
+                    row = StateElapsedMs < Tunables.Run.SpareStandMs * 0.5 ? CharacterSprite.RowCrouch : 0;
+                    col = 0;
+                }
+                else row = _walkMs > 0 ? (int)(_walkMs / 160) % 4 : 0;
+                if (LeaveFadeElapsed >= 0) _body.Modulate = new Color(1, 1, 1, Mathf.Clamp(1f - (float)LeaveFadeElapsed / 500f, 0f, 1f));
                 break;
             case State.Dead:
                 col = 0;

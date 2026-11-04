@@ -18,6 +18,8 @@ Code: MIT, see LICENSE.
 | --- | --- | --- |
 | `actors/ninja_gray.png` | `Actor/Character/NinjaGray/SpriteSheet.png` | The player (the wandering soul) |
 | `actors/ninja_gray_faceset.png` | `Actor/Character/NinjaGray/Faceset.png` | Player portrait (later) |
+| `tiles/tileset_house.png` | `Backgrounds/Tilesets/TilesetHouse.png` | Tavern tables, counters, barrels, crates, door, windows and banners |
+| `actors/skeleton.png` | `Actor/Character/Skeleton/SpriteSheet.png` | The skeleton beside the sword on the title |
 | `actors/camouflage_red.png` | `Actor/Character/CamouflageRed/SpriteSheet.png` | Saber bandit (刀客) |
 | `actors/camouflage_red_faceset.png` | `Actor/Character/CamouflageRed/Faceset.png` | Bandit portrait (later) |
 | `weapons/katana_in_hand.png` | `Items/Weapons/Katana/SpriteInHand.png` | The player's sword (鸣不平) |
@@ -56,7 +58,11 @@ Code: MIT, see LICENSE.
 | `weapons/cleaver_in_hand.png` | `Items/Weapons/Sword/SpriteInHand.png` | The boss's twin cleavers |
 | `weapons/wine_jar.png` | `Items/Potion/EmptyPot.png` | The thrown jar of drugged wine (蒙汗药) |
 | `tiles/tileset_interior_floor.png` | `Backgrounds/Tilesets/Interior/TilesetInteriorFloor.png` | Tavern floor planks |
-| `music/lost_village.ogg` | `Audio/Musics/26 - Lost Village.ogg` | Outside the tavern and the tavern |
+| `music/lost_village.ogg` | `Audio/Musics/26 - Lost Village.ogg` | Outside the tavern |
+| `music/tension.ogg` | `Audio/Musics/28 - Tension.ogg` | The tavern (before the boss) |
+| `music/melancholia.ogg` | `Audio/Musics/16 - Melancholia.ogg` | Title screen |
+| `fx/bamboo_particle.png` | `FX/Particle/Bamboo.png` | Falling bamboo leaves (bamboo forest) |
+| `fx/petal.png` | `FX/Particle/LeafPink.png` | Drifting petals (outside the tavern) |
 | `music/fight.ogg` | `Audio/Musics/17 - Fight.ogg` | Boss fight |
 | `sounds/arrow_shot.wav` | `Audio/Sounds/Whoosh & Slash/Launch.wav` | Arrow release |
 | `sounds/jar_break.wav` | `Audio/Sounds/Hit & Impact/Impact2.wav` | Wine jar shatters |

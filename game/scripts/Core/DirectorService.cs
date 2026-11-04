@@ -36,8 +36,10 @@ public partial class DirectorService : Node
         Leads = new AdaptiveLeadTimes(ReactionDirector.FromPrior(grid, _prior));
         var args = OS.GetCmdlineUserArgs();
         Persist = !args.Contains("--scenario") && !args.Contains("--screenshot");
+        UserSettings.Persist = Persist;
         if (Persist)
         {
+            UserSettings.Load(SettingsPath, applyLocale: !args.Contains("--locale"));
             LoadSettings();
             LoadBelief();
         }

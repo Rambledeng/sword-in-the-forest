@@ -26,8 +26,16 @@ public partial class RunScene : Node2D
     private bool _changing;
     private int _lastHealth;
 
+    /// <summary>The title's start sequence ran: open the tutorial on the intro (zoom out, ghosts barge in).</summary>
+    public static bool PlayIntro { get; set; }
+
     /// <summary>The seed for the next run started by Retry (null: random).</summary>
     public static int? NextSeed { get; set; }
+
+    /// <summary>A soul fell here: the next soul (New soul) starts at this area's first room.</summary>
+    public static Area? NextArea { get; set; }
+    /// <summary>The upgrades the fallen soul had taken; the next soul keeps them.</summary>
+    public static List<Upgrade> NextUpgrades { get; } = new();
 
     /// <summary>0: <see cref="NextSeed"/>, else --seed, else random.</summary>
     [Export] public int Seed { get; set; }
@@ -52,10 +60,17 @@ public partial class RunScene : Node2D
     public SummaryScreen? Summary { get; private set; }
     public PauseMenu Pause { get; private set; } = null!;
     public TuningPanel Tuning { get; private set; } = null!;
+    public DevMenu Dev { get; private set; } = null!;
     public DirectorOverlay Overlay { get; private set; } = null!;
     public ShakeCamera Camera { get; private set; } = null!;
     public TavernBoss? Boss { get; private set; }
     public int RoomsVisited { get; private set; }
+    /// <summary>This soul took up the sword where the last one fell (null: a fresh run).</summary>
+    public Area? ContinuedFrom { get; private set; }
+    /// <summary>Kneel, beg or fake beg at each posture break (first beggar genuine).</summary>
+    public MercyRules Mercy { get; private set; } = null!;
+    /// <summary>The run's first red attack gets a generous lead.</summary>
+    public FirstRedLead FirstRed { get; private set; } = null!;
 
     public event Action<Room>? RoomEntered;
 
@@ -65,6 +80,8 @@ public partial class RunScene : Node2D
         var seed = Seed != 0 ? Seed : NextSeed ?? Cli.Seed ?? (int)(GD.Randi() % 999_999) + 1;
         NextSeed = null;
         Plan = RunPlan.Build(seed);
+        Mercy = new MercyRules(Tunables.Run.FakeBegChance);
+        FirstRed = new FirstRedLead(() => CombatServices.LeadTimes, Tunables.Run.FirstRedLeadMs);
         Telemetry.Instance.StartRun();
         GD.Print($"Run seed {seed}");
 
@@ -86,6 +103,8 @@ public partial class RunScene : Node2D
         AddChild(Overlay);
         Pause = new PauseMenu();
         AddChild(Pause);
+        Dev = new DevMenu(this);
+        AddChild(Dev);
         Pause.QuitRequested += ToTitle;
 
         var service = DirectorService.Instance;
@@ -98,7 +117,24 @@ public partial class RunScene : Node2D
             service.Observed += OnObserved;
         }
         Enemy.AnyGlint += OnAnyGlint;
-        BeginStep(StartStep);
+        var start = StartStep;
+        var carried = new List<Upgrade>();
+        if (start == 0 && NextArea is Area area)
+        {
+            // A new wandering soul picks up the sword where the last one fell.
+            start = Plan.AreaStart(area);
+            carried.AddRange(NextUpgrades);
+            ContinuedFrom = area;
+        }
+        NextArea = null;
+        NextUpgrades.Clear();
+        BeginStep(start);
+        foreach (var u in carried)
+        {
+            Apply(u);
+            Stats.Take(u);
+        }
+        if (ContinuedFrom != null) SwordVoice.Say("sword.new_soul");
     }
 
     public override void _ExitTree()
@@ -123,6 +159,23 @@ public partial class RunScene : Node2D
         if (step.Kind == RunStepKind.Upgrade) ShowUpgrade(step.Choices);
         else LoadRoom(step.Room!);
     }
+
+    /// <summary>Developer jump: leave whatever is on screen and start step <paramref name="index"/>.</summary>
+    public void JumpTo(int index)
+    {
+        if (Stats.Ended || index < 0 || index >= Plan.Steps.Count) return;
+        if (Upgrades != null)
+        {
+            Upgrades.QueueFree();
+            Upgrades = null;
+        }
+        GetTree().Paused = false;
+        _changing = true;
+        BeginStep(index);
+    }
+
+    /// <summary>The index of the boss room's step.</summary>
+    public int BossStep => Plan.Steps.ToList().FindIndex(s => s.Room?.IsBoss == true);
 
     private void Advance()
     {
@@ -173,13 +226,18 @@ public partial class RunScene : Node2D
         }
         if (PlayMusic)
         {
-            var music = plan.IsBoss ? "fight" : plan.Area is Area.Outside or Area.Tavern ? "lost_village" : "dark_forest";
+            var music = MusicFor(plan);
             Sfx.Instance.PlayMusic($"{MusicDir}/{music}.ogg");
         }
         if (plan.Area == Area.Tutorial)
         {
             var ghost = Room.Spawned.OfType<TutorialGhost>().FirstOrDefault();
-            if (ghost != null)
+            if (ghost != null && PlayIntro)
+            {
+                PlayIntro = false;
+                StartIntro(ghost);
+            }
+            else if (ghost != null)
             {
                 var d = DirectorService.Instance;
                 var r = Tunables.Run;
@@ -196,14 +254,132 @@ public partial class RunScene : Node2D
         RoomEntered?.Invoke(Room);
     }
 
+    // ---- The intro: the view pulls back from the sword to the grove, then ghosts barge in ----
+
+    private double _introT = -1;
+    private TutorialGhost? _introGhost;
+    private Vector2 _ghostFrom, _ghostTo;
+    private IPlayerControls? _savedControls;
+    private readonly List<(Node2D Node, Vector2 From, Vector2 To)> _wisps = new();
+    private const double IntroZoomEnd = 1.6, IntroBargeAt = 1.3, IntroEnd = 2.5;
+
+    public bool InIntro => _introT >= 0;
+    private CanvasLayer? _introFade;
+
+    private void StartIntro(TutorialGhost ghost)
+    {
+        _introT = 0;
+        _introGhost = ghost;
+        _savedControls = Player.Controls;
+        Player.Controls = new BotControls();
+        // The soul stands where the sword was, in the middle of the grove.
+        Player.Position = Room!.SizePx / 2 + new Vector2(0, 24);
+        Camera.Zoom = new Vector2(3.5f, 3.5f);
+        Camera.GlobalPosition = Player.GlobalPosition;
+        Camera.ResetSmoothing();
+        _ghostTo = ghost.Position;
+        _ghostFrom = new Vector2(Room.SizePx.X / 2, -12);
+        ghost.DrillMode = true;
+        ghost.Visible = false;
+        // From the title's black, the grove fades in.
+        _introFade = new CanvasLayer { Layer = 40 };
+        var black = new ColorRect { Color = Colors.Black, MouseFilter = Control.MouseFilterEnum.Ignore };
+        black.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        _introFade.AddChild(black);
+        AddChild(_introFade);
+        ghost.Position = _ghostFrom;
+    }
+
+    private void TickIntro(double dtMs)
+    {
+        _introT += dtMs / 1000.0;
+        var t = _introT;
+        var z = (float)Mathf.Clamp(t / IntroZoomEnd, 0, 1);
+        var zoom = Mathf.Lerp(3.5f, 1f, 1 - (1 - z) * (1 - z));
+        Camera.Zoom = new Vector2(zoom, zoom);
+        if (_introFade != null) _introFade.GetChild<ColorRect>(0).Modulate = new Color(1, 1, 1, (float)Mathf.Clamp(1 - t / 0.7, 0, 1));
+        if (_introGhost != null && IsInstanceValid(_introGhost) && t >= IntroBargeAt)
+        {
+            if (!_introGhost.Visible)
+            {
+                _introGhost.Visible = true;
+                SheetFx.Spawn("smoke", 6, 14, _introGhost.BodyGlobal, z: 10);
+                Sfx.Play("swing", 0.1f, 0.8f);
+                SpawnWisps();
+            }
+            var k = (float)Mathf.Clamp((t - IntroBargeAt) / (IntroEnd - IntroBargeAt), 0, 1);
+            _introGhost.Position = _ghostFrom.Lerp(_ghostTo, 1 - (1 - k) * (1 - k));
+        }
+        foreach (var (node, from, to) in _wisps)
+        {
+            if (!IsInstanceValid(node)) continue;
+            var k = (float)Mathf.Clamp((t - IntroBargeAt) / (IntroEnd - IntroBargeAt + 0.4), 0, 1);
+            node.Position = from.Lerp(to, k);
+            node.Modulate = new Color(0.8f, 0.95f, 1f, 0.55f * (1 - k));
+        }
+        if (t < IntroEnd) return;
+        EndIntro();
+    }
+
+    /// <summary>Two more spirits rush through the grove and fade (only the one stays to fight).</summary>
+    private void SpawnWisps()
+    {
+        var tex = GD.Load<Texture2D>("res://assets/third_party/ninja_adventure/actors/spirit.png");
+        var size = Room!.SizePx;
+        foreach (var (from, to) in new[] { (new Vector2(size.X * 0.3f, -10), new Vector2(size.X * 0.1f, size.Y * 0.7f)), (new Vector2(size.X * 0.7f, -10), new Vector2(size.X * 0.92f, size.Y * 0.6f)) })
+        {
+            var s = new CharacterSprite(tex);
+            Room.Fx.AddChild(s);
+            s.Position = from;
+            _wisps.Add((s, from, to));
+        }
+    }
+
+    private void EndIntro()
+    {
+        _introT = -1;
+        Camera.Zoom = Vector2.One;
+        _introFade?.QueueFree();
+        _introFade = null;
+        if (_savedControls != null) Player.Controls = _savedControls;
+        foreach (var (node, _, _) in _wisps) if (IsInstanceValid(node)) node.QueueFree();
+        _wisps.Clear();
+        var ghost = _introGhost;
+        _introGhost = null;
+        if (ghost == null || !IsInstanceValid(ghost)) return;
+        ghost.Position = _ghostTo;
+        ghost.DrillMode = false;
+        var d = DirectorService.Instance;
+        var r = Tunables.Run;
+        var returning = d != null && d.Director.Observations >= r.ReturningObservations;
+        _coach = new TutorialCoach(ghost, returning ? r.TutorialAttacksReturning : r.TutorialAttacks);
+    }
+
+    /// <summary>Each area has its own music: the grove, the village outside, the tavern's tension, the boss's fight.</summary>
+    public static string MusicFor(RoomPlan plan) => plan.IsBoss ? "fight" : plan.Area switch
+    {
+        Area.Outside => "lost_village",
+        Area.Tavern => "tension",
+        _ => "dark_forest",
+    };
+
     private void HookEnemy(Enemy e)
     {
-        e.Surrendered += _ => SayOnce("sword.first_surrender");
+        e.LeadTimesOverride = FirstRed;
+        if (e is Spearman) SayOnce("sword.first_spear");
+        if (e is not TutorialGhost and not TavernBoss) e.BegRoll = en => Mercy.Decide(en.SurrenderChance, en.NextRoll);
+        e.Surrendered += _ =>
+        {
+            // The first beggar (always genuine) teaches spare versus finish.
+            SayOnce("sword.first_surrender");
+        };
         e.Spared += _ =>
         {
             Stats.Spare();
             SayOnce("sword.first_spare");
+            SayOnce("sword.mercy.warn");
         };
+        e.Betrayed += _ => SayOnce("sword.first_fake");
         if (e is TavernBoss boss) boss.PhaseChanged += _ => SwordVoice.Say("sword.boss.phase2");
     }
 
@@ -211,7 +387,12 @@ public partial class RunScene : Node2D
     private void OnFinished(Enemy e)
     {
         Stats.Finished(e.DiedBegging);
-        if (e.DiedBegging) SayOnce("sword.first_karma");
+        if (e.DiedBegging)
+        {
+            SayOnce("sword.first_karma");
+            SayOnce("sword.mercy.warn");
+        }
+        else if (e.DiedFaking) SayOnce("sword.fake_seen");
         else if (e is not TavernBoss && e is not TutorialGhost) SayOnce("sword.first_finisher");
     }
 
@@ -272,6 +453,9 @@ public partial class RunScene : Node2D
 
     // ---- The end ---------------------------------------------------------------------------
 
+    /// <summary>Screenshot stage: end the run now.</summary>
+    public void EndForShot(bool won) => EndRun(won);
+
     private void EndRun(bool won)
     {
         if (Stats.Ended) return;
@@ -289,7 +473,8 @@ public partial class RunScene : Node2D
     {
         var d = DirectorService.Instance;
         var est = d?.Director.Estimate() ?? default;
-        Summary = new SummaryScreen(Stats, est, d?.Leads.Adaptive ?? false, d?.SoulsFallen ?? 0, Plan.Rooms.Count());
+        Summary = new SummaryScreen(Stats, est, d?.Leads.Adaptive ?? false, d?.SoulsFallen ?? 0, Plan.Rooms.Count(),
+            Stats.Won ? null : FellIn);
         Summary.RetryRequested += Retry;
         Summary.TitleRequested += ToTitle;
         AddChild(Summary);
@@ -300,8 +485,19 @@ public partial class RunScene : Node2D
     {
         GetTree().Paused = false;
         NextSeed = (int)(GD.Randi() % 999_999) + 1;
+        NextArea = null;
+        NextUpgrades.Clear();
+        if (!Stats.Won)
+        {
+            // The next soul starts at the start of the area where this one fell, keeping its upgrades.
+            NextArea = FellIn;
+            NextUpgrades.AddRange(Stats.Upgrades);
+        }
         if (ChangeScenes) GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, "res://scenes/Run.tscn");
     }
+
+    /// <summary>The area of the room this soul is in (or last was in).</summary>
+    public Area FellIn => Room?.Plan.Area ?? Area.Tutorial;
 
     private void ToTitle()
     {
@@ -320,6 +516,7 @@ public partial class RunScene : Node2D
             return;
         }
         Stats.ElapsedMs += clock.DeltaMs;
+        if (InIntro) TickIntro(clock.DeltaMs);
         _coach?.Tick();
         if (Player.Deflects > 0) SayOnce("sword.first_deflect");
         if (Player.IsSlowed) SayOnce("sword.boss.jar");
@@ -334,7 +531,7 @@ public partial class RunScene : Node2D
 
     public override void _UnhandledInput(InputEvent e)
     {
-        if (!e.IsActionPressed("pause") || Upgrades != null || Summary != null || Tuning.IsOpen) return;
+        if (!e.IsActionPressed("pause") || Upgrades != null || Summary != null || Tuning.IsOpen || Dev.IsOpen) return;
         GetViewport().SetInputAsHandled();
         Pause.Toggle(!Pause.IsOpen);
     }

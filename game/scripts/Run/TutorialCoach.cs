@@ -6,8 +6,9 @@ namespace SwordInTheForest.Run;
 
 /// <summary>
 /// The tutorial room's script: the sword talks the player through moving, deflecting, blocking,
-/// rolling and the gourd while the ghost attacks, and the director calibrates on those attacks.
-/// After <see cref="Attacks"/> attacks the ghost can be broken and finished.
+/// rolling and the gourd while the ghost attacks with white cuts only (red comes with the
+/// spearman). The director controls from the first attack: the M5 study showed calibration does
+/// not speed up learning. After <see cref="Attacks"/> attacks the ghost can be broken and finished.
 /// </summary>
 public sealed class TutorialCoach
 {
@@ -22,7 +23,6 @@ public sealed class TutorialCoach
         _ghost = ghost;
         Attacks = attacks;
         _startMs = GameClock.Instance.NowMs;
-        DirectorService.Instance?.Leads.BeginCalibration(attacks);
     }
 
     public int Attacks { get; }
@@ -55,8 +55,8 @@ public sealed class TutorialCoach
         }
     }
 
-    /// <summary>The tutorial is over: back to control.</summary>
-    public void End() => DirectorService.Instance?.Leads.EndCalibration();
+    /// <summary>The tutorial is over (kept for callers; nothing to undo since there is no calibration).</summary>
+    public void End() { }
 
     private void Once(int step, bool when, string key)
     {

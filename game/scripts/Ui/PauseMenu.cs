@@ -33,6 +33,12 @@ public partial class PauseMenu : CanvasLayer
         _resume = new Button { Text = "ui.pause.resume" };
         _resume.Pressed += () => Toggle(false);
         stack.AddChild(_resume);
+        var settings = new Button { Text = "ui.pause.settings" };
+        settings.Pressed += () => Settings.Open();
+        stack.AddChild(settings);
+        Settings = new SettingsPanel();
+        AddChild(Settings);
+        Settings.Closed += () => settings.GrabFocus();
         var quit = QuitButton = new Button { Text = "ui.pause.quit" };
         quit.Pressed += () =>
         {
@@ -45,16 +51,18 @@ public partial class PauseMenu : CanvasLayer
     public override void _UnhandledInput(InputEvent e)
     {
         // The run is paused while this is open, so the menu closes itself.
-        if (!IsOpen || !e.IsActionPressed("pause")) return;
+        if (!IsOpen || !e.IsActionPressed("pause") || Settings.IsOpen) return;
         GetViewport().SetInputAsHandled();
         Toggle(false);
     }
 
     public Button QuitButton { get; private set; } = null!;
+    public SettingsPanel Settings { get; private set; } = null!;
 
     public void Toggle(bool open)
     {
         if (open == _root.Visible) return;
+        if (!open) Settings.Close();
         _root.Visible = open;
         GetTree().Paused = open;
         Sfx.Play("ui_move", 0.02f, 0.6f);

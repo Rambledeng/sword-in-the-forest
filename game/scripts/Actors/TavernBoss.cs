@@ -7,7 +7,7 @@ using SwordInTheForest.Tuning;
 namespace SwordInTheForest.Actors;
 
 /// <summary>
-/// The tavern keeper (placeholder name), with twin cleavers. Phase 1: a two-hit cleaver combo and
+/// The Landlady (老板娘, De Waardin), keeper of a black inn, with twin cleavers. Phase 1: a two-hit cleaver combo and
 /// a red charge. Phase 2, at half health or after her first finisher: shorter windups, a three-hit
 /// flurry ending in red, and a thrown jar of drugged wine (蒙汗药) that slows you.
 /// </summary>
