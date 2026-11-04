@@ -22,8 +22,8 @@ public partial class EnemyBars : Node2D
 
     public override void _Draw()
     {
-        if (_enemy == null || _enemy.Current == Enemy.State.Dead) return;
-        var health = _enemy.Health / (float)Mathf.Max(1, Core.Tunables.SaberBandit.MaxHealth);
+        if (_enemy == null || _enemy.Current is Enemy.State.Dead or Enemy.State.Leave) return;
+        var health = Mathf.Clamp(_enemy.Health / (float)Mathf.Max(1, _enemy.MaxHealth), 0f, 1f);
         var posture = (float)_enemy.Posture.Fraction;
         var x0 = -Width / 2;
         if (_enemy.IsKneeling)

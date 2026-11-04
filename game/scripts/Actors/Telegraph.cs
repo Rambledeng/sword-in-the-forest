@@ -26,7 +26,7 @@ public partial class Telegraph : Node2D
         if (a.Projectile == "arrow")
         {
             var dir = lead ? e.AimDir : e.Facing;
-            var len = a.ReachPx;
+            var len = e.ShotRangeFor(dir, a.ReachPx);
             var c = lead ? new Color(1f, 0.95f, 0.8f, 0.75f) : new Color(1f, 0.9f, 0.7f, 0.28f);
             DrawDashed(from + dir * 6, from + dir * len, c, lead ? 1.5f : 1f);
             return;

@@ -17,6 +17,14 @@ public partial class RunTuning : Resource
     /// <summary>Chance that a posture-broken enemy drops its weapon and begs instead of kneeling.</summary>
     [Export(PropertyHint.Range, "0,1,0.05")] public float SurrenderChance { get; set; }
     [Export(PropertyHint.Range, "8,120,1")] public float SpareRangePx { get; set; }
+    /// <summary>After the first beggar of a run (always genuine), the chance that a beggar is a fake.</summary>
+    [Export(PropertyHint.Range, "0,1,0.01")] public float FakeBegChance { get; set; }
+    /// <summary>A spared enemy takes this long to stand up before it walks out.</summary>
+    [Export(PropertyHint.Range, "0,3000,50")] public int SpareStandMs { get; set; }
+    /// <summary>Its walking speed out of the room, as a fraction of its move speed.</summary>
+    [Export(PropertyHint.Range, "0.1,2,0.05")] public float SpareLeaveSpeedFactor { get; set; }
+    /// <summary>It fades out wherever it is after this long (stuck on a corner).</summary>
+    [Export(PropertyHint.Range, "1000,30000,500")] public int SpareLeaveMaxMs { get; set; }
 
     [ExportGroup("Upgrades")]
     [Export(PropertyHint.Range, "0,10,1")] public int VitalityHealth { get; set; }

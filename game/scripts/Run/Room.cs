@@ -152,6 +152,27 @@ public partial class Room : Node2D, INav
         return (TileCenter(next.Value) + new Vector2(0, 2) - from).Normalized();
     }
 
+    public Vector2 ShotEnd(Vector2 fromGlobal, Vector2 toGlobal)
+    {
+        var a = ToLocal(fromGlobal);
+        var b = ToLocal(toGlobal);
+        var len = a.DistanceTo(b);
+        if (len < 0.01f) return toGlobal;
+        var dir = (b - a) / len;
+        // Start a little out from the shooter so its own feet never block the shot.
+        for (var d = 4f; d <= len; d += 2f)
+            if (BlocksShot(a + dir * d)) return ToGlobal(a + dir * Mathf.Max(0, d - 2f));
+        return toGlobal;
+    }
+
+    public Vector2 LeavePoint => ToGlobal(EntryPx);
+
+    private bool BlocksShot(Vector2 local)
+    {
+        var t = T.At(TileAt(local));
+        return t == Tile.Wall || t == Tile.Obstacle;
+    }
+
     /// <summary>A straight walk from a to b (with the body's width) crosses no blocked tile.</summary>
     private bool Clear(Vector2 a, Vector2 b)
     {

@@ -120,6 +120,19 @@ public partial class RunBotScenario : Scenario
     {
         _bot.Step();
         var s = _run.Stats;
+        if (frame % 600 == 0 && _run.Room != null)
+            GD.Print($"  frame {frame}: player {_run.Player.GlobalPosition.Round()} {_run.Player.Current}; " +
+                     string.Join(", ", _run.Room.Spawned.Where(GodotObject.IsInstanceValid).Select(e => $"{e.GetType().Name} {e.Current} {e.GlobalPosition.Round()}")));
+        if (_run.Room != null)
+        {
+            _leavePoint = _run.Room.LeavePoint;
+            foreach (var e in _run.Room.Spawned.Where(e => GodotObject.IsInstanceValid(e) && e.IsLeaving))
+            {
+                if (!_leavers.Contains(e)) _leavers.Add(e);
+                Check(!e.CanBeHit, "a leaving enemy can still be hit");
+                _closest[e.GetInstanceId()] = Mathf.Min(_closest.GetValueOrDefault(e.GetInstanceId(), float.MaxValue), e.GlobalPosition.DistanceTo(_leavePoint));
+            }
+        }
         if (_run.Room is { IsClear: true } && _mercyStage == 0)
         {
             _mercyStage = 1;
@@ -134,7 +147,20 @@ public partial class RunBotScenario : Scenario
                 Check(spoken.Contains(key), $"the sword never said {key}");
             if (n >= 2) Check(spoken.Contains("sword.first_karma"), "the sword never said sword.first_karma");
             Check(_run.Room.Spawned.All(e => !GodotObject.IsInstanceValid(e) || e.WasSpared || e.DiedBegging), "an enemy kneeled instead of begging");
+            Check(_leavers.Count == s.Spared, $"{s.Spared} spared but {_leavers.Count} seen walking out");
+            return;
+        }
+        if (_mercyStage == 1)
+        {
+            // Spared enemies walk to the entrance and only then disappear.
+            if (_leavers.Any(GodotObject.IsInstanceValid)) return;
+            GD.Print($"  spared enemies left at frame {frame}; closest to the entrance: {string.Join(", ", _closest.Values.Select(v => v.ToString("0")))} px");
+            Check(_closest.Count == _leavers.Count && _closest.Values.All(v => v < 12), "a spared enemy faded before reaching the entrance");
             Pass();
         }
     }
+
+    private List<Enemy> _leavers = new();
+    private Vector2 _leavePoint;
+    private readonly Dictionary<ulong, float> _closest = new();
 }

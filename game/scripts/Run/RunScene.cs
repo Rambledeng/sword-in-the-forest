@@ -52,10 +52,13 @@ public partial class RunScene : Node2D
     public SummaryScreen? Summary { get; private set; }
     public PauseMenu Pause { get; private set; } = null!;
     public TuningPanel Tuning { get; private set; } = null!;
+    public DevMenu Dev { get; private set; } = null!;
     public DirectorOverlay Overlay { get; private set; } = null!;
     public ShakeCamera Camera { get; private set; } = null!;
     public TavernBoss? Boss { get; private set; }
     public int RoomsVisited { get; private set; }
+    /// <summary>Kneel, beg or fake beg at each posture break (first beggar genuine).</summary>
+    public MercyRules Mercy { get; private set; } = null!;
 
     public event Action<Room>? RoomEntered;
 
@@ -65,6 +68,7 @@ public partial class RunScene : Node2D
         var seed = Seed != 0 ? Seed : NextSeed ?? Cli.Seed ?? (int)(GD.Randi() % 999_999) + 1;
         NextSeed = null;
         Plan = RunPlan.Build(seed);
+        Mercy = new MercyRules(Tunables.Run.FakeBegChance);
         Telemetry.Instance.StartRun();
         GD.Print($"Run seed {seed}");
 
@@ -86,6 +90,8 @@ public partial class RunScene : Node2D
         AddChild(Overlay);
         Pause = new PauseMenu();
         AddChild(Pause);
+        Dev = new DevMenu(this);
+        AddChild(Dev);
         Pause.QuitRequested += ToTitle;
 
         var service = DirectorService.Instance;
@@ -123,6 +129,23 @@ public partial class RunScene : Node2D
         if (step.Kind == RunStepKind.Upgrade) ShowUpgrade(step.Choices);
         else LoadRoom(step.Room!);
     }
+
+    /// <summary>Developer jump: leave whatever is on screen and start step <paramref name="index"/>.</summary>
+    public void JumpTo(int index)
+    {
+        if (Stats.Ended || index < 0 || index >= Plan.Steps.Count) return;
+        if (Upgrades != null)
+        {
+            Upgrades.QueueFree();
+            Upgrades = null;
+        }
+        GetTree().Paused = false;
+        _changing = true;
+        BeginStep(index);
+    }
+
+    /// <summary>The index of the boss room's step.</summary>
+    public int BossStep => Plan.Steps.ToList().FindIndex(s => s.Room?.IsBoss == true);
 
     private void Advance()
     {
@@ -198,6 +221,7 @@ public partial class RunScene : Node2D
 
     private void HookEnemy(Enemy e)
     {
+        if (e is not TutorialGhost and not TavernBoss) e.BegRoll = en => Mercy.Decide(en.SurrenderChance, en.NextRoll);
         e.Surrendered += _ => SayOnce("sword.first_surrender");
         e.Spared += _ =>
         {
@@ -334,7 +358,7 @@ public partial class RunScene : Node2D
 
     public override void _UnhandledInput(InputEvent e)
     {
-        if (!e.IsActionPressed("pause") || Upgrades != null || Summary != null || Tuning.IsOpen) return;
+        if (!e.IsActionPressed("pause") || Upgrades != null || Summary != null || Tuning.IsOpen || Dev.IsOpen) return;
         GetViewport().SetInputAsHandled();
         Pause.Toggle(!Pause.IsOpen);
     }

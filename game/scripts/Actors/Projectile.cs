@@ -22,6 +22,9 @@ public partial class Projectile : Sprite2D
     private double _afterMs;
     private string _kind = "";
 
+    /// <summary>It flies into a wall or obstacle and stays there.</summary>
+    public bool Stuck { get; set; }
+
     public static Projectile Launch(string kind, Vector2 from, Vector2 to, double flightMs, bool arc)
     {
         var p = new Projectile
@@ -60,6 +63,14 @@ public partial class Projectile : Sprite2D
             return;
         }
         if (hit) { QueueFree(); return; }
+        if (Stuck)
+        {
+            // Into the wood: it stays a moment, then fades.
+            SheetFx.Spawn("smoke", 6, 8, _to, z: 13);
+            _away = Vector2.Zero;
+            _afterMs = -600;
+            return;
+        }
         _away = dir * 220f; // a miss flies on
     }
 
@@ -83,7 +94,7 @@ public partial class Projectile : Sprite2D
         _afterMs += dt;
         GlobalPosition += _away * (float)(dt / 1000.0);
         if (_away != Vector2.Zero && _kind == "arrow") Rotation = _away.Angle() + (float)_afterMs * 0.02f;
-        Modulate = new Color(1, 1, 1, Mathf.Clamp(1f - (float)(_afterMs / 400.0), 0f, 1f));
+        Modulate = new Color(1, 1, 1, Mathf.Clamp(1f - (float)(Mathf.Max(0, _afterMs) / 400.0), 0f, 1f));
         if (_afterMs > 400) QueueFree();
     }
 }
