@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Director\Director.csproj" />
+    <ProjectReference Include="..\..\sim\Sim.csproj" />
   </ItemGroup>
 
 </Project>

@@ -3,4 +3,13 @@ ui.title.name,Sword in the Forest,Zwaard in het Woud,林中剑
 ui.title.press_start,Press attack to begin,Druk op aanvallen om te beginnen,按攻击键开始
 ui.hud.gourd_sips,×{sips},×{sips},×{sips}
 ui.arena.fallen,You have fallen. The sword waits.,Je bent gevallen. Het zwaard wacht.,你倒下了。剑在等你。
-ui.arena.hint,F1 tuning · Esc title,F1 afstellen · Esc titel,F1 调参 · Esc 返回标题
+ui.arena.hint,F1 tuning · F2 director · Esc title,F1 afstellen · F2 regisseur · Esc titel,F1 调参 · F2 剑意观测 · Esc 返回标题
+ui.hud.attunement,Attunement,Afstemming,人剑合一
+ui.title.challenge,Challenge: {value},Uitdaging: {value},挑战：{value}
+ui.title.adaptive,Adaptive timing: {value},Adaptieve timing: {value},自适应时机：{value}
+ui.title.settings_hint,← → challenge · ↑ ↓ adaptive timing,← → uitdaging · ↑ ↓ adaptieve timing,← → 挑战 · ↑ ↓ 自适应时机
+ui.settings.relaxed,Relaxed,Ontspannen,从容
+ui.settings.standard,Standard,Standaard,标准
+ui.settings.hard,Hard,Zwaar,困难
+ui.settings.on,On,Aan,开
+ui.settings.off,Off,Uit,关

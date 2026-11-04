@@ -30,6 +30,7 @@ public partial class Arena : Node2D
     public Node2D Actors { get; private set; } = null!;
     public ShakeCamera Camera { get; private set; } = null!;
     public TuningPanel? Tuning { get; private set; }
+    public DirectorOverlay? Overlay { get; private set; }
     public IReadOnlyList<Enemy> Enemies => _enemies;
     public Vector2 Center => new(WidthTiles * 8, HeightTiles * 8);
 
@@ -70,6 +71,8 @@ public partial class Arena : Node2D
             AddChild(new Hud { Player = Player });
             Tuning = new TuningPanel();
             AddChild(Tuning);
+            Overlay = new DirectorOverlay();
+            AddChild(Overlay);
         }
         if (PlayMusic) Sfx.Instance.PlayMusic("res://assets/third_party/ninja_adventure/music/dark_forest.ogg");
         if (AutoSpawn) SpawnWave();

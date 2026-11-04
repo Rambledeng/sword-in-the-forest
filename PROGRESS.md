@@ -1,5 +1,168 @@
 # Progress
 
+## M2 · The director (2026-11-01)
+
+### Done
+- **Director library** (`src/Director`, pure C#, netstandard2.1): `ReactionDirector` holds the
+  belief on the spec's grid: 62 log-spaced medians from 150 to 900 ms × 12 spreads (0.08–0.56) ×
+  4 lapse rates (0, 3, 7, 12%), 2,976 cells in all. The model is
+  P(success | L) = (1 − λ) Φ((ln(L − d) − m) / s), with d = 25 ms (one 60 Hz frame plus input).
+  - **Update:** before each update the belief blurs along m: 3% of each cell moves to each
+    neighbour, so it can follow a player who improves or tires. The update then multiplies by the
+    attack's likelihood and renormalizes. A timed press uses the log-normal density at its time,
+    mixed with λ × a flat lapse density. No press uses the censored miss at the lead time. A lapse
+    uses λ.
+  - **Population prior** (`Prior.Fit`): fitted to 20,000 simulated training players (seed 2026):
+    a normal over ln(median), times histograms over spread and lapse, with a 2% floor so any
+    player can still be learned.
+  - **Calibration** (Psi method): out of the leads 200–800 ms in 10 ms steps, it picks the one
+    whose outcome minimizes the expected entropy of the median.
+  - **Control:** the shortest lead (5 ms ladder) whose belief-averaged success reaches the
+    target. Relaxed 0.85, Standard 0.70, Hard 0.55. Leads stay within 200–800 ms and the
+    attack's designed range.
+  - **Save format:** `DirectorSave`, a text file with the grid signature, the observation count
+    and the weights.
+- **Telemetry → evidence** (`src/Combat/ThreatEvidence.cs`, unit-tested) and
+  `AdaptiveLeadTimes` (the `ILeadTimeSource`). Your four decisions, plus the rest of the mapping:
+  - **A hit with `angle_deg` beyond the guard arc counts as a lapse, not timing.** I chose lapse
+    over skip for three reasons:
+    - The spec defines λ as covering exactly this ("being out of position").
+    - The lapse likelihood is the same for every median and spread, so it moves λ and never the
+      reaction-time estimate.
+    - The challenge target is the success the player actually experiences. Skipping would hide
+      these misses, and a player who keeps turning their back would get less than the target.
+    - The price: a lapse-prone player gets slightly longer leads. λ tops out at 12%, so Relaxed
+      (85%) stays reachable.
+  - **A guard press in the window that the anti-mash rule turned into a block** is timed at its
+    press time (response `block` with a `press_ms`).
+  - **Attacks forced early by `HitInWindupStrikesNow`** keep their lead, so they count normally;
+    nothing special in the mapping.
+  - Also timed: deflects and rolls in the window, late presses after the impact, and presses the
+    player could not act on.
+  - No press counts as a miss at the lead time, unless it was a whiff (out of reach).
+  - Skipped as anticipation: a guard held from before the glint (block, or guard against red
+    with no press) and a roll started before it (evaded).
+  - Guard pressed against a red glint (wrong button): lapse.
+- **Calibration runs in the bandit arena:** the player's first `DirectorCalibrationAttacks` (12,
+  `combat.tres`) observations ever calibrate; control takes over after that.
+- **Wiring:** a `Director` autoload (`game/scripts/Core/DirectorService.cs`) feeds every finished
+  attack to the filter (where the telemetry line is written) and serves every lead time through
+  `CombatServices.LeadTimes`. The F1 `FixedLeadOverrideMs` still wins when it is above zero.
+- **Persistence:** the belief is saved to `user://director.sav` after every observation and loaded
+  at start. The settings are saved to `user://settings.cfg`. Scenario and screenshot runs never
+  read or write either file, and run with adaptive timing off unless a scenario turns it on.
+- **Settings on the title screen:** ← → picks the challenge, ↑ ↓ turns adaptive timing on or off
+  (arrow keys or d-pad). The labels are localized; see `docs/screens/title_settings.png`. The
+  screenshot shows "Off" because test runs start with adaptive off; you start with it on.
+- **Attunement meter (人剑合一)** under the gourd: it fills as the 80% interval about your median
+  narrows, from about 65% of the median wide (empty) to 12% (full). It dims while adaptive
+  timing is off.
+- **F2 overlay** (the key was F3 in M0; the spec says F2): `docs/screens/director_overlay.png`.
+  It is a developer tool like F1, so its text is not localized.
+- **Simulator** (`sim/`): `SimPlayer` reacts with a log-normal reaction time, a true 17 ms input
+  delay snapped to the next 60 Hz frame, lapses as no press, and late presses timed up to 400 ms
+  after the impact, as in the game. `Simulator`, `M2Study` and the CLI write CSV
+  (see `analysis/README.md`). M5 can add experiments on top: `Prior.Uniform`,
+  `PopulationModel.Shifted` and `SimConfig.CalibrationAttacks = 0` are already there.
+- **Tuning change you didn't ask for:** I widened each attack's designed lead range. M1's ranges
+  (350–600 ms) left the director almost nothing to adapt, so it would have been invisible in your
+  playtest. Defaults are unchanged. The new ranges: slash 1 220–700, slash 2 220–650, chop
+  280–800, counter 220–600, red thrust 250–800 (`game/tuning/attacks/*.tres`, editable in F1).
+
+### Status of "Done when" (all in CI)
+- [x] **Estimate within 40 ms after 15 attacks for at least 80% of 1,000 simulated players:**
+  88.2% (median error 14 ms). The 15 attacks are 12 calibration attacks plus 3 control attacks.
+  Test: `DoneWhenTests`. The test players are drawn with a different seed from the prior's
+  training set.
+- [x] **At least 80% of players within 10 points of the target over 60 attacks** (after
+  calibration), with a clearly tighter spread than fixed timing (420 ms):
+
+  | Challenge | Adaptive: on target | Adaptive: SD | Fixed: on target | Fixed: SD |
+  | --- | --- | --- | --- | --- |
+  | Relaxed | 98.4% | 0.046 | 40.4% | 0.252 |
+  | Standard | 93.6% | 0.057 | 28.1% | 0.252 |
+  | Hard | 91.7% | 0.062 | 21.0% | 0.252 |
+
+  Mean success is 0.851, 0.707 and 0.562. The adaptive SDs are close to the binomial floor for
+  60 attacks. The test asserts at least 80% on target, an SD below half of fixed timing's, and at
+  least 30 points more on target than fixed.
+- [x] **One update plus one decision under 0.5 ms:** 107 µs in Control mode and 145 µs in
+  Calibrate mode, in a Debug build averaged over 2,000 iterations (`DoneWhenTests`).
+- [x] **With adaptive timing off, every attack uses its designed lead exactly:**
+  `AdaptiveLeadTimesTests` (200 attacks while the director keeps learning) and the `director_off`
+  scenario (24 real bandit attacks, every `lead_ms` equal to its designed default).
+- Also: the `director_on` scenario runs a bot that deflects 260 ms after each glint against the
+  free-roaming bandit. Every lead stays in range, calibration hands over to control, and the
+  estimate settles at 242 ms (the bot's presses minus d: ~245). Control leads drop to 280–285 ms,
+  against designed defaults of 380–520. 15 scenarios pass in all.
+
+### How to read the F2 overlay
+- **Line 1:** the mode: `calibrate 7/12` while it is still choosing the most informative leads,
+  then `control, n 37` (observations so far).
+- **Line 2:** challenge and target, and whether adaptive timing is on (orange `OFF` when not).
+- **Heat map:** the belief. Left to right is your median reaction time, 150 to 900 ms on a log
+  scale (ticks at 200, 300, 500 and 800). Top to bottom is your spread s, consistent at the top
+  and erratic at the bottom. Brighter means more likely.
+  - The white vertical line is the estimate. The cyan bar under the map is the 80% interval.
+  - A blob that shrinks and stops moving means the sword has read you.
+- **Small square on the right:** predicted against observed success, in five bins of prediction
+  over the session. Dots on the diagonal mean the predictions are honest. Bigger dots hold more
+  attacks.
+- **`median … ms 80%: lo–hi`:** your reaction time as the sword reads it, excluding the ~25 ms
+  input delay. Below it: s, the lapse rate, and attunement (the HUD meter as a number).
+- **`lead … ms (attack) pred …%`:** the latest lead time chosen, and the success the belief
+  predicted for it.
+- **`last 20: predicted … observed …`:** the two should track each other and sit near your
+  target once it is in control.
+- **The strip:** the last 20 attacks, oldest first. Green is in time, red is late or no press,
+  grey is a lapse (wrong button, or guarding with your back turned). The white tick in each cell
+  is its prediction: higher means it expected you to make it.
+- **Backspace** (while F2 is open) forgets you and goes back to the population prior. Use it to
+  recalibrate, or before handing the game to someone else.
+
+### What to try in the playtest (30–40 min)
+1. **First contact (Standard, adaptive on).** Start, press F2, and fight normally for about 15
+   attacks. Watch calibration (`calibrate n/12`) probe short and long leads, then the blob
+   narrow. Does the median it settles on match how quick you feel? Does the meter fill by then?
+2. **Feel the control.** Keep fighting with F2 closed for a few minutes. About 7 in 10 deflects
+   should land. It should feel demanding but fair, not random.
+3. **Slow room** (the spec's "your part"). Deliberately react late, about half a second, for ~15
+   attacks. With F2 open, the estimate should drift right and the leads grow. Then play normally
+   again and watch it come back.
+4. **Challenges.** Esc to title, ← → to Relaxed, then Hard; play a few minutes each. Leads should
+   lengthen on Relaxed and shorten on Hard, and your success rate should follow (F2 line
+   "observed").
+5. **Off switch.** ↑ ↓ on the title to turn adaptive timing off: every attack is back to its
+   designed lead (slash 420/380, chop 520). The meter dims; the sword still learns.
+6. **Persistence.** Quit and restart: the overlay should show the same estimate and no
+   recalibration. The strip and the predicted/observed numbers start empty each session.
+7. Turn your back and deflect a few times: the strip should show grey (lapse), and the median
+   should not move.
+
+### Questions for the playtest
+- Does the estimated median match your sense of your own speed? Too fast or too slow?
+- Is Standard's 70% the right feel, or should the targets move?
+- Calibration probes short leads on purpose. Do the first 12 attacks feel unfair?
+- Are the widened lead ranges right? A 220 ms slash is very fast; an 800 ms chop is very slow.
+- Is the meter's position (under the gourd) and wording ("Attunement" / 人剑合一) right?
+
+### Known issues
+- The prior comes from a simulated population (median of medians 330 ms). The spec plans to
+  refit it from real playtest logs later.
+- One reaction-time distribution covers both deflects (white) and rolls (red). Rolling is a
+  different choice, so red attacks may need their own offset once we have real data.
+- Combat time freezes during hit-stop, so a glint shown during another freeze gets extra real
+  time (unchanged from M1). The director sees game time.
+- The sword's spoken lines when its reading changes, and the run summary, come in M3.
+- F2 and F1 text is English only (developer tools).
+- `tools/screenshot.sh screens/DirectorView "" 30 director_overlay` restages the overlay
+  screenshot (also in CI).
+
+### Next (M3 · The run)
+- The tutorial ghost takes over calibration from the arena: point it at
+  `AdaptiveLeadTimes` in `DirectorMode.Calibrate` and drop the arena's calibration count.
+- The sword's lines on reading changes; the run summary shows the median with its range.
+
 ## M1 polish · playtest fixes (2026-11-01)
 
 Your six notes, in order. Each has a test.

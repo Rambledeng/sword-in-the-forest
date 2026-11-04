@@ -7,5 +7,6 @@
 script = ExtResource("1_script")
 LatePressGraceMs = 400
 FixedLeadOverrideMs = 0
+DirectorCalibrationAttacks = 12
 ArenaEnemies = 1
 RespawnDelayMs = 2000

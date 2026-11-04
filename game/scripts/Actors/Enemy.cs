@@ -118,7 +118,11 @@ public abstract partial class Enemy : CharacterBody2D
         Runner.Swing += OnSwing;
         Runner.Impact += OnImpact;
         Runner.Finished += OnFinished;
-        Runner.Finalized += t => Telemetry.Instance.Write(t);
+        Runner.Finalized += t =>
+        {
+            Telemetry.Instance.Write(t);
+            DirectorService.Instance?.Observe(t);
+        };
         Enter(State.Approach);
     }
 
