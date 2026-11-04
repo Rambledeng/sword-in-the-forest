@@ -11,6 +11,7 @@ namespace SwordInTheForest;
 ///   --locale &lt;code&gt;       start in this locale (en, nl, zh_CN)
 ///   --frames &lt;n&gt;          with --screenshot: frames to wait before the shot (default 10)
 ///   --shot-name &lt;name&gt;    with --screenshot: output file name without .png
+///   --seed &lt;n&gt;            the run's seed (default: random)
 /// </summary>
 public partial class Cli : Node
 {
@@ -19,6 +20,9 @@ public partial class Cli : Node
     private string? _screenshotScene;
     private string? _shotName;
     private int _framesUntilShot = -1;
+
+    /// <summary>The run seed from --seed, if given.</summary>
+    public static int? Seed { get; private set; }
 
     public override void _Ready()
     {
@@ -41,6 +45,9 @@ public partial class Cli : Node
                     break;
                 case "--frames" when value != null && int.TryParse(value, out var frames):
                     _framesUntilShot = frames;
+                    break;
+                case "--seed" when value != null && int.TryParse(value, out var seed):
+                    Seed = seed;
                     break;
                 case "--shot-name" when value != null:
                     _shotName = value;

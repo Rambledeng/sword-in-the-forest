@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/AttackData.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+Id = "boss_charge"
+Red = true
+WindupMinMs = 700
+WindupMaxMs = 1000
+LeadDefaultMs = 500
+LeadMinMs = 260
+LeadMaxMs = 800
+SwingMs = 160
+RecoveryMs = 1000
+Damage = 3
+PostureDamage = 34.0
+DeflectPostureDamage = 0.0
+ReachPx = 96.0
+ArcDeg = 30.0
+LungePx = 80.0
+Shape = "line"
+WidthPx = 9.0
+Projectile = ""
+Slows = false

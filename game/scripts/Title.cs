@@ -5,7 +5,7 @@ using SwordInTheForest.Director;
 namespace SwordInTheForest;
 
 /// <summary>
-/// Title screen: attack (left click, J, X/RB), interact or accept starts the test arena (M1).
+/// Title screen: attack (left click, J, X/RB), interact or accept starts a run.
 /// Left/right picks the challenge and up/down turns adaptive timing on or off (keys or d-pad).
 /// Uses _Input, not _UnhandledInput: the full-screen controls consume mouse clicks in the GUI
 /// pass, which is why left click did nothing in M1.
@@ -45,7 +45,7 @@ public partial class Title : Control
         if (!(e.IsActionPressed("attack") || e.IsActionPressed("interact") || e.IsActionPressed("ui_accept"))) return;
         GetViewport().SetInputAsHandled();
         StartRequested = true;
-        if (ChangeScene) GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, "res://scenes/Arena.tscn");
+        if (ChangeScene) GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, "res://scenes/Run.tscn");
     }
 
     private bool ChangeSetting(InputEvent e)

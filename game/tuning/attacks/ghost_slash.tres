@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/AttackData.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+Id = "ghost_slash"
+Red = false
+WindupMinMs = 900
+WindupMaxMs = 1500
+LeadDefaultMs = 450
+LeadMinMs = 200
+LeadMaxMs = 800
+SwingMs = 80
+RecoveryMs = 900
+Damage = 1
+PostureDamage = 14.0
+DeflectPostureDamage = 22.0
+ReachPx = 30.0
+ArcDeg = 110.0
+LungePx = 10.0
+Shape = "arc"
+WidthPx = 0.0
+Projectile = ""
+Slows = false

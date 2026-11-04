@@ -5,6 +5,7 @@ using Godot;
 using SwordInTheForest.Combat;
 using SwordInTheForest.Core;
 using SwordInTheForest.Fx;
+using SwordInTheForest.Run;
 using SwordInTheForest.Tuning;
 
 namespace SwordInTheForest.Actors;
@@ -16,7 +17,7 @@ namespace SwordInTheForest.Actors;
 /// </summary>
 public abstract partial class Enemy : CharacterBody2D
 {
-    public enum State { Approach, Circle, Attack, Recover, Stagger, Kneel, Dead }
+    public enum State { Approach, Circle, Attack, Recover, Stagger, Kneel, Surrender, Dead }
     public enum HitResult { Ignored, Hit, Blocked, Kneel, Finisher }
 
     public static readonly Vector2 BodyCenter = new(0, -7);
@@ -45,6 +46,10 @@ public abstract partial class Enemy : CharacterBody2D
     private double _guardPoseUntilMs;
     private AttackData? _attack;
     private readonly Queue<AttackData> _drill = new();
+    private WeaponSprite? _offhand;
+    private Telegraph _telegraph = null!;
+    private Vector2 _areaTarget;
+    private Projectile? _projectile;
 
     protected Enemy()
     {
@@ -67,9 +72,33 @@ public abstract partial class Enemy : CharacterBody2D
 
     public event Action<Enemy>? Died;
     public event Action<Enemy>? Kneeled;
+    /// <summary>It posture-broke and begs (投降忏悔) instead of kneeling.</summary>
+    public event Action<Enemy>? Surrendered;
+    /// <summary>The player let it go.</summary>
+    public event Action<Enemy>? Spared;
+
+    /// <summary>Chance it begs instead of kneeling when its posture breaks (0 in the test arena).</summary>
+    public float SurrenderChance { get; set; }
+    /// <summary>Colour variant tint for the body (random per spawn).</summary>
+    public Color Tint { get; set; } = Colors.White;
+    /// <summary>Steering around obstacles (null: walk straight).</summary>
+    public INav? Nav { get; set; }
+    /// <summary>The enemy's own random numbers (surrender rolls, attack choice); reseed for a repeatable run.</summary>
+    public Random Rng { get; set; } = new(_seedCounter * 7919);
+    /// <summary>Attacks whose telemetry line is complete.</summary>
+    public int AttacksMade { get; private set; }
+    /// <summary>It begged and was cut down anyway (karma).</summary>
+    public bool DiedBegging { get; private set; }
+    public bool WasSpared { get; private set; }
+    public bool IsBegging => Current == State.Surrender;
 
     public bool CanBeHit => Current != State.Dead;
     public bool IsKneeling => Current == State.Kneel;
+    public bool IsGone => Current == State.Dead;
+    /// <summary>Where a thrown attack lands: the player's position at the glint.</summary>
+    public Vector2 AreaTarget => _areaTarget;
+    public bool InSwing => _swingStartMs >= 0;
+    public double MaxHealth => Tuning.MaxHealth;
     public Vector2 BodyGlobal => GlobalPosition + BodyCenter;
     public double StateElapsedMs => Clock.NowMs - _stateStartMs;
 
@@ -80,6 +109,19 @@ public abstract partial class Enemy : CharacterBody2D
 
     /// <summary>The brain: choose the next attack to start.</summary>
     protected abstract AttackData ChooseAttack();
+
+    /// <summary>False while it cannot be broken or hurt (the tutorial ghost before calibration ends).</summary>
+    public virtual bool Breakable => true;
+    /// <summary>False when a finisher only ends a phase (the boss's first).</summary>
+    protected virtual bool FinisherKills => true;
+    /// <summary>Windups are multiplied by this (the boss's second phase).</summary>
+    protected virtual float WindupFactor => 1f;
+    protected virtual float SpriteScale => 1f;
+    protected virtual string? OffhandWeaponPath => null;
+    protected virtual float BodyAlpha => 1f;
+
+    /// <summary>A random number in [0, 1) from the enemy's own generator.</summary>
+    protected float Roll() => (float)Rng.NextDouble();
 
     /// <summary>The fast attack it answers a string of blocked strikes with (null = none).</summary>
     protected virtual AttackData? CounterAttack => null;
@@ -92,7 +134,7 @@ public abstract partial class Enemy : CharacterBody2D
     /// Blocks the player's strikes while it is free to (approaching or circling); open while it
     /// attacks, recovers from an attack (the player's opening), is staggered or kneels.
     /// </summary>
-    public bool IsBlocking => Current is State.Approach or State.Circle;
+    public virtual bool IsBlocking => Current is State.Approach or State.Circle;
 
     public static IEnumerable<Enemy> All(Node from) => from.GetTree().GetNodesInGroup(Group).OfType<Enemy>();
 
@@ -106,8 +148,16 @@ public abstract partial class Enemy : CharacterBody2D
         AddChild(new Shadow());
         _weapon = new WeaponSprite(GD.Load<Texture2D>(WeaponPath));
         AddChild(_weapon);
-        _body = new CharacterSprite(GD.Load<Texture2D>(SheetPath));
+        if (OffhandWeaponPath != null)
+        {
+            _offhand = new WeaponSprite(GD.Load<Texture2D>(OffhandWeaponPath)) { Scale = new Vector2(SpriteScale, SpriteScale) };
+            AddChild(_offhand);
+        }
+        _weapon.Scale = new Vector2(SpriteScale, SpriteScale);
+        _body = new CharacterSprite(GD.Load<Texture2D>(SheetPath)) { Scale = new Vector2(SpriteScale, SpriteScale) };
         AddChild(_body);
+        _telegraph = new Telegraph(this) { ZIndex = -1 };
+        AddChild(_telegraph);
         _bars = new EnemyBars(this);
         AddChild(_bars);
 
@@ -120,6 +170,7 @@ public abstract partial class Enemy : CharacterBody2D
         Runner.Finished += OnFinished;
         Runner.Finalized += t =>
         {
+            AttacksMade++;
             Telemetry.Instance.Write(t);
             DirectorService.Instance?.Observe(t);
         };
@@ -206,6 +257,8 @@ public abstract partial class Enemy : CharacterBody2D
                     Enter(State.Circle);
                 }
                 break;
+            case State.Surrender:
+                break;
             case State.Dead:
                 if (StateElapsedMs >= 1200) QueueFree();
                 break;
@@ -216,32 +269,64 @@ public abstract partial class Enemy : CharacterBody2D
         UpdateVisuals(now);
     }
 
-    private Vector2 UpdateApproach(Vector2 toTarget, float dist, bool targetAlive)
+    protected virtual Vector2 UpdateApproach(Vector2 toTarget, float dist, bool targetAlive)
     {
         if (!targetAlive) return Vector2.Zero;
         Facing = toTarget.Normalized();
         _walkMs += Clock.DeltaMs;
         if (dist <= Tuning.CircleDistancePx + 4)
         {
-            Enter(State.Circle);
-            _circleMs = GD.RandRange(Tuning.CircleMinMs, Tuning.CircleMaxMs);
-            _circleSign = GD.Randf() < 0.5f ? -1 : 1;
+            BeginCircle();
             return Vector2.Zero;
         }
-        return Facing * Tuning.MoveSpeed;
+        return SteerTo(Target!.GlobalPosition) * Tuning.MoveSpeed;
     }
+
+    /// <summary>The direction to walk toward a point, around the room's obstacles.</summary>
+    protected Vector2 SteerTo(Vector2 globalPoint)
+    {
+        var straight = (globalPoint - GlobalPosition).Normalized();
+        if (Nav == null) return straight;
+        var d = Nav.Steer(GlobalPosition, globalPoint);
+        return d == Vector2.Zero ? straight : d;
+    }
+
+    protected void BeginCircle()
+    {
+        Enter(State.Circle);
+        _circleMs = Tuning.CircleMinMs + Rng.NextDouble() * (Tuning.CircleMaxMs - Tuning.CircleMinMs);
+        _circleSign = Rng.Next(2) == 0 ? -1 : 1;
+    }
+
+    protected void AddWalk() => _walkMs += Clock.DeltaMs;
 
     private double _circleMs;
     private int _circleSign = 1;
+    protected bool CircleDone => StateElapsedMs >= _circleMs && AttackSlotFree;
 
-    private Vector2 UpdateCircle(Vector2 toTarget, float dist, bool targetAlive)
+    /// <summary>Fewer than MaxConcurrentAttacks other enemies are between their windup and impact.</summary>
+    protected bool AttackSlotFree
+    {
+        get
+        {
+            var max = Tunables.Combat.MaxConcurrentAttacks;
+            if (max <= 0) return true;
+            var busy = 0;
+            foreach (var e in All(this))
+                if (e != this && e.Current == State.Attack && e.Runner.Phase is AttackPhase.Windup or AttackPhase.Lead) busy++;
+            return busy < max;
+        }
+    }
+    protected int CircleSign => _circleSign;
+
+    protected virtual Vector2 UpdateCircle(Vector2 toTarget, float dist, bool targetAlive)
     {
         if (!targetAlive) { _walkMs = 0; return Vector2.Zero; }
         Facing = toTarget.Normalized();
         if (dist > Tuning.CircleDistancePx * 1.8f) { Enter(State.Approach); return Vector2.Zero; }
         // A posture-broken player is punished at once with the fast counter.
         var punish = Target!.Current == Player.State.Broken && CounterAttack != null && dist <= Tuning.AttackRangePx * 1.5f;
-        if (StateElapsedMs >= _circleMs || punish)
+        if (CircleDone || punish)
         {
             StartAttack(punish ? CounterAttack! : ChooseAttack());
             return Vector2.Zero;
@@ -268,13 +353,13 @@ public abstract partial class Enemy : CharacterBody2D
                 if (!DrillMode && dist > Tuning.AttackRangePx)
                 {
                     _walkMs += Clock.DeltaMs;
-                    return want * Tuning.MoveSpeed * 0.9f;
+                    return SteerTo(Target!.GlobalPosition) * Tuning.MoveSpeed * 0.9f;
                 }
             }
             _walkMs = 0;
             return Vector2.Zero;
         }
-        if (Runner.Phase == AttackPhase.Lead && _swingStartMs >= 0 && _attack.SwingMs > 0 && !DrillMode)
+        if (Runner.Phase == AttackPhase.Lead && _swingStartMs >= 0 && _attack.SwingMs > 0 && !DrillMode && _attack.Projectile == "")
             return AimDir * (_attack.LungePx / (_attack.SwingMs / 1000f));
         return Vector2.Zero;
     }
@@ -294,13 +379,14 @@ public abstract partial class Enemy : CharacterBody2D
         _attack = attack;
         _swingStartMs = -1;
         Runner.LeadTimes = CombatServices.LeadTimes;
-        Runner.Start(attack.ToSpec(), Clock.NowMs, attack.SwingMs);
+        Runner.Start(attack.ToSpec(WindupFactor), Clock.NowMs, attack.SwingMs);
         Enter(State.Attack);
     }
 
     private void OnGlint(ThreatWindow threat)
     {
         AimDir = Facing;
+        if (Target != null && IsInstanceValid(Target)) _areaTarget = Target.BodyGlobal;
         GlintFx.Spawn(threat.Glint == GlintColor.Red, () => _weapon.TipGlobal);
         Sfx.Play(threat.Glint == GlintColor.Red ? "glint_red" : "glint_white", 0f);
         AnyGlint?.Invoke(this, threat);
@@ -309,24 +395,52 @@ public abstract partial class Enemy : CharacterBody2D
     private void OnSwing(ThreatWindow threat)
     {
         _swingStartMs = Clock.NowMs;
+        var a = _attack;
+        if (a != null && a.Projectile != "")
+        {
+            Sfx.Play(a.Projectile == "arrow" ? "arrow_shot" : "swing", 0.1f, 0.8f);
+            var from = _weapon.GlobalPosition;
+            var along = Target != null && IsInstanceValid(Target) ? (Target.BodyGlobal - BodyGlobal).Dot(AimDir) : a.ReachPx;
+            var to = a.IsArea ? _areaTarget : BodyGlobal + AimDir * Mathf.Clamp(along, 8, a.ReachPx);
+            _projectile = Projectile.Launch(a.Projectile, from, to, a.SwingMs, a.IsArea);
+            return;
+        }
         Sfx.Play("swing", 0.1f, 0.7f);
+    }
+
+    /// <summary>Whether the player's body is inside this attack's hit area at the impact.</summary>
+    private bool InReach(AttackData attack, Player target)
+    {
+        var to = target.BodyGlobal - BodyGlobal;
+        if (attack.IsArea) return target.BodyGlobal.DistanceTo(_areaTarget) <= attack.WidthPx + Player.Radius;
+        if (attack.IsLine)
+        {
+            var along = to.Dot(AimDir);
+            var across = Mathf.Abs(to.Dot(AimDir.Orthogonal()));
+            return along >= -Player.Radius && along <= attack.ReachPx + Player.Radius && across <= attack.WidthPx + Player.Radius;
+        }
+        return to.Length() <= attack.ReachPx + Player.Radius &&
+               (to.Length() < 6 || Mathf.Abs(AimDir.AngleTo(to)) <= Mathf.DegToRad(attack.ArcDeg / 2));
     }
 
     private void OnImpact(ThreatWindow threat)
     {
         Enter(State.Recover);
         var attack = _attack!;
-        var reachFx = BodyGlobal + AimDir * (attack.ReachPx * 0.55f);
-        SheetFx.Spawn("slash_curved", 4, 28, reachFx, AimDir.Angle(), modulate: attack.Red ? new Color(1f, 0.55f, 0.5f) : null, z: 12);
+        if (attack.Projectile == "")
+        {
+            var reachFx = BodyGlobal + AimDir * (attack.IsLine ? Mathf.Min(attack.ReachPx, 40) * 0.6f : attack.ReachPx * 0.55f);
+            SheetFx.Spawn("slash_curved", 4, 28, reachFx, AimDir.Angle(), modulate: attack.Red ? new Color(1f, 0.55f, 0.5f) : null, z: 12);
+        }
         var target = Target;
         if (target == null || !IsInstanceValid(target) || target.IsDead)
         {
             threat.Resolve(new ImpactState(false, false, false));
+            _projectile?.Land(false, false);
             return;
         }
         var to = target.BodyGlobal - BodyGlobal;
-        var inReach = to.Length() <= attack.ReachPx + Player.Radius &&
-                      (to.Length() < 6 || Mathf.Abs(AimDir.AngleTo(to)) <= Mathf.DegToRad(attack.ArcDeg / 2));
+        var inReach = InReach(attack, target);
         // Guard and deflect only cover the player's front arc; rolls evade from any direction.
         var toAttacker = -to;
         var angleDeg = toAttacker.LengthSquared() > 0.01f
@@ -334,8 +448,11 @@ public abstract partial class Enemy : CharacterBody2D
             : 0;
         var covers = angleDeg <= Tunables.Player.GuardArcDeg / 2f;
         var r = threat.Resolve(new ImpactState(inReach, target.IsInvulnerable, target.IsGuarding, covers, angleDeg));
+        var deflected = r.Response == Response.Deflect && r.Outcome == Outcome.Success;
+        _projectile?.Land(inReach && r.Outcome == Outcome.Hit, inReach && (deflected || r.Outcome == Outcome.Blocked));
+        _projectile = null;
         if (!inReach) return; // a whiff, or a right response that also left the reach: no contact
-        var contact = BodyGlobal + to * 0.6f;
+        var contact = attack.Projectile != "" ? target.BodyGlobal - to.Normalized() * 6 : BodyGlobal + to * 0.6f;
         target.ReceiveAttack(attack, r, to.LengthSquared() > 0 ? to.Normalized() : AimDir, contact);
         if (r.Response == Response.Deflect && r.Outcome == Outcome.Success) OnDeflected(attack);
         // The full opening after an impact is earned by defending: after a clean hit on the
@@ -345,9 +462,10 @@ public abstract partial class Enemy : CharacterBody2D
 
     private void OnDeflected(AttackData attack)
     {
-        _knockback = -AimDir * Tunables.Feel.KnockbackDeflect;
+        if (attack.Projectile == "") _knockback = -AimDir * Tunables.Feel.KnockbackDeflect;
         _recoilUntilMs = Clock.NowMs + Tuning.DeflectedRecoilMs + 60;
-        if (!DrillMode && Posture.Add(attack.DeflectPostureDamage))
+        var factor = Target?.Mods.DeflectFactor ?? 1f;
+        if (!DrillMode && Posture.Add(attack.DeflectPostureDamage * factor))
         {
             EnterKneel();
             return;
@@ -378,9 +496,14 @@ public abstract partial class Enemy : CharacterBody2D
         var feel = Tunables.Feel;
         _lastHitMs = Clock.NowMs;
         Flash(Colors.White, feel.FlashMs);
-        if (Current == State.Kneel)
+        if (Current is State.Kneel or State.Surrender)
         {
-            Die(dir);
+            if (Current == State.Kneel && !FinisherKills)
+            {
+                OnPhaseFinisher(dir);
+                return HitResult.Finisher;
+            }
+            Die(dir, begging: Current == State.Surrender);
             return HitResult.Finisher;
         }
 
@@ -390,8 +513,9 @@ public abstract partial class Enemy : CharacterBody2D
             return Current == State.Kneel ? HitResult.Kneel : HitResult.Blocked;
         }
 
-        Health = Mathf.Max(0, Health - damage);
+        if (Breakable) Health = Mathf.Max(0, Health - damage);
         Sfx.Play("enemy_hit", 0.08f);
+        OnHurt();
         var armored = Current == State.Attack;
         _knockback = dir * feel.KnockbackEnemyHit * (armored ? 0.3f : 1f);
         // Trading into a windup is a poor deal: the hit lands but barely moves its posture,
@@ -442,10 +566,62 @@ public abstract partial class Enemy : CharacterBody2D
         }
     }
 
-    private void EnterKneel()
+    /// <summary>After any health damage (the boss checks its phase).</summary>
+    protected virtual void OnHurt() { }
+
+    /// <summary>A finisher that does not kill (the boss's first): the subclass decides what follows.</summary>
+    protected virtual void OnPhaseFinisher(Vector2 dir) { }
+
+    /// <summary>Back on its feet at once (stagger state), with fresh posture.</summary>
+    protected void Recover(float posture)
     {
+        Posture.Reset(posture);
         Runner.Abort();
         _attack = null;
+        _staggerChain = 0;
+        Enter(State.Stagger);
+    }
+
+    protected void SetHealth(int health) => Health = Mathf.Clamp(health, 0, Tuning.MaxHealth);
+
+    /// <summary>The player lets a begging enemy go: +1 merit.</summary>
+    public bool Spare()
+    {
+        if (Current != State.Surrender) return false;
+        WasSpared = true;
+        Runner.Flush();
+        Enter(State.Dead);
+        CollisionLayer = 0;
+        CollisionMask = 0;
+        Sfx.Play("spare", 0.03f);
+        SheetFx.Spawn("smoke", 6, 14, BodyGlobal, z: 10);
+        Spared?.Invoke(this);
+        return true;
+    }
+
+    private void EnterKneel()
+    {
+        if (!Breakable)
+        {
+            // Not yet: shrug it off.
+            Posture.Reset(Posture.Max * 0.6f);
+            Sfx.Play("block", 0.08f);
+            SparkFx.Block(BodyGlobal);
+            return;
+        }
+        Runner.Abort();
+        _attack = null;
+        if (!DrillMode && SurrenderChance > 0 && Roll() < SurrenderChance)
+        {
+            Enter(State.Surrender);
+            Posture.Reset(Posture.Max);
+            Sfx.Play("posture_break", 0.03f);
+            Clock.HitStop(Tunables.Feel.HitStopDeflectMs);
+            SheetFx.Spawn("smoke", 6, 18, BodyGlobal + new Vector2(0, 2), z: 10);
+            DropWeapon();
+            Surrendered?.Invoke(this);
+            return;
+        }
         Enter(State.Kneel);
         Posture.Reset(Posture.Max);
         Sfx.Play("posture_break", 0.03f);
@@ -455,8 +631,22 @@ public abstract partial class Enemy : CharacterBody2D
         Kneeled?.Invoke(this);
     }
 
-    private void Die(Vector2 dir)
+    private void DropWeapon()
     {
+        var dropped = new Sprite2D
+        {
+            Texture = GD.Load<Texture2D>(WeaponPath),
+            TextureFilter = TextureFilterEnum.Nearest,
+            Rotation = Mathf.Pi / 2 + 0.3f,
+            Modulate = new Color(0.85f, 0.85f, 0.85f),
+            ZIndex = -2,
+        };
+        FxLayer.Add(dropped, GlobalPosition + new Vector2(10, -2));
+    }
+
+    private void Die(Vector2 dir, bool begging = false)
+    {
+        DiedBegging = begging;
         Runner.Flush();
         _attack = null;
         Enter(State.Dead);
@@ -530,6 +720,13 @@ public abstract partial class Enemy : CharacterBody2D
             case State.Stagger:
                 _body.Position = new Vector2(Mathf.Round(Mathf.Sin((float)now * 0.08f)), 0);
                 break;
+            case State.Surrender:
+                // Weapon dropped, bowing low: begging for its life.
+                row = CharacterSprite.RowCrouch;
+                col = 0;
+                _weapon.Visible = false;
+                _body.Position = new Vector2(0, (int)(now / 260) % 2);
+                break;
             case State.Kneel:
                 row = CharacterSprite.RowCrouch;
                 col = 0;
@@ -551,8 +748,34 @@ public abstract partial class Enemy : CharacterBody2D
             row = CharacterSprite.RowAttack;
             col = CharacterSprite.Column(Facing);
         }
+        if (_attack != null && Current is State.Attack or State.Recover && _attack.Projectile == "arrow")
+        {
+            // A bow held across the aim.
+            pivot = BodyCenter + AimDir * 5;
+            blade = aimAngle;
+        }
+        else if (_attack != null && Current == State.Attack && _attack.Projectile == "jar")
+        {
+            _weapon.Visible = false;
+        }
+        else if (_attack != null && Current is State.Attack or State.Recover && _attack.IsLine)
+        {
+            // A thrust: drawn back through the windup, driven along the aim in the strike.
+            var reach = Runner.Phase == AttackPhase.Recovery ? 7f : _swingStartMs >= 0 ? 9f : -1f;
+            pivot = BodyCenter + AimDir * reach + side * 2;
+            blade = aimAngle;
+        }
         _body.Pose(col, row);
+        _body.Scale = new Vector2(SpriteScale, SpriteScale);
         _weapon.Point(pivot, blade);
+        if (_offhand != null)
+        {
+            _offhand.Visible = _weapon.Visible;
+            var off = new Vector2(-(pivot - BodyCenter).X, (pivot - BodyCenter).Y) + BodyCenter;
+            _offhand.Point(off, Mathf.Pi - blade);
+        }
+        _body.SelfModulate = new Color(Tint.R, Tint.G, Tint.B, BodyAlpha);
+        _telegraph.QueueRedraw();
         Shadow.PlaceWeapon(this, _weapon, _body, behind: (Current is State.Attack or State.Recover ? AimDir : Facing).Y < -0.3f);
         _body.SetFlash(now < _flashUntilMs ? 0.9f : 0f, _flashColor);
         _bars.QueueRedraw();

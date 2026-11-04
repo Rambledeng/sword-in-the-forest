@@ -70,6 +70,21 @@ public partial class Player : CharacterBody2D, IThreatTarget
     public int StrikesBlocked { get; private set; }
 
     public event Action<Player>? Died;
+    /// <summary>A finisher landed (a kneeling or begging enemy was killed).</summary>
+    public event Action<Player, Enemy>? FinisherLanded;
+    /// <summary>The player let a begging enemy go.</summary>
+    public event Action<Player, Enemy>? SparedEnemy;
+
+    /// <summary>The run's upgrades.</summary>
+    public PlayerMods Mods { get; set; } = new();
+    /// <summary>Test runs: attacks still resolve and log, but take no health.</summary>
+    public bool Invulnerable { get; set; }
+    /// <summary>Drugged wine: movement is slowed until this game time.</summary>
+    public double SlowedUntilMs { get; private set; }
+    public bool IsSlowed => Clock.NowMs < SlowedUntilMs;
+    public int MaxHealth => T.MaxHealth + Mods.HealthBonus;
+    public int MaxSips => T.GourdSips + Mods.SipsBonus;
+    private float SpeedFactor => IsSlowed ? Tunables.Run.DrugSlowFactor : 1f;
 
     public IReadOnlyList<ThreatWindow> OpenThreats => _threats;
     public double StateElapsedMs => Clock.NowMs - _stateStartMs;
@@ -106,18 +121,30 @@ public partial class Player : CharacterBody2D, IThreatTarget
     /// <summary>Full health, posture and sips; back to the free state.</summary>
     public void Revive()
     {
-        Health = T.MaxHealth;
-        Sips = T.GourdSips;
-        Posture.Max = T.MaxPosture;
+        Health = MaxHealth;
+        Sips = MaxSips;
+        Posture.Max = T.MaxPosture + Mods.PostureBonus;
         Posture.Reset();
         _knockback = Vector2.Zero;
+        SlowedUntilMs = 0;
         Enter(State.Free);
+    }
+
+    /// <summary>A new area: the gourd is full again (3 sips per area, plus upgrades).</summary>
+    public void RefillGourd() => Sips = MaxSips;
+
+    /// <summary>Raises health by <paramref name="amount"/> (capped at the maximum).</summary>
+    public void Heal(int amount)
+    {
+        if (amount <= 0 || IsDead) return;
+        Health = Mathf.Min(MaxHealth, Health + amount);
+        Flash(new Color(0.6f, 1f, 0.6f), 160);
     }
 
     /// <summary>Refills health and posture without changing state (test drills).</summary>
     public void RefillForDrill()
     {
-        Health = T.MaxHealth;
+        Health = MaxHealth;
         Posture.Reset();
         if (Current is State.Dead or State.Broken or State.Hurt) Enter(State.Free);
     }
@@ -147,8 +174,8 @@ public partial class Player : CharacterBody2D, IThreatTarget
             return;
         }
 
-        Posture.Max = T.MaxPosture;
-        Posture.Tick(dt, T.PostureDrainPerSec, T.PostureDrainDelayMs, holdDrain: IsGuarding);
+        Posture.Max = T.MaxPosture + Mods.PostureBonus;
+        Posture.Tick(dt, T.PostureDrainPerSec * Mods.PostureDrainFactor, T.PostureDrainDelayMs, holdDrain: IsGuarding);
 
         var velocity = Vector2.Zero;
         switch (Current)
@@ -301,6 +328,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
             Enter(State.Guard);
             return Vector2.Zero;
         }
+        if (_buffer.TryConsume(PlayerAction.Interact, now) && TrySpare()) return Vector2.Zero;
         if (_buffer.TryConsume(PlayerAction.Attack, now))
         {
             EnterAttack(1, now);
@@ -326,7 +354,29 @@ public partial class Player : CharacterBody2D, IThreatTarget
             var aim = Controls.Aim(this);
             if (aim != Vector2.Zero) Facing = aim;
         }
-        return move * T.MoveSpeed;
+        return move * T.MoveSpeed * SpeedFactor;
+    }
+
+    /// <summary>The nearest begging enemy within spare range, if any.</summary>
+    public Enemy? SpareCandidate()
+    {
+        Enemy? best = null;
+        var bestDist = Tunables.Run.SpareRangePx;
+        foreach (var e in Enemy.All(this))
+        {
+            if (!e.IsBegging) continue;
+            var d = e.BodyGlobal.DistanceTo(BodyGlobal);
+            if (d <= bestDist) { bestDist = d; best = e; }
+        }
+        return best;
+    }
+
+    private bool TrySpare()
+    {
+        var e = SpareCandidate();
+        if (e == null || !e.Spare()) return false;
+        SparedEnemy?.Invoke(this, e);
+        return true;
     }
 
     private Vector2 UpdateGuard(double now)
@@ -343,7 +393,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
             return Vector2.Zero;
         }
         Facing = AssistedAim();
-        return Controls.Move * T.GuardMoveSpeed;
+        return Controls.Move * T.GuardMoveSpeed * SpeedFactor;
     }
 
     private Vector2 UpdateDeflect(double now)
@@ -362,9 +412,9 @@ public partial class Player : CharacterBody2D, IThreatTarget
 
     private (int Windup, int Recovery, int Damage, int Posture) ComboNumbers(int step) => step switch
     {
-        1 => (T.Attack1WindupMs, T.Attack1RecoveryMs, T.Attack1Damage, T.Attack1Posture),
-        2 => (T.Attack2WindupMs, T.Attack2RecoveryMs, T.Attack2Damage, T.Attack2Posture),
-        _ => (T.Attack3WindupMs, T.Attack3RecoveryMs, T.Attack3Damage, T.Attack3Posture),
+        1 => (T.Attack1WindupMs, T.Attack1RecoveryMs, T.Attack1Damage + Mods.DamageBonus, T.Attack1Posture),
+        2 => (T.Attack2WindupMs, T.Attack2RecoveryMs, T.Attack2Damage + Mods.DamageBonus, T.Attack2Posture),
+        _ => (T.Attack3WindupMs, T.Attack3RecoveryMs, T.Attack3Damage + Mods.DamageBonus, T.Attack3Posture),
     };
 
     private void EnterAttack(int step, double now)
@@ -434,7 +484,13 @@ public partial class Player : CharacterBody2D, IThreatTarget
                 continue;
             }
             anyHit = true;
-            if (result == Enemy.HitResult.Finisher) { finisher = true; Finishers++; }
+            if (result == Enemy.HitResult.Finisher)
+            {
+                finisher = true;
+                Finishers++;
+                Heal(Mods.FinisherHeal);
+                FinisherLanded?.Invoke(this, e);
+            }
             SparkFx.Hit(origin + to * 0.7f);
         }
 
@@ -480,7 +536,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
         // Fast start, eased stop; the profile 1.6·(1−x)^0.6 averages to 1 over the roll.
         var x = (float)(elapsed / T.RollDurationMs);
         var baseSpeed = T.RollDistancePx / (T.RollDurationMs / 1000f);
-        return _rollDir * baseSpeed * 1.6f * Mathf.Pow(Mathf.Max(0f, 1f - x), 0.6f);
+        return _rollDir * baseSpeed * 1.6f * Mathf.Pow(Mathf.Max(0f, 1f - x), 0.6f) * Mathf.Lerp(1f, SpeedFactor, 0.5f);
     }
 
     private Vector2 UpdateDrink(double now)
@@ -488,7 +544,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
         if (!_drinkHealed && StateElapsedMs >= T.DrinkHealAtMs)
         {
             _drinkHealed = true;
-            Health = Mathf.Min(T.MaxHealth, Health + T.GourdHeal);
+            Health = Mathf.Min(MaxHealth, Health + T.GourdHeal);
             Sfx.Play("heal", 0.02f);
             Flash(new Color(0.6f, 1f, 0.6f), 160);
         }
@@ -497,7 +553,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
             Enter(State.Free);
             return Vector2.Zero;
         }
-        return Controls.Move * T.DrinkMoveSpeed;
+        return Controls.Move * T.DrinkMoveSpeed * SpeedFactor;
     }
 
     // ---- Being attacked -------------------------------------------------------------------
@@ -533,6 +589,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
                 ShakeCamera.Shake(feel.ShakeBlock);
                 break;
             case Outcome.Hit:
+                if (data.Slows) SlowedUntilMs = Clock.NowMs + Tunables.Run.DrugSlowMs;
                 TakeDamage(data.Damage, data.PostureDamage * T.HitPostureFactor, dir);
                 break;
         }
@@ -542,7 +599,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
     {
         var feel = Tunables.Feel;
         HitsTaken++;
-        Health = Mathf.Max(0, Health - damage);
+        if (!Invulnerable) Health = Mathf.Max(0, Health - damage);
         Flash(new Color(1f, 0.25f, 0.2f), feel.FlashMs * 1.5);
         Sfx.Play("player_hurt", 0.05f);
         Clock.HitStop(feel.HitStopPlayerHurtMs);
@@ -662,5 +719,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
 
         var flashing = now < _flashUntilMs;
         _body.SetFlash(flashing ? 0.6f : 0f, _flashColor);
+        // Drugged wine: a sickly purple tint while it lasts.
+        _body.SelfModulate = IsSlowed ? new Color(0.85f, 0.7f, 1f) : Colors.White;
     }
 }

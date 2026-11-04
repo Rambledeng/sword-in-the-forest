@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/AttackData.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+Id = "spear_thrust"
+Red = true
+WindupMinMs = 600
+WindupMaxMs = 1000
+LeadDefaultMs = 480
+LeadMinMs = 250
+LeadMaxMs = 800
+SwingMs = 90
+RecoveryMs = 850
+Damage = 3
+PostureDamage = 30.0
+DeflectPostureDamage = 0.0
+ReachPx = 58.0
+ArcDeg = 30.0
+LungePx = 14.0
+Shape = "line"
+WidthPx = 7.0
+Projectile = ""
+Slows = false

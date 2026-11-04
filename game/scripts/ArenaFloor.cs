@@ -6,11 +6,14 @@ namespace SwordInTheForest;
 public partial class ArenaFloor : Node2D
 {
     private const string TileDir = "res://assets/third_party/ninja_adventure/tiles";
-    private static readonly Vector2I Plain = new(11, 12);
-    private static readonly Vector2I[] Variants = { new(12, 12), new(13, 12), new(14, 12), new(15, 12) };
 
     public Vector2I SizeTiles { get; set; }
     public int Seed { get; set; } = 7;
+    /// <summary>The tile sheet under tiles/ and its plain tile and occasional variants.</summary>
+    public string Sheet { get; set; } = "tileset_floor";
+    public Vector2I Plain { get; set; } = new(11, 12);
+    public Vector2I[] Variants { get; set; } = { new(12, 12), new(13, 12), new(14, 12), new(15, 12) };
+    public float VariantChance { get; set; } = 0.12f;
 
     // Held for the node's lifetime. Draw commands keep only the texture's RID, so a texture
     // loaded into a local inside _Draw was freed when the GC collected its C# wrapper, and the
@@ -20,7 +23,7 @@ public partial class ArenaFloor : Node2D
     public override void _Ready()
     {
         ZIndex = -100;
-        _tiles = GD.Load<Texture2D>($"{TileDir}/tileset_floor.png");
+        _tiles = GD.Load<Texture2D>($"{TileDir}/{Sheet}.png");
     }
 
     public override void _Draw()
@@ -31,7 +34,7 @@ public partial class ArenaFloor : Node2D
         for (var x = 0; x < SizeTiles.X; x++)
         {
             var r = rng.Randf();
-            var tile = r < 0.12f ? Variants[rng.RandiRange(0, Variants.Length - 1)] : Plain;
+            var tile = r < VariantChance && Variants.Length > 0 ? Variants[rng.RandiRange(0, Variants.Length - 1)] : Plain;
             DrawTextureRectRegion(tex, new Rect2(x * 16, y * 16, 16, 16), new Rect2(tile.X * 16, tile.Y * 16, 16, 16));
         }
     }

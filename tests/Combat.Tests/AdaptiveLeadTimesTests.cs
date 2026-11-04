@@ -37,10 +37,13 @@ public class AdaptiveLeadTimesTests
     }
 
     [Fact]
-    public void AdaptiveOn_StaysInsideEachAttacksRange_AndCalibratesFirst()
+    public void AdaptiveOn_StaysInsideEachAttacksRange_AndCalibratesWhenAsked()
     {
         var leads = Make();
+        Assert.Equal(DirectorMode.Control, leads.Mode);
+        leads.BeginCalibration(12);
         Assert.Equal(DirectorMode.Calibrate, leads.Mode);
+        Assert.Equal(12, leads.CalibrationLeft);
         for (var i = 0; i < 40; i++)
         {
             var attack = Attacks[i % Attacks.Length];
@@ -63,5 +66,24 @@ public class AdaptiveLeadTimesTests
             slow.Observe(new TelemetryRecord("r", i, attack.Id, attack.Glint, 420, 520, Response.None, Outcome.Hit, 0), 220);
         }
         Assert.True(fast.NextLeadMs(attack) + 150 < slow.NextLeadMs(attack));
+    }
+
+    [Fact]
+    public void Calibration_EndsAfterItsAttacks_OrWhenEnded()
+    {
+        var leads = Make();
+        var attack = Attacks[0];
+        leads.BeginCalibration(3);
+        for (var i = 0; i < 3; i++)
+        {
+            Assert.Equal(DirectorMode.Calibrate, leads.Mode);
+            leads.Observe(new TelemetryRecord("r", i, attack.Id, attack.Glint, 420, 260, Response.Deflect, Outcome.Success, 0), 220);
+        }
+        Assert.Equal(DirectorMode.Control, leads.Mode);
+        leads.BeginCalibration(5);
+        Assert.Equal(DirectorMode.Calibrate, leads.Mode);
+        leads.EndCalibration();
+        Assert.Equal(DirectorMode.Control, leads.Mode);
+        Assert.Equal(0, leads.CalibrationLeft);
     }
 }

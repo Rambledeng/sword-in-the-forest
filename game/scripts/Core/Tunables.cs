@@ -16,12 +16,24 @@ public static class Tunables
     // referenced a resource, a GC would free it and the next load would drop live F1 edits.
     private static PlayerTuning? _player;
     private static EnemyTuning? _saberBandit;
+    private static RunTuning? _run;
+    private static readonly Dictionary<string, EnemyTuning> Enemies = new();
     private static FeelTuning? _feel;
     private static CombatTuning? _combat;
     private static readonly Dictionary<string, AttackData> Attacks = new();
 
     public static PlayerTuning Player => _player ??= GD.Load<PlayerTuning>($"{Dir}/player.tres");
     public static EnemyTuning SaberBandit => _saberBandit ??= GD.Load<EnemyTuning>($"{Dir}/saber_bandit.tres");
+    public static RunTuning Run => _run ??= GD.Load<RunTuning>($"{Dir}/run.tres");
+
+    /// <summary>An enemy type's numbers by file name (spearman, archer, ghost, boss).</summary>
+    public static EnemyTuning Enemy(string id)
+    {
+        if (id == "saber_bandit") return SaberBandit;
+        if (!Enemies.TryGetValue(id, out var e)) Enemies[id] = e = GD.Load<EnemyTuning>($"{Dir}/{id}.tres");
+        return e;
+    }
+
     public static FeelTuning Feel => _feel ??= GD.Load<FeelTuning>($"{Dir}/feel.tres");
     public static CombatTuning Combat => _combat ??= GD.Load<CombatTuning>($"{Dir}/combat.tres");
 
@@ -38,6 +50,8 @@ public static class Tunables
         yield return SaberBandit;
         yield return Feel;
         yield return Combat;
+        yield return Run;
+        foreach (var id in new[] { "ghost", "spearman", "archer", "boss" }) yield return Enemy(id);
         foreach (var file in DirAccess.GetFilesAt($"{Dir}/attacks"))
         {
             var name = file.TrimSuffix(".remap");

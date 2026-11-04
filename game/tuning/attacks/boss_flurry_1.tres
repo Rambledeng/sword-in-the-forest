@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/AttackData.cs" id="1_script"]
+[ext_resource type="Resource" path="res://tuning/attacks/boss_flurry_2.tres" id="2_next"]
+
+
+[resource]
+script = ExtResource("1_script")
+Id = "boss_flurry_1"
+Red = false
+WindupMinMs = 450
+WindupMaxMs = 750
+LeadDefaultMs = 360
+LeadMinMs = 220
+LeadMaxMs = 650
+SwingMs = 70
+RecoveryMs = 150
+Damage = 2
+PostureDamage = 18.0
+DeflectPostureDamage = 20.0
+ReachPx = 34.0
+ArcDeg = 130.0
+LungePx = 8.0
+Shape = "arc"
+WidthPx = 0.0
+Projectile = ""
+Slows = false
+Next = ExtResource("2_next")

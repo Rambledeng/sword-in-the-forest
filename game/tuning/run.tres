@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="RunTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/RunTuning.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+TutorialAttacks = 12
+TutorialAttacksReturning = 6
+ReturningObservations = 40
+SurrenderChance = 0.25
+SpareRangePx = 40.0
+VitalityHealth = 2
+BroadStancePosture = 30.0
+SteadyBreathFactor = 1.6
+KeenEdgeDamage = 1
+DeepGourdSips = 1
+IronDeflectFactor = 1.4
+MercifulCutHeal = 2
+SwordLineMs = 3800
+ReadingAttunedAt = 0.5
+ReadingShift = 0.12
+ReadingMinGap = 8
+DeathToSummaryMs = 2200
+AreaTitleMs = 2600
+BossPhase2At = 0.5
+BossPhase2WindupFactor = 0.65
+BossChargeChance = 0.3
+BossJarChance = 0.3
+BossFlurryChance = 0.45
+DrugSlowFactor = 0.55
+DrugSlowMs = 3500
+ArcherFleePx = 60.0
+ArcherKeepPx = 120.0

@@ -44,7 +44,31 @@ Code: MIT, see LICENSE.
 | `sounds/swing.wav` | `Audio/Sounds/Elemental/Grass2.wav` | Sword swing |
 | `sounds/drink.wav` | `Audio/Sounds/Elemental/Bubble.wav` | Gourd sip |
 | `sounds/heal.wav` | `Audio/Sounds/Magic & Skill/Heal.wav` | Healing |
-| `music/dark_forest.ogg` | `Audio/Musics/37 - Dark Forest.ogg` | Test arena music |
+| `music/dark_forest.ogg` | `Audio/Musics/37 - Dark Forest.ogg` | Tutorial and bamboo forest music (also the test arena) |
+| `actors/spirit.png` | `Actor/Character/Spirit/SpriteSheet.png` | Tutorial ghost |
+| `actors/samurai_blue.png` | `Actor/Character/SamuraiBlue/SpriteSheet.png` | Spearman (枪客) |
+| `actors/hunter.png` | `Actor/Character/Hunter/SpriteSheet.png` | Archer (弓手) |
+| `actors/sorcerer_black.png` | `Actor/Character/SorcererBlack/SpriteSheet.png` | The tavern keeper (boss, drawn at 1.35×) |
+| `actors/sorcerer_black_faceset.png` | `Actor/Character/SorcererBlack/Faceset.png` | Boss portrait (later) |
+| `weapons/lance_in_hand.png` | `Items/Weapons/Lance/SpriteInHand.png` | The spearman's spear |
+| `weapons/bow.png` | `Items/Weapons/Bow/Sprite.png` | The archer's bow |
+| `weapons/arrow.png` | `Items/Weapons/Bow/Arrow.png` | Arrows |
+| `weapons/cleaver_in_hand.png` | `Items/Weapons/Sword/SpriteInHand.png` | The boss's twin cleavers |
+| `weapons/wine_jar.png` | `Items/Potion/EmptyPot.png` | The thrown jar of drugged wine (蒙汗药) |
+| `tiles/tileset_interior_floor.png` | `Backgrounds/Tilesets/Interior/TilesetInteriorFloor.png` | Tavern floor planks |
+| `music/lost_village.ogg` | `Audio/Musics/26 - Lost Village.ogg` | Outside the tavern and the tavern |
+| `music/fight.ogg` | `Audio/Musics/17 - Fight.ogg` | Boss fight |
+| `sounds/arrow_shot.wav` | `Audio/Sounds/Whoosh & Slash/Launch.wav` | Arrow release |
+| `sounds/jar_break.wav` | `Audio/Sounds/Hit & Impact/Impact2.wav` | Wine jar shatters |
+| `sounds/upgrade.wav` | `Audio/Sounds/Bonus/PowerUp1.wav` | Upgrade screen |
+| `sounds/room_clear.wav` | `Audio/Sounds/Bonus/Bonus.wav` | Room cleared, exit opens |
+| `sounds/spare.wav` | `Audio/Sounds/Bonus/Coin.wav` | Sparing an enemy |
+| `sounds/ui_accept.wav` | `Audio/Sounds/Menu/Accept.wav` | Menu confirm |
+| `sounds/ui_move.wav` | `Audio/Sounds/Menu/Move1.wav` | Pause menu |
+| `sounds/sword_voice.wav` | `Audio/Sounds/Voice/Voice1.wav` | The sword speaks (quiet blip) |
+
+Also from the pack, already copied in M1: the dirt floor of the rooms outside the tavern
+(`tileset_floor.png`) and the trees, rocks, stumps and barrels (`tileset_nature.png`).
 
 ### Fusion Pixel Font (缝合像素字体), 12 px proportional
 
@@ -66,8 +90,9 @@ Fusion Pixel combines glyphs from these fonts, whose licences ship with it in `L
 
 ## Drawn in code
 
-The glint (剑光), deflect, block, hit and finisher sparks, the shadows, the posture bars and the
-finisher mark are drawn in code (`game/scripts/Fx/`, `game/scripts/Actors/EnemyBars.cs`,
+The glint (剑光), deflect, block, hit and finisher sparks, the shadows, the posture bars, the
+finisher mark, the archer's aim line, the red thrust line, the jar's landing ring, the tavern's
+walls and tables and the boss bar are drawn in code (`game/scripts/Fx/`, `game/scripts/Actors/EnemyBars.cs`,
 `game/scripts/Ui/Hud.cs`).
 
 ## Translations

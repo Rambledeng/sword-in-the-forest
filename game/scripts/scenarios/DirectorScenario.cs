@@ -29,6 +29,8 @@ public partial class DirectorScenario : Scenario
     [Export] public bool Adaptive { get; set; } = true;
     [Export] public int Attacks { get; set; } = 24;
     [Export] public double ResponseDelayMs { get; set; } = 260;
+    /// <summary>The arena no longer calibrates on its own (the tutorial ghost does); the scenario asks for it.</summary>
+    [Export] public int CalibrationAttacks { get; set; } = 12;
 
     protected override bool FailOnTimeout => true;
 
@@ -41,6 +43,7 @@ public partial class DirectorScenario : Scenario
             _service.ResetBelief();
             _service.Leads.Adaptive = Adaptive;
             _service.Leads.Challenge = Challenge.Standard;
+            _service.Leads.BeginCalibration(CalibrationAttacks);
             _firstLine = Telemetry.Instance.Lines.Count;
             _arena = new Arena { AutoSpawn = false, WithUi = true, PlayMusic = false, Controls = _controls };
             AddChild(_arena);
@@ -77,7 +80,7 @@ public partial class DirectorScenario : Scenario
 
     private void CheckAdaptive(List<Dictionary<string, object?>> lines)
     {
-        var calibration = Tunables.Combat.DirectorCalibrationAttacks;
+        var calibration = CalibrationAttacks;
         foreach (var l in lines)
         {
             var attack = Tunables.Attack((string)l["attack"]!);

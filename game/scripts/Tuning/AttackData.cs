@@ -32,11 +32,23 @@ public partial class AttackData : Resource
     [ExportGroup("Hit area")]
     [Export(PropertyHint.Range, "4,120,1")] public float ReachPx { get; set; }
     [Export(PropertyHint.Range, "10,360,5")] public float ArcDeg { get; set; }
-    [Export(PropertyHint.Range, "0,60,1")] public float LungePx { get; set; }
+    [Export(PropertyHint.Range, "0,120,1")] public float LungePx { get; set; }
+    /// <summary>arc: a cut within ReachPx and ArcDeg. line: a thrust, shot or charge along the aim,
+    /// ReachPx long and WidthPx to each side. area: lands WidthPx around where you stood at the glint.</summary>
+    [Export(PropertyHint.Enum, "arc,line,area")] public string Shape { get; set; } = "arc";
+    [Export(PropertyHint.Range, "0,60,1")] public float WidthPx { get; set; }
+    /// <summary>Thrown or shot: "arrow" or "jar" (flies during SwingMs); empty for a held weapon.</summary>
+    [Export(PropertyHint.Enum, ",arrow,jar")] public string Projectile { get; set; } = "";
+    /// <summary>Drugged wine: a hit slows you (RunTuning.DrugSlow*).</summary>
+    [Export] public bool Slows { get; set; }
 
     /// <summary>The next attack of a combo, started right after this one's recovery.</summary>
     [Export] public AttackData? Next { get; set; }
 
-    public AttackSpec ToSpec() => new(Id, Red ? GlintColor.Red : GlintColor.White,
-        WindupMinMs, WindupMaxMs, LeadDefaultMs, LeadMinMs, LeadMaxMs, RecoveryMs);
+    public AttackSpec ToSpec(float windupFactor = 1f) => new(Id, Red ? GlintColor.Red : GlintColor.White,
+        Mathf.RoundToInt(WindupMinMs * windupFactor), Mathf.RoundToInt(WindupMaxMs * windupFactor),
+        LeadDefaultMs, LeadMinMs, LeadMaxMs, RecoveryMs);
+
+    public bool IsLine => Shape == "line";
+    public bool IsArea => Shape == "area";
 }
