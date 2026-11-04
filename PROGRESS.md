@@ -1,5 +1,102 @@
 # Progress
 
+## M4 · Playtest fixes, intro, languages and polish (2026-11-04)
+
+All ten items of the kickoff list are done, in order, one commit each (items 1 and 2 share one).
+Unit tests: 173 pass (Combat 135, Director 35, Localization 3). Scenarios: 27 pass (7 new:
+`arrow_wall`, `dev_menu`, `run_continue`, `run_fake`, `intro`, `atmosphere`, `settings`; `run_mercy`
+and `run_bot` check more).
+
+### Done
+1. **Bugs.** Arrows stop at walls and obstacles: the shot is clipped by a tile ray (the same grid
+   the nav uses), the aim line stops there too, and an archer with no clear shot walks around its
+   cover. A **spared enemy** stands up (0.7 s), walks to the room's entrance and fades there (it
+   can't be hit while leaving). **Boss bar**: a fixed frame; the health fill, posture line and
+   phase marker scale inside it. Enemy bars now use each enemy's own max health (they used the
+   bandit's, so tougher enemies overflowed). The boss name has an outline.
+2. **F3 developer menu** (English): god mode (no damage, no posture break), jump to any step or
+   straight to the boss, next break begs (genuine or fake), clear room, die.
+3. **Death:** New soul starts at the first room of the area where the last soul fell (bamboo
+   forest, outside the tavern, or the tavern; new layout), keeping every upgrade it had taken.
+   The summary still shows and says where the next soul will start; the sword greets the new soul.
+   Title → Start is always a fresh run.
+4. **Tutorial**: basics only (move, attack, deflect, block, roll, gourd), white cuts only, and **no
+   Psi calibration**: the director controls from the first attack. The first spearman brings a
+   sword line explaining red, and the run's **first red attack gets at least 900 ms** of lead
+   (`FirstRedLeadMs`).
+5. **Mercy:** the first beggar of a run is always genuine; the sword explains spare (merit, it
+   walks away) versus finish (karma), then warns "not every beggar means it; watch its eyes".
+   Later beggars are **fakes 1 in 3** (`FakeBegChance` 0.33). **The tell:** a fake does not tremble,
+   and its head turns to follow you; a genuine one stays bowed and shaking. A fake strikes when
+   spared, or when you stand within 90 px with your back to it for 0.4 s (after it has begged
+   0.7 s). The strike has the normal glint and lead. Cutting a fake while it begs is merit, not
+   karma ("you saw through it"). A fresh beggar ignores cuts for 0.5 s, so the rest of the combo
+   that broke it can't cost you karma by accident.
+6. **Intro:** the title is a code-drawn close-up of the sword in the bitter bamboo, with a
+   peeling talisman on the blade and the pack's skeleton lying at its foot. On Start the sword
+   hums, the seal peels and falls, the soul's hand reaches in and grips the hilt, and the view
+   pulls back to black. The run fades in zoomed on the soul and zooms out to the grove; two
+   spirits rush through and the tutorial ghost barges in from the north. A second press skips.
+   See `docs/screens/title_*.png` and `intro_*.png`.
+7. **Atmosphere:** yellowed bamboo leaves falling in the bamboo areas, pink petals outside the
+   tavern, glowing dust in the tavern. **Music now changes with every area**: the tavern shared
+   Lost Village with outside; it now has Tension. Tutorial and bamboo share Dark Forest (both are
+   the grove), the boss has Fight, and the title has Melancholia.
+8. **Boss name:** 老板娘 / The Landlady / De Waardin.
+9. **Localization:** every key in en, nl and zh_CN, including all new lines. A **settings panel**
+   (title and pause menu) has language, master, music and effects volume, challenge and adaptive
+   timing. Language and volumes are saved in `settings.cfg`; the first launch follows the OS
+   language. The title menu has Start, a language picker (`< English >`) and Settings.
+   `tools/screens_all.sh` renders 10 screens × 3 languages to `docs/screens/<screen>_<locale>.png`;
+   I looked at all 30 and found no overflow.
+10. **Budget allowed both:** the tavern art pass (tables with cloths, counters with wine jars,
+    barrels and crates, a door that opens, windows, banners, a planked wall, all from the pack's
+    house tileset) and **upgrade descriptions that read their numbers from `run.tres`**.
+
+Also: the test bot spares the beggar it means to spare and never cuts next to one. These were
+flaky failures in `run_mercy` (now 10 of 10 runs pass).
+
+### Not done / known issues
+- **Settings surviving a restart** is written but untested here (scenarios never touch user
+  files). Check it once by hand (see below).
+- Face customisation is for later, as asked.
+- The intro's hand and the skeleton are simple; an artist pass would help. The title's close-up
+  sword is code-drawn because the pack's katana is 6×14 px.
+- `run_bot` timed out once in the second bamboo room, before the bot fixes in item 5, and I could
+  not reproduce it in 8 later runs. If CI shows it again, the log has a state trace
+  (`SCENARIO_TRACE=1`).
+- The cellar's long counters are built from 16 px pieces and look plain; the wall autotiles in
+  the pack were too involved for this pass, so walls are still code-drawn (with planks, windows
+  and banners).
+- Dutch and Chinese are machine-drafted (CREDITS says so). The new sword lines need your
+  review: first_spear, mercy.warn, first_fake, fake_seen, new_soul, next_soul.
+
+### Playtest checklist
+1. **Title:** does the close-up read as "sword, seal, skeleton in the bamboo"? Press Start and
+   watch hum → seal → hand → pull back → zoom out → ghosts. Try the language picker and Settings.
+2. **Settings:** change the language and the volumes, quit the game, relaunch. Did they stick?
+3. **Tutorial:** no red, no calibration (F2 shows control from the first attack). Is it too long
+   at 12 ghost attacks?
+4. **Outside the tavern:** the first spearman gets a red line, and its first thrust should feel
+   slow and readable. After that, red is at the director's normal pace.
+5. **Mercy:** the first beggar is genuine (listen to the sword). Later, try to spot a fake before
+   sparing it: it stares at you and does not shake. Turn your back on one. Is the tell fair,
+   and is 1 in 3 right?
+6. **Spare** one and watch it walk out through the entrance.
+7. **Archers** behind tables or bushes: arrows should stop there.
+8. **Die** outside the tavern: the summary says where the next soul starts. Press New soul: you
+   start at the first room outside the tavern with your upgrades.
+9. **F3:** god mode, jump to the boss, force a fake beg.
+10. **Boss:** the bar stays inside its frame through phase 2; the name reads 老板娘 / The Landlady.
+11. **Atmosphere and music** in each area. Play once in Chinese and once in Dutch.
+
+### Questions for the playtest
+- Is the fake's tell too subtle or too obvious? (`FakeTurnAwayMs`, `FakeTurnAwayDeg`,
+  `FakeStrikeRangePx`, `FakeBegChance` in F1 → run.tres.)
+- Should Title → Start also continue where the last soul fell, or stay a fresh run?
+- Is 900 ms right for the first red thrust?
+- Is the intro's length (about 3 s title + 2.5 s grove) right, or should it be shorter on later runs?
+
 ## M3 · The run (2026-11-04, sessions A and B in one)
 
 ### Done
