@@ -43,6 +43,7 @@ public partial class DevMenu : CanvasLayer
         root.AddChild(Button("Next break: genuine beg", () => Force(BegKind.Genuine)));
         root.AddChild(Button("Next break: fake beg", () => Force(BegKind.Fake)));
         root.AddChild(Button("Clear room", ClearRoom));
+        root.AddChild(Button("Die", () => { Toggle(false); _run.Player.Kill(); }));
         _status = Dev("", new Color(0.7f, 0.9f, 0.7f));
         root.AddChild(_status);
 

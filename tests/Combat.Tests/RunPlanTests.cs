@@ -120,4 +120,20 @@ public class RunPlanTests
         Assert.Equal(goal, p);
         Assert.Null(RoomNav.NextStep(t, from, goal, exitsOpen: false));
     }
+
+    [Fact]
+    public void AreaStart_IsTheFirstRoomOfEachArea()
+    {
+        for (var seed = 1; seed <= 20; seed++)
+        {
+            var plan = RunPlan.Build(seed);
+            foreach (var area in new[] { Area.Tutorial, Area.Bamboo, Area.Outside, Area.Tavern })
+            {
+                var i = plan.AreaStart(area);
+                Assert.Equal(area, plan.Steps[i].Room!.Area);
+                Assert.True(i == 0 || plan.Steps[i - 1].Room?.Area != area);
+            }
+            Assert.Equal(0, plan.AreaStart(Area.Tutorial));
+        }
+    }
 }

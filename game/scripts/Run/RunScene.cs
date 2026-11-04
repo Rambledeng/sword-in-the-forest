@@ -29,6 +29,11 @@ public partial class RunScene : Node2D
     /// <summary>The seed for the next run started by Retry (null: random).</summary>
     public static int? NextSeed { get; set; }
 
+    /// <summary>A soul fell here: the next soul (New soul) starts at this area's first room.</summary>
+    public static Area? NextArea { get; set; }
+    /// <summary>The upgrades the fallen soul had taken; the next soul keeps them.</summary>
+    public static List<Upgrade> NextUpgrades { get; } = new();
+
     /// <summary>0: <see cref="NextSeed"/>, else --seed, else random.</summary>
     [Export] public int Seed { get; set; }
     /// <summary>Tests start mid-run (e.g. the boss).</summary>
@@ -57,6 +62,8 @@ public partial class RunScene : Node2D
     public ShakeCamera Camera { get; private set; } = null!;
     public TavernBoss? Boss { get; private set; }
     public int RoomsVisited { get; private set; }
+    /// <summary>This soul took up the sword where the last one fell (null: a fresh run).</summary>
+    public Area? ContinuedFrom { get; private set; }
     /// <summary>Kneel, beg or fake beg at each posture break (first beggar genuine).</summary>
     public MercyRules Mercy { get; private set; } = null!;
 
@@ -104,7 +111,24 @@ public partial class RunScene : Node2D
             service.Observed += OnObserved;
         }
         Enemy.AnyGlint += OnAnyGlint;
-        BeginStep(StartStep);
+        var start = StartStep;
+        var carried = new List<Upgrade>();
+        if (start == 0 && NextArea is Area area)
+        {
+            // A new wandering soul picks up the sword where the last one fell.
+            start = Plan.AreaStart(area);
+            carried.AddRange(NextUpgrades);
+            ContinuedFrom = area;
+        }
+        NextArea = null;
+        NextUpgrades.Clear();
+        BeginStep(start);
+        foreach (var u in carried)
+        {
+            Apply(u);
+            Stats.Take(u);
+        }
+        if (ContinuedFrom != null) SwordVoice.Say("sword.new_soul");
     }
 
     public override void _ExitTree()
@@ -313,7 +337,8 @@ public partial class RunScene : Node2D
     {
         var d = DirectorService.Instance;
         var est = d?.Director.Estimate() ?? default;
-        Summary = new SummaryScreen(Stats, est, d?.Leads.Adaptive ?? false, d?.SoulsFallen ?? 0, Plan.Rooms.Count());
+        Summary = new SummaryScreen(Stats, est, d?.Leads.Adaptive ?? false, d?.SoulsFallen ?? 0, Plan.Rooms.Count(),
+            Stats.Won ? null : FellIn);
         Summary.RetryRequested += Retry;
         Summary.TitleRequested += ToTitle;
         AddChild(Summary);
@@ -324,8 +349,19 @@ public partial class RunScene : Node2D
     {
         GetTree().Paused = false;
         NextSeed = (int)(GD.Randi() % 999_999) + 1;
+        NextArea = null;
+        NextUpgrades.Clear();
+        if (!Stats.Won)
+        {
+            // The next soul starts at the start of the area where this one fell, keeping its upgrades.
+            NextArea = FellIn;
+            NextUpgrades.AddRange(Stats.Upgrades);
+        }
         if (ChangeScenes) GetTree().CallDeferred(SceneTree.MethodName.ChangeSceneToFile, "res://scenes/Run.tscn");
     }
+
+    /// <summary>The area of the room this soul is in (or last was in).</summary>
+    public Area FellIn => Room?.Plan.Area ?? Area.Tutorial;
 
     private void ToTitle()
     {

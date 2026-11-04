@@ -595,6 +595,14 @@ public partial class Player : CharacterBody2D, IThreatTarget
         }
     }
 
+    /// <summary>Developer and tests: falls at once.</summary>
+    public void Kill()
+    {
+        if (IsDead) return;
+        Invulnerable = false;
+        TakeDamage(Health, 0, Vector2.Down);
+    }
+
     private void TakeDamage(int damage, float posture, Vector2 dir)
     {
         var feel = Tunables.Feel;

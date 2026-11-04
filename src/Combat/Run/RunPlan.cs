@@ -44,6 +44,14 @@ namespace SwordInTheForest.Run
         /// <summary>Colour variants per regular enemy (0 is the sheet's own colours).</summary>
         public const int Variants = 5;
 
+        /// <summary>The index of the first room of <paramref name="area"/> (0 when the plan has none).</summary>
+        public int AreaStart(Area area)
+        {
+            for (var i = 0; i < Steps.Count; i++)
+                if (Steps[i].Room?.Area == area) return i;
+            return 0;
+        }
+
         private RunPlan(int seed, IReadOnlyList<RunStep> steps)
         {
             Seed = seed;

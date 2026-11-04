@@ -88,3 +88,5 @@ sword.verdict.win_karma,You won. But the ones who begged will follow you.,"Je wo
 sword.verdict.loss_merit,You fell with clean hands. That is not nothing.,Je viel met schone handen. Dat is niet niets.,你倒下了，手却干净。这并非一无所有。
 sword.verdict.loss_balanced,You fell. I will remember your hand; the next soul will feel it.,Je viel. Ik onthoud je hand; de volgende ziel zal het voelen.,你倒下了。我记得你的手，下一个游魂会感觉到。
 sword.verdict.loss_karma,"You fell, and the ones who begged laughed. Do better, next soul.","Je viel, en wie smeekten lachten. Doe het beter, volgende ziel.",你倒下了，求饶的人在笑。下一个游魂，好好做。
+summary.next_soul,The next soul will take up the sword in {area}.,De volgende ziel neemt het zwaard op in {area}.,下一个游魂将在{area}拿起这把剑。
+sword.new_soul,"A new hand. The last one fell here; we begin again where it did.","Een nieuwe hand. De vorige viel hier; we beginnen opnieuw waar zij viel.",新的手。上一个倒在这里，我们就从这里重来。
