@@ -24,7 +24,7 @@ ui.upgrade.hint,← → choose · attack or click to take,← → kiezen · aanv
 ui.pause.title,Paused,Gepauzeerd,暂停
 ui.pause.resume,Resume,Verder,继续
 ui.pause.quit,Quit to title,Naar titelscherm,返回标题
-combat.boss.name,The Tavern Keeper,De Waardin,老板娘
+combat.boss.name,The Landlady,De Waardin,老板娘
 upgrade.vitality.name,Vitality,Levenskracht,气血
 upgrade.vitality.desc,+1 heart (2 health).,+1 hart (2 leven).,+1 颗心（2 点生命）。
 upgrade.broad_stance.name,Broad Stance,Brede Houding,沉桩
