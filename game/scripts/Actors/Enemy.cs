@@ -284,10 +284,10 @@ public abstract partial class Enemy : CharacterBody2D
                 if (IsFake && targetAlive && !DrillMode && TurnedAway(toTarget, dist)) Betray();
                 break;
             case State.Grab:
-                if (_dropped != null && StateElapsedMs >= Tunables.Run.FakeGrabMs * 0.5) PickUpWeapon();
+                if (_dropped != null && StateElapsedMs >= GrabMs * 0.5) PickUpWeapon();
                 // Weapon in hand: it turns to face you as it rises.
                 if (_dropped == null && targetAlive) Facing = AimDir = toTarget.Normalized();
-                if (StateElapsedMs >= Tunables.Run.FakeGrabMs)
+                if (StateElapsedMs >= GrabMs)
                 {
                     if (targetAlive) StartAttack(CounterAttack ?? ChooseAttack());
                     else BeginCircle();
@@ -365,6 +365,7 @@ public abstract partial class Enemy : CharacterBody2D
     /// </summary>
     private void Betray()
     {
+        GrabMs = GrabMsRoll?.Invoke() ?? Tunables.Run.FakeGrabMs;
         IsFake = false;
         Revealed = true;
         _turnedAwayMs = 0;
@@ -373,6 +374,11 @@ public abstract partial class Enemy : CharacterBody2D
         if (_dropped == null) PickUpWeapon();
         Betrayed?.Invoke(this);
     }
+
+    /// <summary>Picks how long this fake's grab lasts when it drops the act (the run makes the first one longer).</summary>
+    public Func<int>? GrabMsRoll { get; set; }
+    /// <summary>How long its grab lasts (set when it drops the act).</summary>
+    public double GrabMs { get; private set; }
 
     /// <summary>The dropped weapon leaves the ground and is back in hand.</summary>
     private void PickUpWeapon()
@@ -892,7 +898,7 @@ public abstract partial class Enemy : CharacterBody2D
             case State.Grab:
             {
                 // Reach down to the dropped weapon, snatch it, rise with it to face you.
-                var half = Mathf.Max(1, Tunables.Run.FakeGrabMs * 0.5);
+                var half = Mathf.Max(1, GrabMs * 0.5);
                 if (_dropped != null)
                 {
                     var toWeapon = _droppedAt - GlobalPosition;

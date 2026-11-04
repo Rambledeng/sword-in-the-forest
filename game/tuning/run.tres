@@ -19,6 +19,7 @@ FakeStrikeRangePx = 90.0
 FakeMinBegMs = 700
 FakePostureAfter = 0.5
 FakeGrabMs = 380
+FirstFakeGrabMs = 1000
 SpareStandMs = 700
 SpareLeaveSpeedFactor = 0.7
 SpareLeaveMaxMs = 12000

@@ -34,6 +34,8 @@ public partial class RunTuning : Resource
     [Export(PropertyHint.Range, "0,1,0.05")] public float FakePostureAfter { get; set; }
     /// <summary>A fake that drops the act first picks its weapon back up, taking this long, then strikes.</summary>
     [Export(PropertyHint.Range, "0,1500,10")] public int FakeGrabMs { get; set; }
+    /// <summary>The run's first fake to drop the act grabs slowly, so it is clearly readable (like the first red attack's lead).</summary>
+    [Export(PropertyHint.Range, "0,2500,10")] public int FirstFakeGrabMs { get; set; }
     /// <summary>A spared enemy takes this long to stand up before it walks out.</summary>
     [Export(PropertyHint.Range, "0,3000,50")] public int SpareStandMs { get; set; }
     /// <summary>Its walking speed out of the room, as a fraction of its move speed.</summary>

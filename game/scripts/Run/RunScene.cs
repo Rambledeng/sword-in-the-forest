@@ -371,6 +371,7 @@ public partial class RunScene : Node2D
         e.LeadTimesOverride = FirstRed;
         if (e is Spearman) SayOnce("sword.first_spear");
         if (e is not TutorialGhost and not TavernBoss) e.BegRoll = en => Mercy.Decide(en.SurrenderChance, en.NextRoll);
+        e.GrabMsRoll = () => Mercy.NextGrabMs(Tunables.Run.FirstFakeGrabMs, Tunables.Run.FakeGrabMs);
         e.Surrendered += _ =>
         {
             // The sword wants every beggar dead, and never warns about fakes.
