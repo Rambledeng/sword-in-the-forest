@@ -6,7 +6,8 @@ using SwordInTheForest.Director;
 namespace SwordInTheForest.Ui;
 
 /// <summary>
-/// Settings, from the title and the pause menu: language (switches at once), master, music and
+/// Settings, from the title and the pause menu: language (switches at once), display mode, window
+/// size (multiples of 480×270 that fit the screen), master, music and
 /// effects volume, challenge, adaptive timing and (after the first ending) Detail mode. Saved in settings.cfg. Mouse, keys or pad:
 /// up/down moves, left/right changes, Esc or Back closes.
 /// </summary>
@@ -17,6 +18,8 @@ public partial class SettingsPanel : CanvasLayer
     private Button _challenge = null!;
     private Button _adaptive = null!;
     private Button _detail = null!;
+    private Button _display = null!;
+    private Button _resolution = null!;
     private Label _detailLabel = null!;
     private HSlider _master = null!;
     private Button _back = null!;
@@ -24,6 +27,8 @@ public partial class SettingsPanel : CanvasLayer
     public bool IsOpen => _root.Visible;
     /// <summary>The Detail mode row (hidden until the first ending).</summary>
     public Button DetailButton => _detail;
+    public Button DisplayButton => _display;
+    public Button ResolutionButton => _resolution;
     public event Action? Closed;
 
     public override void _Ready()
@@ -57,6 +62,8 @@ public partial class SettingsPanel : CanvasLayer
         stack.AddChild(grid);
 
         _language = Cycle(grid, "ui.settings.language", UserSettings.CycleLocale);
+        _display = Cycle(grid, "ui.settings.display", UserSettings.CycleDisplay);
+        _resolution = Cycle(grid, "ui.settings.resolution", UserSettings.CycleScale);
         _master = Slider(grid, "ui.settings.master", UserSettings.Master, v => UserSettings.SetVolumes(master: v));
         Slider(grid, "ui.settings.music", UserSettings.Music, v => UserSettings.SetVolumes(music: v));
         Slider(grid, "ui.settings.effects", UserSettings.Effects, v =>
@@ -102,8 +109,21 @@ public partial class SettingsPanel : CanvasLayer
             Refresh();
             b.AcceptEvent();
         };
+        Compact(b);
         Row(grid, key, b);
         return b;
+    }
+
+    /// <summary>Thinner padding, so every row (Detail mode too) fits the 270 px screen.</summary>
+    private static void Compact(Button b)
+    {
+        foreach (var state in new[] { "normal", "hover", "pressed", "focus", "disabled" })
+        {
+            if (b.GetThemeStylebox(state)?.Duplicate() is not StyleBox box) continue;
+            box.ContentMarginTop = 0;
+            box.ContentMarginBottom = 0;
+            b.AddThemeStyleboxOverride(state, box);
+        }
     }
 
     private static HSlider Slider(GridContainer grid, string key, float value, Action<float> changed)
@@ -117,6 +137,16 @@ public partial class SettingsPanel : CanvasLayer
     private void Refresh()
     {
         _language.Text = $"< {UserSettings.LocaleName(UserSettings.Locale)} >";
+        _display.Text = $"< {Tr(UserSettings.Display switch
+        {
+            DisplayMode.Borderless => "ui.settings.borderless",
+            DisplayMode.Fullscreen => "ui.settings.fullscreen",
+            _ => "ui.settings.windowed",
+        })} >";
+        // The window size only applies to a window; full screen always fills the screen.
+        _resolution.Disabled = UserSettings.Display != DisplayMode.Windowed;
+        var k = Mathf.Clamp(UserSettings.Scale, 1, UserSettings.MaxScale());
+        _resolution.Text = _resolution.Disabled ? Tr("ui.settings.fit_screen") : $"< {UserSettings.BaseWidth * k}×{UserSettings.BaseHeight * k} >";
         // Detail mode appears once the first ending is reached.
         _detail.Visible = _detailLabel.Visible = UserSettings.EndingSeen;
         _detail.Text = $"< {Tr(UserSettings.DetailMode ? "ui.settings.on" : "ui.settings.off")} >";

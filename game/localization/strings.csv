@@ -111,3 +111,9 @@ summary.reading.quick,The sword found your hand quick.,Het zwaard vond je hand s
 summary.reading.learning,The sword found your hand still learning.,Het zwaard vond dat je hand nog leert.,剑说：你的手还在学。
 summary.reading.slow,The sword found your hand slow.,Het zwaard vond je hand traag.,剑说：你的手慢。
 sword.spared_fake,"Why did you spare it? They deserve death, and death alone.","Waarom spaarde je het? Zij verdienen de dood, en niets dan de dood.",为何饶它？此等恶徒，唯死而已！
+ui.settings.display,Display,Weergave,显示
+ui.settings.windowed,Windowed,Venster,窗口
+ui.settings.borderless,Borderless,Randloos,无边框全屏
+ui.settings.fullscreen,Fullscreen,Volledig scherm,全屏
+ui.settings.resolution,Window size,Venstergrootte,窗口尺寸
+ui.settings.fit_screen,Fits the screen,Past op het scherm,适配屏幕
