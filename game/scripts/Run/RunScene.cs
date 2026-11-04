@@ -372,16 +372,17 @@ public partial class RunScene : Node2D
         if (e is not TutorialGhost and not TavernBoss) e.BegRoll = en => Mercy.Decide(en.SurrenderChance, en.NextRoll);
         e.Surrendered += _ =>
         {
-            // The first beggar (always genuine) teaches spare versus finish.
+            // The sword wants every beggar dead, and never warns about fakes.
             SayOnce("sword.first_surrender");
         };
         e.Spared += _ =>
         {
             Stats.Spare();
+            // A genuine beggar walks away: the sword is grim about it.
             SayOnce("sword.first_spare");
-            SayOnce("sword.mercy.warn");
         };
-        e.Betrayed += _ => SayOnce("sword.first_fake");
+        // A spared fake attacks: scorn. A fake that strikes at your back: cut it down.
+        e.Betrayed += en => SayOnce(en.BetrayedOnSpare ? "sword.spared_fake" : "sword.first_fake");
         if (e is TavernBoss boss) boss.PhaseChanged += _ => SwordVoice.Say("sword.boss.phase2");
     }
 
@@ -401,7 +402,6 @@ public partial class RunScene : Node2D
         if (e.DiedBegging)
         {
             SayOnce("sword.first_karma");
-            SayOnce("sword.mercy.warn");
         }
         else if (e.DiedFaking) SayOnce("sword.fake_seen");
         else if (e is not TavernBoss && e is not TutorialGhost) SayOnce("sword.first_finisher");
@@ -568,12 +568,12 @@ public partial class RunScene : Node2D
         if (d == null || Stats.Ended) return;
         var est = d.Director.Estimate();
         var change = _watcher.Observe(est.MedianMs, est.Attunement, est.Observations);
-        var args = new Dictionary<string, string> { ["ms"] = ((int)Math.Round(est.MedianMs)).ToString() };
+        // The sword reads the player in words (quick, slow, learning), never in numbers.
         switch (change)
         {
-            case ReadingChange.Attuned: SwordVoice.Say("sword.read.attuned", args); break;
-            case ReadingChange.Quicker: SwordVoice.Say("sword.read.quicker", args); break;
-            case ReadingChange.Slower: SwordVoice.Say("sword.read.slower", args); break;
+            case ReadingChange.Attuned: SwordVoice.Say("sword.read.attuned"); break;
+            case ReadingChange.Quicker: SwordVoice.Say("sword.read.quicker"); break;
+            case ReadingChange.Slower: SwordVoice.Say("sword.read.slower"); break;
         }
     }
 

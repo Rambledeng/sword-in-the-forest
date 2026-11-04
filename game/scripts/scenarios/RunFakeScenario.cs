@@ -56,7 +56,8 @@ public partial class RunFakeScenario : Scenario
                 if (_fake == null || _betrayals == 0) return;
                 Check(_fake.Revealed && _fake.Current == Enemy.State.Attack, $"the spared fake is {_fake.Current}, not attacking");
                 Check(_run.Stats.Spared == 1 && _run.Stats.Merit == 1, "sparing a fake gave merit");
-                Check(_run.Voice.Spoken.Contains("sword.first_fake"), "the sword did not call out the fake");
+                Check(_run.Voice.Spoken.Contains("sword.first_spare"), "the sword said nothing about the genuine beggar walking away");
+                Check(_run.Voice.Spoken.Contains("sword.spared_fake"), "the sword did not scorn sparing the fake");
                 GD.Print($"  frame {frame}: spared fake attacked");
                 _run.Mercy.ForceNext = BegKind.Fake;
                 _fake = null;
@@ -72,6 +73,7 @@ public partial class RunFakeScenario : Scenario
                 if (_betrayals >= 2)
                 {
                     Check(_fake!.Revealed, "the wrong enemy attacked");
+                    Check(_run.Voice.Spoken.Contains("sword.first_fake"), "the sword did not call out the fake at your back");
                     GD.Print($"  frame {frame}: the fake struck when the player turned away");
                     Pass();
                     return;
