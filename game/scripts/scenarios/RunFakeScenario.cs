@@ -18,6 +18,7 @@ public partial class RunFakeScenario : Scenario
     private RunBot _bot = null!;
     private int _stage;
     private Enemy? _fake;
+    private Enemy? _first;
     private int _betrayals;
 
     protected override bool FailOnTimeout => true;
@@ -40,9 +41,16 @@ public partial class RunFakeScenario : Scenario
         switch (_stage)
         {
             case 0: // the first beggar is genuine; the bot spares it
+                // Check the first beggar itself when it kneels: another enemy may break (and, at
+                // fake chance 1, beg as a fake) before the bot has finished sparing this one.
+                if (_first == null && beggar != null)
+                {
+                    _first = beggar;
+                    Check(!beggar.IsFake && _run.Mercy.Begs == 1 && _run.Mercy.Fakes == 0, "the first beggar was not genuine");
+                }
                 _bot.Step();
                 if (_run.Stats.Spared == 0) return;
-                Check(_run.Mercy.Begs == 1 && _run.Mercy.Fakes == 0, "the first beggar was not genuine");
+                Check(_first != null && !_first.IsFake, "the bot spared something other than the first beggar");
                 GD.Print($"  frame {frame}: first beggar genuine and spared");
                 _stage = 1;
                 return;

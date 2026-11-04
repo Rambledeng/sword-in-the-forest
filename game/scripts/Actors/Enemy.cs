@@ -588,8 +588,8 @@ public abstract partial class Enemy : CharacterBody2D
         }
         _attack = null;
         Enter(State.Circle);
-        _circleMs = DrillMode ? 0 : GD.RandRange(Tuning.CircleMinMs, Tuning.CircleMaxMs);
-        _circleSign = GD.Randf() < 0.5f ? -1 : 1;
+        _circleMs = DrillMode ? 0 : Tuning.CircleMinMs + Rng.NextDouble() * (Tuning.CircleMaxMs - Tuning.CircleMinMs);
+        _circleSign = Rng.Next(2) == 0 ? -1 : 1;
     }
 
     // ---- Being hit ----------------------------------------------------------------------
