@@ -90,6 +90,8 @@ public partial class RunScene : Node2D
         Player.Died += _ => EndRun(false);
         Player.FinisherLanded += (_, e) => { if (e.IsGone) OnFinished(e); };
         Player.SparedEnemy += (_, _) => { };
+        Stats.MeritGained += () => ValueFx(karma: false);
+        Stats.KarmaGained += () => ValueFx(karma: true);
 
         Camera = new ShakeCamera { Target = Player };
         AddChild(Camera);
@@ -383,6 +385,15 @@ public partial class RunScene : Node2D
         if (e is TavernBoss boss) boss.PhaseChanged += _ => SwordVoice.Say("sword.boss.phase2");
     }
 
+    /// <summary>Merit and karma are felt, not counted: glitter or smoke on the player.</summary>
+    public int ValueFxPlayed { get; private set; }
+
+    private void ValueFx(bool karma)
+    {
+        ValueFxPlayed++;
+        MeritFx.Play(Player, Player.BodyCenter, karma, Plan.Seed * 31 + ValueFxPlayed);
+    }
+
     /// <summary>A finisher killed <paramref name="e"/>.</summary>
     private void OnFinished(Enemy e)
     {
@@ -453,6 +464,9 @@ public partial class RunScene : Node2D
 
     // ---- The end ---------------------------------------------------------------------------
 
+    /// <summary>This run's win was the player's first ending.</summary>
+    public bool FirstEnding { get; private set; }
+
     /// <summary>Screenshot stage: end the run now.</summary>
     public void EndForShot(bool won) => EndRun(won);
 
@@ -461,6 +475,12 @@ public partial class RunScene : Node2D
         if (Stats.Ended) return;
         Stats.End(won);
         _coach?.End();
+        if (won)
+        {
+            // The first ending unlocks Detail mode (saved in settings.cfg).
+            FirstEnding = !UserSettings.EndingSeen;
+            UserSettings.MarkEndingSeen();
+        }
         if (!won)
         {
             DirectorService.Instance?.AddSoulFallen();
@@ -474,7 +494,7 @@ public partial class RunScene : Node2D
         var d = DirectorService.Instance;
         var est = d?.Director.Estimate() ?? default;
         Summary = new SummaryScreen(Stats, est, d?.Leads.Adaptive ?? false, d?.SoulsFallen ?? 0, Plan.Rooms.Count(),
-            Stats.Won ? null : FellIn);
+            Stats.Won ? null : FellIn) { FirstEnding = FirstEnding };
         Summary.RetryRequested += Retry;
         Summary.TitleRequested += ToTitle;
         AddChild(Summary);

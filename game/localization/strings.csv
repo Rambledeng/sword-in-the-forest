@@ -105,3 +105,9 @@ ui.settings.effects,Effects,Effecten,音效
 ui.settings.challenge,Challenge,Uitdaging,挑战
 ui.settings.adaptive,Adaptive timing,Adaptieve timing,自适应时机
 ui.settings.back,Back,Terug,返回
+ui.settings.detail,Detail mode,Detailmodus,详细模式
+summary.detail_unlocked,"Detail mode is now in the settings: merit, karma and the sword's numbers.","Detailmodus staat nu in de instellingen: verdienste, karma en de getallen van het zwaard.",设置中已开放详细模式：功德、业障与剑的读数。
+summary.reading.unread,The sword has not read your hand yet.,Het zwaard heeft je hand nog niet gelezen.,剑还未读透你的手。
+summary.reading.quick,The sword found your hand quick.,Het zwaard vond je hand snel.,剑说：你的手快。
+summary.reading.learning,The sword found your hand still learning.,Het zwaard vond dat je hand nog leert.,剑说：你的手还在学。
+summary.reading.slow,The sword found your hand slow.,Het zwaard vond je hand traag.,剑说：你的手慢。

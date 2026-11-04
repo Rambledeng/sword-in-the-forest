@@ -7,7 +7,7 @@ namespace SwordInTheForest.Ui;
 
 /// <summary>
 /// Settings, from the title and the pause menu: language (switches at once), master, music and
-/// effects volume, challenge and adaptive timing. Saved in settings.cfg. Mouse, keys or pad:
+/// effects volume, challenge, adaptive timing and (after the first ending) Detail mode. Saved in settings.cfg. Mouse, keys or pad:
 /// up/down moves, left/right changes, Esc or Back closes.
 /// </summary>
 public partial class SettingsPanel : CanvasLayer
@@ -16,10 +16,14 @@ public partial class SettingsPanel : CanvasLayer
     private Button _language = null!;
     private Button _challenge = null!;
     private Button _adaptive = null!;
+    private Button _detail = null!;
+    private Label _detailLabel = null!;
     private HSlider _master = null!;
     private Button _back = null!;
 
     public bool IsOpen => _root.Visible;
+    /// <summary>The Detail mode row (hidden until the first ending).</summary>
+    public Button DetailButton => _detail;
     public event Action? Closed;
 
     public override void _Ready()
@@ -70,6 +74,8 @@ public partial class SettingsPanel : CanvasLayer
             var d = DirectorService.Instance;
             d?.SetAdaptive(!d.Leads.Adaptive);
         });
+        _detail = Cycle(grid, "ui.settings.detail", _ => UserSettings.SetDetailMode(!UserSettings.DetailMode));
+        _detailLabel = grid.GetChild<Label>(grid.GetChildCount() - 2);
         _back = new Button { Text = "ui.settings.back" };
         _back.Pressed += Close;
         stack.AddChild(_back);
@@ -111,6 +117,9 @@ public partial class SettingsPanel : CanvasLayer
     private void Refresh()
     {
         _language.Text = $"< {UserSettings.LocaleName(UserSettings.Locale)} >";
+        // Detail mode appears once the first ending is reached.
+        _detail.Visible = _detailLabel.Visible = UserSettings.EndingSeen;
+        _detail.Text = $"< {Tr(UserSettings.DetailMode ? "ui.settings.on" : "ui.settings.off")} >";
         var d = DirectorService.Instance;
         _challenge.Disabled = _adaptive.Disabled = d == null;
         if (d == null) return;

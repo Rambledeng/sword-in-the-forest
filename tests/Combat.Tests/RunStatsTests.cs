@@ -47,4 +47,19 @@ public class RunStatsTests
         primed.Prime(300, 50);
         Assert.Equal(ReadingChange.None, primed.Observe(305, 0.9, 60));
     }
+
+    [Fact]
+    public void MeritAndKarma_RaiseTheirEvents()
+    {
+        var s = new RunStats();
+        int merit = 0, karma = 0;
+        s.MeritGained += () => merit++;
+        s.KarmaGained += () => karma++;
+        s.Finished(begging: false);
+        s.Spare();
+        s.Finished(begging: true);
+        s.Killed();
+        Assert.Equal((2, 1), (merit, karma));
+        Assert.Equal((2, 1), (s.Merit, s.Karma));
+    }
 }

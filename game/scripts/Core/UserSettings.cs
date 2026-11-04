@@ -5,7 +5,7 @@ namespace SwordInTheForest.Core;
 
 /// <summary>
 /// The player's own settings, kept in user://settings.cfg beside the director's: language and the
-/// master, music and effects volumes. First launch follows the operating system's language
+/// master, music and effects volumes, whether the first ending was reached and Detail mode. First launch follows the operating system's language
 /// (Dutch, Chinese, otherwise English). Nothing is read or written in scenario and screenshot runs.
 /// </summary>
 public static class UserSettings
@@ -25,6 +25,12 @@ public static class UserSettings
     public static float Music { get; private set; } = 1f;
     public static float Effects { get; private set; } = 1f;
     public static string Locale => Normalize(TranslationServer.GetLocale());
+    /// <summary>The boss has been beaten once (the first ending): Detail mode can be turned on.</summary>
+    public static bool EndingSeen { get; private set; }
+    /// <summary>The player's choice; only counts once <see cref="EndingSeen"/>.</summary>
+    public static bool DetailMode { get; private set; }
+    /// <summary>Show merit, karma, reaction times and the attunement meter.</summary>
+    public static bool ShowDetails => EndingSeen && DetailMode;
 
     public static event Action? Changed;
 
@@ -43,6 +49,8 @@ public static class UserSettings
         Master = (float)(double)cfg.GetValue("audio", "master", 1.0);
         Music = (float)(double)cfg.GetValue("audio", "music", 1.0);
         Effects = (float)(double)cfg.GetValue("audio", "effects", 1.0);
+        EndingSeen = (bool)cfg.GetValue("progress", "ending_seen", false);
+        DetailMode = (bool)cfg.GetValue("ui", "detail_mode", false);
         if (applyLocale)
         {
             var saved = loaded ? (string)cfg.GetValue("ui", "locale", "") : "";
@@ -73,6 +81,28 @@ public static class UserSettings
         Save();
     }
 
+    /// <summary>The first ending: unlocks Detail mode (saved).</summary>
+    public static void MarkEndingSeen()
+    {
+        if (EndingSeen) return;
+        EndingSeen = true;
+        Save();
+    }
+
+    public static void SetDetailMode(bool on)
+    {
+        DetailMode = on && EndingSeen;
+        Save();
+    }
+
+    /// <summary>Scenarios set the hidden-values state directly (nothing is saved).</summary>
+    public static void SetProgressForTest(bool endingSeen, bool detailMode)
+    {
+        EndingSeen = endingSeen;
+        DetailMode = detailMode && endingSeen;
+        Changed?.Invoke();
+    }
+
     private static void ApplyAudio() => AudioServer.SetBusVolumeDb(0, Mathf.LinearToDb(Mathf.Max(0.0001f, Master)));
 
     private static void Save()
@@ -85,6 +115,8 @@ public static class UserSettings
         cfg.SetValue("audio", "master", (double)Master);
         cfg.SetValue("audio", "music", (double)Music);
         cfg.SetValue("audio", "effects", (double)Effects);
+        cfg.SetValue("progress", "ending_seen", EndingSeen);
+        cfg.SetValue("ui", "detail_mode", DetailMode);
         cfg.Save(DirectorService.SettingsPath);
     }
 }

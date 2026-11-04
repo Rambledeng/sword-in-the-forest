@@ -34,4 +34,12 @@ public partial class FeelTuning : Resource
     [Export(PropertyHint.Range, "20,600,5")] public int GlintVisibleMs { get; set; }
     [Export(PropertyHint.Range, "0,2,0.05")] public float SfxVolume { get; set; }
     [Export(PropertyHint.Range, "0,2,0.05")] public float MusicVolume { get; set; }
+
+    [ExportGroup("Merit and karma")]
+    /// <summary>The gold glitter on the player when merit is gained.</summary>
+    [Export(PropertyHint.Range, "100,3000,10")] public int MeritFxMs { get; set; }
+    [Export(PropertyHint.Range, "1,40,1")] public int MeritFxSparkles { get; set; }
+    /// <summary>The wisp of dark smoke when karma is gained.</summary>
+    [Export(PropertyHint.Range, "100,4000,10")] public int KarmaFxMs { get; set; }
+    [Export(PropertyHint.Range, "1,40,1")] public int KarmaFxPuffs { get; set; }
 }

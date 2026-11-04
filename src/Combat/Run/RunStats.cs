@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace SwordInTheForest.Run
@@ -21,12 +22,17 @@ namespace SwordInTheForest.Run
         public double ElapsedMs { get; set; }
         public IReadOnlyList<Upgrade> Upgrades => _upgrades;
 
+        /// <summary>Merit was gained (the game shows a gold glitter instead of a counter).</summary>
+        public event Action? MeritGained;
+        /// <summary>Karma was gained (a wisp of dark smoke).</summary>
+        public event Action? KarmaGained;
+
         /// <summary>An enemy killed by a finisher; <paramref name="begging"/> when it had surrendered.</summary>
         public void Finished(bool begging)
         {
             Kills++;
-            if (begging) Karma++;
-            else Merit++;
+            if (begging) AddKarma();
+            else AddMerit();
         }
 
         /// <summary>An enemy killed without a finisher (its health ran out).</summary>
@@ -35,7 +41,19 @@ namespace SwordInTheForest.Run
         public void Spare()
         {
             Spared++;
+            AddMerit();
+        }
+
+        private void AddMerit()
+        {
             Merit++;
+            MeritGained?.Invoke();
+        }
+
+        private void AddKarma()
+        {
+            Karma++;
+            KarmaGained?.Invoke();
         }
 
         public void RoomCleared() => RoomsCleared++;
