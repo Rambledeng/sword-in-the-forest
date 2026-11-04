@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="EnemyTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/EnemyTuning.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+MaxHealth = 36
+MaxPosture = 180.0
+PostureDrainPerSec = 12.0
+PostureDrainDelayMs = 1500.0
+MoveSpeed = 60.0
+CircleSpeed = 32.0
+AttackRangePx = 34.0
+CircleDistancePx = 50.0
+CircleMinMs = 400
+CircleMaxMs = 1100
+ChopChance = 0.0
+TurnSpeedDeg = 600.0
+BlockPostureFactor = 0.35
+BlocksBeforeCounter = 4
+BlockChainResetMs = 1500
+ArmoredPostureFactor = 0.5
+HitInWindupStrikesNow = true
+StaggerMs = 200
+MaxStaggerChain = 2
+DeflectedRecoilMs = 160
+RecoveryAfterHitFactor = 0.35
+KneelMs = 2600
+PostureAfterKneel = 0.4

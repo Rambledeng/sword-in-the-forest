@@ -55,11 +55,19 @@ public partial class DirectorService : Node
     /// <summary>Feeds one finished attack (its telemetry line is complete) to the director.</summary>
     public void Observe(ThreatWindow threat)
     {
-        Leads.CalibrationAttacks = Tunables.Combat.DirectorCalibrationAttacks;
         var record = TelemetryRecord.From(threat, "", 0);
         if (!Leads.Observe(record, Tunables.Player.GuardArcDeg)) return;
         if (Persist) SaveBelief();
         Observed?.Invoke();
+    }
+
+    /// <summary>Wandering souls fallen across every run (仇), kept with the settings.</summary>
+    public int SoulsFallen { get; private set; }
+
+    public void AddSoulFallen()
+    {
+        SoulsFallen++;
+        SaveSettings();
     }
 
     public void SetAdaptive(bool on)
@@ -89,6 +97,7 @@ public partial class DirectorService : Node
         Leads.Adaptive = (bool)cfg.GetValue("director", "adaptive", true);
         var c = (int)cfg.GetValue("director", "challenge", (int)Challenge.Standard);
         Leads.Challenge = Enum.IsDefined(typeof(Challenge), c) ? (Challenge)c : Challenge.Standard;
+        SoulsFallen = (int)cfg.GetValue("records", "souls_fallen", 0);
     }
 
     private void SaveSettings()
@@ -98,6 +107,7 @@ public partial class DirectorService : Node
         cfg.Load(SettingsPath);
         cfg.SetValue("director", "adaptive", Leads.Adaptive);
         cfg.SetValue("director", "challenge", (int)Leads.Challenge);
+        cfg.SetValue("records", "souls_fallen", SoulsFallen);
         cfg.Save(SettingsPath);
     }
 

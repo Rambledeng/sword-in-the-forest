@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/AttackData.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+Id = "archer_shot"
+Red = false
+WindupMinMs = 900
+WindupMaxMs = 1400
+LeadDefaultMs = 460
+LeadMinMs = 220
+LeadMaxMs = 750
+SwingMs = 110
+RecoveryMs = 700
+Damage = 2
+PostureDamage = 16.0
+DeflectPostureDamage = 24.0
+ReachPx = 230.0
+ArcDeg = 10.0
+LungePx = 0.0
+Shape = "line"
+WidthPx = 6.0
+Projectile = "arrow"
+Slows = false

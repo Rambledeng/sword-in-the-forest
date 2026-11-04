@@ -13,3 +13,78 @@ ui.settings.standard,Standard,Standaard,标准
 ui.settings.hard,Hard,Zwaar,困难
 ui.settings.on,On,Aan,开
 ui.settings.off,Off,Uit,关
+ui.run.hint,Esc pause · F2 director,Esc pauze · F2 regisseur,Esc 暂停 · F2 剑意观测
+ui.hud.spare_prompt,It begs. E / B: spare · Attack: finish,Het smeekt. E / B: sparen · Aanval: afmaken,它在求饶。E / B：饶恕 · 攻击：补刀
+ui.area.tutorial,The Bitter Bamboo,Het Bittere Bamboe,苦竹林
+ui.area.bamboo,Bamboo Forest,Bamboebos,竹林
+ui.area.outside,Outside the Tavern,Buiten de Herberg,酒馆外
+ui.area.tavern,The Tavern,De Herberg,酒馆
+ui.upgrade.title,Choose what the sword teaches you,Kies wat het zwaard je leert,择一剑意
+ui.upgrade.hint,← → choose · attack or click to take,← → kiezen · aanval of klik om te nemen,← → 选择 · 攻击或点击确认
+ui.pause.title,Paused,Gepauzeerd,暂停
+ui.pause.resume,Resume,Verder,继续
+ui.pause.quit,Quit to title,Naar titelscherm,返回标题
+combat.boss.name,The Tavern Keeper,De Waardin,老板娘
+upgrade.vitality.name,Vitality,Levenskracht,气血
+upgrade.vitality.desc,+1 heart (2 health).,+1 hart (2 leven).,+1 颗心（2 点生命）。
+upgrade.broad_stance.name,Broad Stance,Brede Houding,沉桩
+upgrade.broad_stance.desc,A larger posture bar.,Een grotere houdingsbalk.,架势条更长。
+upgrade.steady_breath.name,Steady Breath,Rustige Adem,调息
+upgrade.steady_breath.desc,Posture recovers faster.,Houding herstelt sneller.,架势恢复更快。
+upgrade.keen_edge.name,Keen Edge,Scherpe Snede,锋芒
+upgrade.keen_edge.desc,+1 damage on every cut.,+1 schade per slag.,每一击 +1 伤害。
+upgrade.deep_gourd.name,Deep Gourd,Diepe Kalebas,深葫芦
+upgrade.deep_gourd.desc,+1 gourd sip per area.,+1 slok uit de kalebas per gebied.,每个区域酒葫芦 +1 口。
+upgrade.iron_deflect.name,Iron Deflect,IJzeren Parade,铁弹
+upgrade.iron_deflect.desc,Your deflects break posture faster.,Je parades breken houding sneller.,弹反造成更多架势伤害。
+upgrade.merciful_cut.name,Merciful Cut,Genadige Snede,慈悲一刀
+upgrade.merciful_cut.desc,Finishers heal 2 health.,Genadeslagen genezen 2 leven.,补刀回复 2 点生命。
+summary.title.win,The tavern falls silent.,De herberg valt stil.,酒馆归于寂静。
+summary.title.loss,The wandering soul fades.,De dolende ziel vervaagt.,游魂消散。
+summary.merit_karma,Merit: {merit}   Karma: {karma},Verdienste: {merit}   Karma: {karma},功德：{merit}　业障：{karma}
+summary.kills_spared,Kills: {kills}   Spared: {spared},Gedood: {kills}   Gespaard: {spared},斩杀（怨）：{kills}　饶恕：{spared}
+summary.souls,Souls fallen: {deaths},Gevallen zielen: {deaths},游魂陨落（仇）：{deaths}
+summary.rooms,Rooms cleared: {rooms}/{total},Kamers gezuiverd: {rooms}/{total},通过房间：{rooms}/{total}
+summary.time,Time: {time},Tijd: {time},用时：{time}
+summary.upgrades,Sword intent: {list},Zwaardintentie: {list},剑意：{list}
+summary.reading,The sword read your reaction: {median} ms (80%: {low}–{high} ms),Het zwaard las je reactie: {median} ms (80%: {low}–{high} ms),剑读出你的反应：{median} 毫秒（80%：{low}–{high} 毫秒）
+summary.attunement,Attunement: {pct}% after {n} attacks,Afstemming: {pct}% na {n} aanvallen,人剑合一：{pct}%（{n} 次攻击）
+summary.adaptive_off,Adaptive timing was off: every attack used its fixed timing.,Adaptieve timing stond uit: elke aanval had zijn vaste timing.,自适应时机已关闭：每次攻击都用固定时机。
+summary.retry,New soul,Nieuwe ziel,新的游魂
+summary.to_title,Title,Titel,标题
+sword.tut.wake,"Sixty years in the bitter bamboo. Your hand is cold, soul. Let me see it move.","Zestig jaar in het bittere bamboe. Je hand is koud, ziel. Laat me zien hoe ze beweegt.",苦竹林中六十年。游魂，你的手很冷。动一动，让我看看。
+sword.tut.move,Walk with WASD or the stick. Strike with attack.,Loop met WASD of de stick. Sla toe met aanvallen.,WASD 或摇杆移动，攻击键出剑。
+sword.tut.glint,"When its blade flashes, tap guard. That is a deflect.","Flitst zijn kling, tik dan op blokkeren. Zo pareer je.",刀光一闪，轻按格挡。这便是弹反。
+sword.tut.block,Hold guard to block. Each block weighs on your posture.,Houd blokkeren ingedrukt. Elke blokkade drukt op je houding.,按住格挡可以挡下，但每一挡都压在你的架势上。
+sword.tut.roll,Roll through a blow. Against a red flash it is the only answer.,Rol door een slag heen. Tegen een rode flits is dat het enige antwoord.,翻滚可以躲过一击。见到红光，唯有翻滚。
+sword.tut.gourd,"Hurt? Drink from the gourd. Three sips each area, and drinking is slow.","Gewond? Drink uit de kalebas. Drie slokken per gebied, en drinken gaat traag.",受伤了？喝一口酒葫芦。每个区域三口，喝得慢，小心。
+sword.tut.break,Enough. I know your hand now. Break the ghost.,Genoeg. Ik ken je hand nu. Breek de geest.,够了，我已识得你的手。破了这鬼魂。
+sword.tut.finish,It kneels. Strike now to finish it.,Het knielt. Sla nu toe om het af te maken.,它跪下了。出剑，补刀。
+sword.tut.done,The way north is open. Walk on.,De weg naar het noorden is open. Loop verder.,北面的路开了。走吧。
+sword.first_deflect,Steel on steel. Good.,Staal op staal. Goed.,铁碰铁。好。
+sword.first_finisher,One more evil ghost back to the dust. Merit.,Weer een kwade geest terug tot stof. Verdienste.,又一个恶鬼归于尘土。功德。
+sword.first_surrender,"It drops its blade and begs. Spare it, or cut it down.","Het laat zijn kling vallen en smeekt. Spaar het, of hak het neer.",它弃刀求饶。饶它，或者斩了它。
+sword.first_spare,Mercy. I will remember that.,Genade. Dat onthoud ik.,慈悲。我记下了。
+sword.first_karma,It begged. I will remember that too.,Het smeekte. Ook dat onthoud ik.,它求过饶。这个我也记下了。
+sword.first_red,Red. Do not guard. Roll.,Rood. Niet blokkeren. Rollen.,红光！别挡，翻滚！
+sword.first_arrow,"An arrow is only a blade that flies. Deflect it, then close in.",Een pijl is maar een vliegende kling. Pareer hem en kom dichterbij.,箭不过是会飞的刃。弹开它，再逼近。
+sword.low_health,"You are bleeding, soul. The gourd.","Je bloedt, ziel. De kalebas.",游魂，你在流血。喝酒。
+sword.room_clear,Quiet again. The way on is open.,Weer stil. De weg verder is open.,又安静了。前路已开。
+sword.upgrade,Choose. I will teach you one thing.,Kies. Ik leer je één ding.,选吧。我教你一招。
+sword.death,Another soul falls. I will wait for the next.,Weer valt een ziel. Ik wacht op de volgende.,又一个游魂倒下。我等下一个。
+sword.area.bamboo,The bamboo forest. Bandits sleep here with their sabres.,Het bamboebos. Hier slapen bandieten met hun sabels.,竹林。刀客枕刀而眠。
+sword.area.outside,Smoke and wine. Spears and bows wait outside the tavern.,Rook en wijn. Speren en bogen wachten buiten de herberg.,炊烟酒香。酒馆外，枪与弓正等着。
+sword.area.tavern,The tavern. Mind the wine.,De herberg. Pas op voor de wijn.,酒馆到了。当心酒。
+sword.boss.intro,She keeps a black inn. Her cleavers have sent many travellers to the pot.,Zij houdt een zwarte herberg. Haar hakmessen stuurden menig reiziger de pot in.,这是一家黑店。她的双刀，送过不少客人进锅。
+sword.boss.phase2,"Now she is angry. Faster, and watch for the jar.","Nu is ze kwaad. Sneller, en let op de kruik.",她动怒了。更快了，小心酒坛。
+sword.boss.jar,Drugged wine. Your legs are heavy; keep your guard.,Bedwelmde wijn. Je benen zijn zwaar; blijf op je hoede.,蒙汗药！腿发沉了，稳住。
+sword.boss.dead,The tavern is quiet. I have not felt a hand like yours in sixty years.,De herberg is stil. Zo'n hand voelde ik in zestig jaar niet.,酒馆静了。六十年来，没碰过你这样的手。
+sword.read.attuned,I have your measure: about {ms} ms from flash to hand.,Ik heb je gepeild: zo'n {ms} ms van flits tot hand.,我已读懂你：从刀光到出手，约 {ms} 毫秒。
+sword.read.quicker,"You are quicker now, about {ms} ms. I will press harder.","Je bent nu sneller, zo'n {ms} ms. Ik zet harder aan.",你快了，约 {ms} 毫秒。我会逼得更紧。
+sword.read.slower,"You are slowing, about {ms} ms. Tired? I will give you room.","Je wordt trager, zo'n {ms} ms. Moe? Ik geef je ruimte.",你慢了，约 {ms} 毫秒。累了？我给你留些余地。
+sword.verdict.win_merit,"You cut only what had to be cut. Walk in the light, soul.","Je sneed alleen wat moest. Wandel in het licht, ziel.",当斩则斩，当饶则饶。游魂，往光里走吧。
+sword.verdict.win_balanced,"You won, and paid in equal coin. The scales are level.","Je won, en betaalde met gelijke munt. De weegschaal staat recht.",你赢了，功过相抵。秤是平的。
+sword.verdict.win_karma,You won. But the ones who begged will follow you.,"Je won. Maar wie smeekten, zullen je volgen.",你赢了。可那些求饶的，会一直跟着你。
+sword.verdict.loss_merit,You fell with clean hands. That is not nothing.,Je viel met schone handen. Dat is niet niets.,你倒下了，手却干净。这并非一无所有。
+sword.verdict.loss_balanced,You fell. I will remember your hand; the next soul will feel it.,Je viel. Ik onthoud je hand; de volgende ziel zal het voelen.,你倒下了。我记得你的手，下一个游魂会感觉到。
+sword.verdict.loss_karma,"You fell, and the ones who begged laughed. Do better, next soul.","Je viel, en wie smeekten lachten. Doe het beter, volgende ziel.",你倒下了，求饶的人在笑。下一个游魂，好好做。

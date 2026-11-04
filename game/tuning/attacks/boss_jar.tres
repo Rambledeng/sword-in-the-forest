@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/AttackData.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+Id = "boss_jar"
+Red = false
+WindupMinMs = 600
+WindupMaxMs = 900
+LeadDefaultMs = 520
+LeadMinMs = 280
+LeadMaxMs = 800
+SwingMs = 240
+RecoveryMs = 700
+Damage = 1
+PostureDamage = 10.0
+DeflectPostureDamage = 10.0
+ReachPx = 220.0
+ArcDeg = 360.0
+LungePx = 0.0
+Shape = "area"
+WidthPx = 18.0
+Projectile = "jar"
+Slows = true

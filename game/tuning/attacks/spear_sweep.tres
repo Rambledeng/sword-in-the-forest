@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/AttackData.cs" id="1_script"]
+
+
+[resource]
+script = ExtResource("1_script")
+Id = "spear_sweep"
+Red = false
+WindupMinMs = 450
+WindupMaxMs = 800
+LeadDefaultMs = 420
+LeadMinMs = 220
+LeadMaxMs = 700
+SwingMs = 90
+RecoveryMs = 700
+Damage = 2
+PostureDamage = 22.0
+DeflectPostureDamage = 28.0
+ReachPx = 38.0
+ArcDeg = 200.0
+LungePx = 4.0
+Shape = "arc"
+WidthPx = 0.0
+Projectile = ""
+Slows = false

@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="AttackData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/Tuning/AttackData.cs" id="1_script"]
+[ext_resource type="Resource" path="res://tuning/attacks/boss_cleave_2.tres" id="2_next"]
+
+
+[resource]
+script = ExtResource("1_script")
+Id = "boss_cleave_1"
+Red = false
+WindupMinMs = 500
+WindupMaxMs = 900
+LeadDefaultMs = 400
+LeadMinMs = 220
+LeadMaxMs = 700
+SwingMs = 80
+RecoveryMs = 200
+Damage = 2
+PostureDamage = 22.0
+DeflectPostureDamage = 24.0
+ReachPx = 34.0
+ArcDeg = 130.0
+LungePx = 10.0
+Shape = "arc"
+WidthPx = 0.0
+Projectile = ""
+Slows = false
+Next = ExtResource("2_next")

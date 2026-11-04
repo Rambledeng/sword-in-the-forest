@@ -78,7 +78,7 @@ public partial class DirectorOverlay : CanvasLayer
             _canvas.DrawString(font, new Vector2(x + dx, y + fs - 2), s, HorizontalAlignment.Left, -1, fs, c ?? Colors.White);
 
         var mode = leads.Mode == DirectorMode.Calibrate
-            ? $"calibrate {d.Observations}/{leads.CalibrationAttacks}"
+            ? $"calibrate, {leads.CalibrationLeft} left"
             : $"control, n {d.Observations}";
         Text($"F2 director · {mode}");
         y += line;
