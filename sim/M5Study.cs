@@ -41,24 +41,29 @@ public sealed class M5Study
         public string Timing => Config.Adaptive ? "adaptive" : "fixed";
     }
 
+    /// <summary>Calibration attacks in the shipped game (none) and in the comparison arm.</summary>
+    private const int Shipped = 0, Psi = 12;
+
     private void Plan()
     {
+        // The game ships without calibration: the director controls from the first attack
+        // (Shipped). The learning experiment keeps 12 Psi attacks first as a comparison arm.
         // 1 + 3: learning speed, on the default and on shifted populations (Standard challenge).
         foreach (var (pop, _) in Populations)
         {
-            Add("learning", pop, "lognormal", "population", new SimConfig { Learn = false });
-            Add("learning", pop, "lognormal", "uniform", new SimConfig());
-            Add("learning", pop, "lognormal", "uniform", new SimConfig { CalibrationAttacks = 0 });
-            Add("learning", pop, "lognormal", "population", new SimConfig());
-            Add("learning", pop, "lognormal", "population", new SimConfig { CalibrationAttacks = 0 });
-            if (pop != "default") Add("shifted", pop, "lognormal", "population", new SimConfig { Adaptive = false });
+            Add("learning", pop, "lognormal", "population", new SimConfig { CalibrationAttacks = Shipped, Learn = false });
+            Add("learning", pop, "lognormal", "uniform", new SimConfig { CalibrationAttacks = Psi });
+            Add("learning", pop, "lognormal", "uniform", new SimConfig { CalibrationAttacks = Shipped });
+            Add("learning", pop, "lognormal", "population", new SimConfig { CalibrationAttacks = Psi });
+            Add("learning", pop, "lognormal", "population", new SimConfig { CalibrationAttacks = Shipped });
+            if (pop != "default") Add("shifted", pop, "lognormal", "population", new SimConfig { CalibrationAttacks = Shipped, Adaptive = false });
         }
         // 2 + 4: success rates per challenge, adaptive against fixed, for log-normal and ex-Gaussian bots.
         foreach (var model in new[] { "lognormal", "exgaussian" })
             foreach (var c in new[] { Challenge.Relaxed, Challenge.Standard, Challenge.Hard })
                 foreach (var adaptive in new[] { true, false })
                     Add(model == "lognormal" ? "challenge" : "wrong_model", "default", model, "population",
-                        new SimConfig { Challenge = c, Adaptive = adaptive });
+                        new SimConfig { CalibrationAttacks = Shipped, Challenge = c, Adaptive = adaptive });
     }
 
     private void Add(string experiment, string population, string model, string prior, SimConfig cfg) =>

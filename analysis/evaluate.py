@@ -77,9 +77,9 @@ def error_curves(runs: pd.DataFrame, attacks: pd.DataFrame) -> pd.DataFrame:
 COND_STYLE = {
     "prior": ("Population prior only", GREY, "-"),
     "data_cal": ("Player data only", ORANGE, "-"),
-    "both_cal": ("Prior + player data (shipped)", BLUE, "-"),
+    "both_cal": ("Prior + player data", BLUE, "-"),
     "data_nocal": ("Player data only", ORANGE, "-"),
-    "both_nocal": ("Prior + player data", BLUE, "-"),
+    "both_nocal": ("Prior + player data (shipped)", BLUE, "-"),
 }
 
 
@@ -100,8 +100,8 @@ def plot_curves(ax, curves: pd.DataFrame, pop: str, conds: list[str], label_end:
 
 def fig_learning(curves: pd.DataFrame, out: Path, n_players: int) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.1), sharey=True)
-    for ax, cal, title in [(axes[0], "_cal", "With calibration (12 Psi attacks, then control)"),
-                           (axes[1], "_nocal", "Without calibration (control from attack 1)")]:
+    for ax, cal, title in [(axes[0], "_nocal", "Shipped: control from attack 1"),
+                           (axes[1], "_cal", "For comparison: 12 Psi calibration attacks first")]:
         plot_curves(ax, curves, "default", ["prior", "data" + cal, "both" + cal])
         ax.set_title(title, fontsize=9)
     axes[0].set_ylabel("|estimated − true median| (ms)")
@@ -119,13 +119,13 @@ def fig_learning(curves: pd.DataFrame, out: Path, n_players: int) -> None:
 def fig_shifted(curves: pd.DataFrame, out: Path) -> None:
     fig, axes = plt.subplots(1, 3, figsize=(7.6, 2.9), sharey=True)
     for ax, pop in zip(axes, POPS):
-        plot_curves(ax, curves, pop, ["prior", "data_cal", "both_cal"])
+        plot_curves(ax, curves, pop, ["prior", "data_nocal", "both_nocal"])
         ax.set_title(POP_LABEL[pop], fontsize=9)
     axes[0].set_ylabel("|estimated − true median| (ms)")
     axes[0].set_ylim(0, 200)
     h, l = axes[0].get_legend_handles_labels()
     fig.legend(h, l, loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.02))
-    fig.suptitle("Fig. 3  Estimate error on populations the prior was not fitted to (with calibration)", x=0.01, ha="left", fontsize=10, fontweight="bold")
+    fig.suptitle("Fig. 3  Estimate error on populations the prior was not fitted to", x=0.01, ha="left", fontsize=10, fontweight="bold")
     fig.tight_layout(rect=(0, 0.09, 1, 1))
     fig.savefig(out / "fig3_shifted.png", bbox_inches="tight")
     plt.close(fig)
@@ -157,7 +157,7 @@ def fig_success(pp: pd.DataFrame, out: Path) -> None:
 
 
 def reliability(attacks: pd.DataFrame, run_ids, bins=np.linspace(0, 1, 21), min_n: int = 500) -> pd.DataFrame:
-    """Every attack (calibration probes spread the predictions; control attacks cluster at the targets)."""
+    """Every attack (early attacks, under a wide belief, spread the predictions; later ones cluster at the targets)."""
     a = attacks[attacks["run"].isin(run_ids)]
     b = pd.cut(a["predicted"], bins, include_lowest=True)
     g = a.groupby(b, observed=True).agg(pred=("predicted", "mean"), obs=("success", "mean"), n=("success", "size"))
@@ -207,7 +207,7 @@ def fig_wrong_model(runs: pd.DataFrame, attacks: pd.DataFrame, pp: pd.DataFrame,
 
 
 def fig_leads(pp: pd.DataFrame, players: pd.DataFrame, out: Path) -> None:
-    d = pp[(pp["experiment"] == "learning") & (pp["condition"] == "both_cal")].merge(players, on=["run", "player"])
+    d = pp[(pp["experiment"] == "learning") & (pp["condition"] == "both_nocal")].merge(players, on=["run", "player"])
     fig, ax = plt.subplots(figsize=(7.6, 3.0))
     for pop, color in zip(POPS, [AQUA, BLUE, ORANGE]):
         x = d[d["population"] == pop]
@@ -266,9 +266,9 @@ def main() -> None:
         v[f"w40_{cond}_15"] = pct(cv("default", cond, 15, "within40"))
         v[f"w40_{cond}_60"] = pct(cv("default", cond, 60, "within40"))
     for k in [15, 60]:
-        v[f"cov_both_cal_{k}"] = pct(cv("default", "both_cal", k, "coverage"))
+        v[f"cov_both_nocal_{k}"] = pct(cv("default", "both_nocal", k, "coverage"))
     for pop in POPS:
-        for cond in ["prior", "data_cal", "both_cal"]:
+        for cond in ["prior", "data_nocal", "both_nocal"]:
             for k in [15, 60]:
                 v[f"err_{pop}_{cond}_{k}"] = f"{cv(pop, cond, k, 'median'):.0f}"
                 v[f"w40_{pop}_{cond}_{k}"] = pct(cv(pop, cond, k, "within40"))
@@ -293,7 +293,7 @@ def main() -> None:
             v[f"floor_{ch}"] = f"{math.sqrt(t * (1 - t) / 60):.3f}"
     # 3. Shifted populations: success at Standard.
     for pop in POPS:
-        for cond, timing, label in [("both_cal", "adaptive", "both"), ("data_cal", "adaptive", "data"), ("prior", "adaptive", "prior")]:
+        for cond, timing, label in [("both_nocal", "adaptive", "both"), ("data_nocal", "adaptive", "data"), ("prior", "adaptive", "prior")]:
             x = pp[(pp["experiment"] == "learning") & (pp["population"] == pop) & (pp["condition"] == cond)]
             v[f"on_{pop}_{label}"] = pct(float(((x["run_success"] - 0.7).abs() <= 0.1 + 1e-9).mean()))
             v[f"mean_{pop}_{label}"] = f"{x['run_success'].mean():.3f}"
@@ -301,7 +301,7 @@ def main() -> None:
         x = pp[(pp["experiment"] == exp) & (pp["population"] == pop) & (pp["challenge"] == "Standard") & (pp["timing"] == "fixed")]
         v[f"on_{pop}_fixed"] = pct(float(((x["run_success"] - 0.7).abs() <= 0.1 + 1e-9).mean()))
         v[f"mean_{pop}_fixed"] = f"{x['run_success'].mean():.3f}"
-    slow = pp[(pp["experiment"] == "learning") & (pp["population"] == "slower") & (pp["condition"] == "both_cal")].merge(
+    slow = pp[(pp["experiment"] == "learning") & (pp["population"] == "slower") & (pp["condition"] == "both_nocal")].merge(
         players, on=["run", "player"])
     capped = slow[slow["share_at_cap"] >= 0.5]
     v["slow_capped_share"] = pct(len(capped) / len(slow))
@@ -316,11 +316,11 @@ def main() -> None:
         r = rel[model]
         v[f"maxgap_{model}"] = f"{100 * (r['pred'] - r['obs']).abs().max():.1f}"
     eg_runs = runs[(runs["model"] == "exgaussian") & (runs["timing"] == "adaptive") & (runs["challenge"] == "Standard")]["run"]
-    a = attacks[attacks["run"].isin(eg_runs) & (attacks["attack"] == 72)]
+    a = attacks[attacks["run"].isin(eg_runs) & (attacks["attack"] == 60)]
     bias = a["est_median_ms"] - a["true_median_ms"]
     v["eg_bias_median"] = f"{bias.median():+.0f}"
-    v["eg_err_72"] = f"{a['err_ms'].median():.0f}"
-    v["eg_cov_72"] = pct(float(a["covered"].mean()))
+    v["eg_err_60"] = f"{a['err_ms'].median():.0f}"
+    v["eg_cov_60"] = pct(float(a["covered"].mean()))
     a15 = attacks[attacks["run"].isin(eg_runs) & (attacks["attack"] == 15)]
     v["eg_w40_15"] = pct(float((a15["err_ms"] <= 40).mean()))
     eg = players[players["run"].isin(eg_runs)]
