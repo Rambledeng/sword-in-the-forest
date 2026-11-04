@@ -26,19 +26,19 @@ ui.pause.resume,Resume,Verder,继续
 ui.pause.quit,Quit to title,Naar titelscherm,返回标题
 combat.boss.name,The Landlady,De Waardin,老板娘
 upgrade.vitality.name,Vitality,Levenskracht,气血
-upgrade.vitality.desc,+1 heart (2 health).,+1 hart (2 leven).,+1 颗心（2 点生命）。
+upgrade.vitality.desc,Max health +{health}.,Maximaal leven +{health}.,生命上限 +{health}。
 upgrade.broad_stance.name,Broad Stance,Brede Houding,沉桩
-upgrade.broad_stance.desc,A larger posture bar.,Een grotere houdingsbalk.,架势条更长。
+upgrade.broad_stance.desc,Posture bar +{posture}.,Houdingsbalk +{posture}.,架势条 +{posture}。
 upgrade.steady_breath.name,Steady Breath,Rustige Adem,调息
-upgrade.steady_breath.desc,Posture recovers faster.,Houding herstelt sneller.,架势恢复更快。
+upgrade.steady_breath.desc,Posture recovers {pct}% faster.,Houding herstelt {pct}% sneller.,架势恢复快 {pct}%。
 upgrade.keen_edge.name,Keen Edge,Scherpe Snede,锋芒
-upgrade.keen_edge.desc,+1 damage on every cut.,+1 schade per slag.,每一击 +1 伤害。
+upgrade.keen_edge.desc,+{damage} damage on every cut.,+{damage} schade per slag.,每一击伤害 +{damage}。
 upgrade.deep_gourd.name,Deep Gourd,Diepe Kalebas,深葫芦
-upgrade.deep_gourd.desc,+1 gourd sip per area.,+1 slok uit de kalebas per gebied.,每个区域酒葫芦 +1 口。
+upgrade.deep_gourd.desc,Gourd sips per area +{sips}.,Slokken per gebied +{sips}.,每个区域酒葫芦 +{sips} 口。
 upgrade.iron_deflect.name,Iron Deflect,IJzeren Parade,铁弹
-upgrade.iron_deflect.desc,Your deflects break posture faster.,Je parades breken houding sneller.,弹反造成更多架势伤害。
+upgrade.iron_deflect.desc,Deflects deal {pct}% more posture damage.,Parades doen {pct}% meer houdingsschade.,弹反的架势伤害 +{pct}%。
 upgrade.merciful_cut.name,Merciful Cut,Genadige Snede,慈悲一刀
-upgrade.merciful_cut.desc,Finishers heal 2 health.,Genadeslagen genezen 2 leven.,补刀回复 2 点生命。
+upgrade.merciful_cut.desc,Finishers heal {health} health.,Genadeslagen genezen {health} leven.,补刀回复 {health} 点生命。
 summary.title.win,The tavern falls silent.,De herberg valt stil.,酒馆归于寂静。
 summary.title.loss,The wandering soul fades.,De dolende ziel vervaagt.,游魂消散。
 summary.merit_karma,Merit: {merit}   Karma: {karma},Verdienste: {merit}   Karma: {karma},功德：{merit}　业障：{karma}

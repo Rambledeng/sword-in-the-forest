@@ -26,6 +26,12 @@ public partial class SettingsScenario : Scenario
                 return;
             case 2:
                 Check(UserSettings.Locale == "en", $"started in {UserSettings.Locale}");
+                foreach (var u in System.Enum.GetValues<Upgrade>())
+                {
+                    var text = Ui.UpgradeScreen.Describe(u, Tr($"upgrade.{Ui.UpgradeScreen.Key(u)}.desc"));
+                    Check(!text.Contains('{'), $"unfilled upgrade text: {text}");
+                }
+                Check(Ui.UpgradeScreen.Describe(Upgrade.IronDeflect, Tr("upgrade.iron_deflect.desc")).Contains(Mathf.RoundToInt((Tunables.Run.IronDeflectFactor - 1) * 100) + "%"), "Iron Deflect does not show its tuned number");
                 _title.LanguageButton.EmitSignal(BaseButton.SignalName.Pressed);
                 Check(UserSettings.Locale == "nl" && Tr("ui.title.start") == "Beginnen", "the picker did not switch to Dutch");
                 Check(_title.LanguageButton.Text.Contains("Nederlands"), "the picker does not name Dutch");

@@ -33,6 +33,19 @@ public partial class UpgradeScreen : CanvasLayer
         _ => "merciful_cut",
     };
 
+    /// <summary>Fills an upgrade's description with its numbers from run.tres, so F1 edits show.</summary>
+    public static string Describe(Upgrade u, string template)
+    {
+        var r = Core.Tunables.Run;
+        static string Pct(float factor) => Mathf.RoundToInt((factor - 1f) * 100f).ToString();
+        return template
+            .Replace("{health}", (u == Upgrade.MercifulCut ? r.MercifulCutHeal : r.VitalityHealth).ToString())
+            .Replace("{posture}", Mathf.RoundToInt(r.BroadStancePosture).ToString())
+            .Replace("{pct}", Pct(u == Upgrade.SteadyBreath ? r.SteadyBreathFactor : r.IronDeflectFactor))
+            .Replace("{damage}", r.KeenEdgeDamage.ToString())
+            .Replace("{sips}", r.DeepGourdSips.ToString());
+    }
+
     public override void _Ready()
     {
         Layer = 20;
@@ -57,7 +70,7 @@ public partial class UpgradeScreen : CanvasLayer
             var b = new Button
             {
                 AutoTranslateMode = Node.AutoTranslateModeEnum.Disabled,
-                Text = Tr($"upgrade.{k}.name") + "\n\n" + Tr($"upgrade.{k}.desc"),
+                Text = Tr($"upgrade.{k}.name") + "\n\n" + Describe(u, Tr($"upgrade.{k}.desc")),
                 AutowrapMode = TextServer.AutowrapMode.WordSmart,
                 CustomMinimumSize = new Vector2(132, 92),
                 Alignment = HorizontalAlignment.Center,
