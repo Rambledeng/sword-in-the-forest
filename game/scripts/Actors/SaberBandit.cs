@@ -17,5 +17,5 @@ public partial class SaberBandit : Enemy
     protected override AttackData? CounterAttack => Tunables.Attack("saber_counter");
 
     protected override AttackData ChooseAttack() =>
-        GD.Randf() < Tuning.ChopChance ? Tunables.Attack("saber_chop") : Tunables.Attack("saber_slash_1");
+        Roll() < Tuning.ChopChance ? Tunables.Attack("saber_chop") : Tunables.Attack("saber_slash_1");
 }

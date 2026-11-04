@@ -17,7 +17,7 @@ namespace SwordInTheForest.Actors;
 /// </summary>
 public abstract partial class Enemy : CharacterBody2D
 {
-    public enum State { Approach, Circle, Attack, Recover, Stagger, Kneel, Surrender, Leave, Dead }
+    public enum State { Approach, Circle, Attack, Recover, Stagger, Kneel, Surrender, Grab, Leave, Dead }
     public enum HitResult { Ignored, Hit, Blocked, Kneel, Finisher }
 
     public static readonly Vector2 BodyCenter = new(0, -7);
@@ -216,6 +216,8 @@ public abstract partial class Enemy : CharacterBody2D
 
     protected void Enter(State s)
     {
+        // Leaving the grab early (knocked to its knees) still leaves the weapon in its hand.
+        if (Current == State.Grab && s != State.Grab) PickUpWeapon();
         Current = s;
         _stateStartMs = Clock.NowMs;
     }
@@ -280,6 +282,16 @@ public abstract partial class Enemy : CharacterBody2D
                 break;
             case State.Surrender:
                 if (IsFake && targetAlive && !DrillMode && TurnedAway(toTarget, dist)) Betray();
+                break;
+            case State.Grab:
+                if (_dropped != null && StateElapsedMs >= Tunables.Run.FakeGrabMs * 0.5) PickUpWeapon();
+                // Weapon in hand: it turns to face you as it rises.
+                if (_dropped == null && targetAlive) Facing = AimDir = toTarget.Normalized();
+                if (StateElapsedMs >= Tunables.Run.FakeGrabMs)
+                {
+                    if (targetAlive) StartAttack(CounterAttack ?? ChooseAttack());
+                    else BeginCircle();
+                }
                 break;
             case State.Leave:
                 velocity = UpdateLeave();
@@ -347,17 +359,28 @@ public abstract partial class Enemy : CharacterBody2D
         return _turnedAwayMs >= r.FakeTurnAwayMs;
     }
 
-    /// <summary>The fake drops the act: weapon back in hand, and it strikes at once (with the usual glint and lead).</summary>
+    /// <summary>
+    /// The fake drops the act: it snatches its weapon off the ground (<see cref="RunTuning.FakeGrabMs"/>),
+    /// then strikes with the usual glint and lead.
+    /// </summary>
     private void Betray()
     {
         IsFake = false;
         Revealed = true;
         _turnedAwayMs = 0;
         Posture.Reset(Posture.Max * Tunables.Run.FakePostureAfter);
-        if (Target != null && IsInstanceValid(Target)) Facing = AimDir = (Target.BodyGlobal - BodyGlobal).Normalized();
-        Sfx.Play("swing", 0.1f, 1.3f);
-        StartAttack(CounterAttack ?? ChooseAttack());
+        Enter(State.Grab);
+        if (_dropped == null) PickUpWeapon();
         Betrayed?.Invoke(this);
+    }
+
+    /// <summary>The dropped weapon leaves the ground and is back in hand.</summary>
+    private void PickUpWeapon()
+    {
+        if (_dropped == null) return;
+        if (IsInstanceValid(_dropped)) _dropped.QueueFree();
+        _dropped = null;
+        Sfx.Play("swing", 0.1f, 1.3f);
     }
 
     private double _leaveFadeStartMs = -1;
@@ -588,8 +611,8 @@ public abstract partial class Enemy : CharacterBody2D
         }
         _attack = null;
         Enter(State.Circle);
-        _circleMs = DrillMode ? 0 : GD.RandRange(Tuning.CircleMinMs, Tuning.CircleMaxMs);
-        _circleSign = GD.Randf() < 0.5f ? -1 : 1;
+        _circleMs = DrillMode ? 0 : Tuning.CircleMinMs + Rng.NextDouble() * (Tuning.CircleMaxMs - Tuning.CircleMinMs);
+        _circleSign = Rng.Next(2) == 0 ? -1 : 1;
     }
 
     // ---- Being hit ----------------------------------------------------------------------
@@ -624,12 +647,13 @@ public abstract partial class Enemy : CharacterBody2D
         if (Breakable) Health = Mathf.Max(0, Health - damage);
         Sfx.Play("enemy_hit", 0.08f);
         OnHurt();
-        var armored = Current == State.Attack;
+        // A fake snatching its weapon finishes the grab, like a windup: no stagger.
+        var armored = Current is State.Attack or State.Grab;
         _knockback = dir * feel.KnockbackEnemyHit * (armored ? 0.3f : 1f);
         // Trading into a windup is a poor deal: the hit lands but barely moves its posture,
         // and the bandit strikes at once (its glint shows next frame, with the usual lead).
         var postureDamage = armored ? posture * Tuning.ArmoredPostureFactor : posture;
-        if (armored && Tuning.HitInWindupStrikesNow) Runner.SkipToGlint(Clock.NowMs);
+        if (Current == State.Attack && Tuning.HitInWindupStrikesNow) Runner.SkipToGlint(Clock.NowMs);
         if (Posture.Add(postureDamage) || Health == 0)
         {
             EnterKneel();
@@ -752,9 +776,15 @@ public abstract partial class Enemy : CharacterBody2D
         Kneeled?.Invoke(this);
     }
 
+    private Sprite2D? _dropped;
+    /// <summary>Its weapon lies on the ground (dropped to beg, not yet picked back up).</summary>
+    public bool WeaponOnGround => _dropped != null;
+    private Vector2 _droppedAt;
+
     private void DropWeapon()
     {
-        var dropped = new Sprite2D
+        _droppedAt = GlobalPosition + new Vector2(10, -2);
+        var dropped = _dropped = new Sprite2D
         {
             Texture = GD.Load<Texture2D>(WeaponPath),
             TextureFilter = TextureFilterEnum.Nearest,
@@ -762,7 +792,7 @@ public abstract partial class Enemy : CharacterBody2D
             Modulate = new Color(0.85f, 0.85f, 0.85f),
             ZIndex = -2,
         };
-        FxLayer.Add(dropped, GlobalPosition + new Vector2(10, -2));
+        FxLayer.Add(dropped, _droppedAt);
     }
 
     private void Die(Vector2 dir, bool begging = false)
@@ -859,6 +889,31 @@ public abstract partial class Enemy : CharacterBody2D
                     col = CharacterSprite.Column(Target.BodyGlobal - BodyGlobal);
                 else _body.Position = new Vector2(0, (int)(now / 260) % 2);
                 break;
+            case State.Grab:
+            {
+                // Reach down to the dropped weapon, snatch it, rise with it to face you.
+                var half = Mathf.Max(1, Tunables.Run.FakeGrabMs * 0.5);
+                if (_dropped != null)
+                {
+                    var toWeapon = _droppedAt - GlobalPosition;
+                    col = CharacterSprite.Column(toWeapon);
+                    row = CharacterSprite.RowCrouch;
+                    _body.Position = toWeapon.Normalized() * 2;
+                    _weapon.Visible = false;
+                }
+                else
+                {
+                    var t = Mathf.Clamp((float)((StateElapsedMs - half) / half), 0f, 1f);
+                    var ease = t * t * (3 - 2 * t);
+                    col = CharacterSprite.Column(Facing);
+                    row = t < 0.4f ? CharacterSprite.RowCrouch : 0;
+                    // From low at its side, blade down, to the ready grip.
+                    var (restPivot, restBlade) = WeaponSprite.Rest(BodyCenter, Facing);
+                    pivot = (BodyCenter + Facing.Orthogonal() * 6 + new Vector2(0, 5)).Lerp(restPivot, ease);
+                    blade = Mathf.LerpAngle(Mathf.Pi / 2, restBlade, ease);
+                }
+                break;
+            }
             case State.Kneel:
                 row = CharacterSprite.RowCrouch;
                 col = 0;

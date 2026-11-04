@@ -1,6 +1,7 @@
 using System.Linq;
 using Godot;
 using SwordInTheForest.Actors;
+using SwordInTheForest.Core;
 using SwordInTheForest.Run;
 
 namespace SwordInTheForest.Ui;
@@ -102,7 +103,7 @@ public partial class DevMenu : CanvasLayer
 
     public override void _UnhandledInput(InputEvent e)
     {
-        if (!e.IsActionPressed("debug_dev")) return;
+        if (!DevTools.Enabled || !e.IsActionPressed("debug_dev")) return;
         Toggle(!IsOpen);
         GetViewport().SetInputAsHandled();
     }

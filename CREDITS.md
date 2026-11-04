@@ -10,18 +10,16 @@ Code: MIT, see LICENSE.
 - Licence: CC0 1.0 (public domain), text in
   `game/assets/third_party/ninja_adventure/LICENSE.txt`
 - Source: <https://pixel-boy.itch.io/ninja-adventure-asset-pack>
-- The full pack is at `game/assets/third_party/Ninja Adventure - Asset Pack/` (it has a
-  `.gdignore`, so Godot does not import it). The game uses only the copies listed below, renamed
-  and placed under `game/assets/third_party/ninja_adventure/`.
+- Only the files the game uses are in the repository, renamed and placed under
+  `game/assets/third_party/ninja_adventure/` (listed below with their path in the pack). The
+  full pack is not included; download it from the source above.
 
 | File in `ninja_adventure/` | Original path in the pack | Used for |
 | --- | --- | --- |
 | `actors/ninja_gray.png` | `Actor/Character/NinjaGray/SpriteSheet.png` | The player (the wandering soul) |
-| `actors/ninja_gray_faceset.png` | `Actor/Character/NinjaGray/Faceset.png` | Player portrait (later) |
 | `tiles/tileset_house.png` | `Backgrounds/Tilesets/TilesetHouse.png` | Tavern tables, counters, barrels, crates, door, windows and banners |
 | `actors/skeleton.png` | `Actor/Character/Skeleton/SpriteSheet.png` | The skeleton beside the sword on the title |
 | `actors/camouflage_red.png` | `Actor/Character/CamouflageRed/SpriteSheet.png` | Saber bandit (刀客) |
-| `actors/camouflage_red_faceset.png` | `Actor/Character/CamouflageRed/Faceset.png` | Bandit portrait (later) |
 | `weapons/katana_in_hand.png` | `Items/Weapons/Katana/SpriteInHand.png` | The player's sword (鸣不平) |
 | `weapons/big_sword_in_hand.png` | `Items/Weapons/BigSword/SpriteInHand.png` | The bandit's saber |
 | `fx/slash_arc.png` | `FX/Slash/SpriteSheetArc.png` | Player sword trail |
@@ -29,8 +27,7 @@ Code: MIT, see LICENSE.
 | `fx/cut_x.png` | `FX/Attack/CutX/SpriteSheet.png` | Finisher cut |
 | `fx/smoke.png` | `FX/Smoke/Smoke/SpriteSheet.png` | Posture break puff |
 | `fx/smoke_circular.png` | `FX/Smoke/SmokeCircular/SpriteSheet.png` | Roll dust |
-| `fx/spark.png`, `fx/leaf.png` | `FX/Particle/Spark.png`, `FX/Particle/Leaf.png` | Reserved for M3/M4 polish |
-| `tiles/tileset_floor.png` | `Backgrounds/Tilesets/TilesetFloor.png` | Arena grass |
+| `tiles/tileset_floor.png` | `Backgrounds/Tilesets/TilesetFloor.png` | Grass and dirt floors |
 | `tiles/tileset_nature.png` | `Backgrounds/Tilesets/TilesetNature.png` | Bamboo fence and bushes |
 | `ui/heart.png` | `Ui/Receptacle/Heart.png` | Health hearts |
 | `ui/gourd.png` | `Items/Object/Gourd.png` | Gourd (酒葫芦) icon |
@@ -51,7 +48,6 @@ Code: MIT, see LICENSE.
 | `actors/samurai_blue.png` | `Actor/Character/SamuraiBlue/SpriteSheet.png` | Spearman (枪客) |
 | `actors/hunter.png` | `Actor/Character/Hunter/SpriteSheet.png` | Archer (弓手) |
 | `actors/sorcerer_black.png` | `Actor/Character/SorcererBlack/SpriteSheet.png` | The tavern keeper (boss, drawn at 1.35×) |
-| `actors/sorcerer_black_faceset.png` | `Actor/Character/SorcererBlack/Faceset.png` | Boss portrait (later) |
 | `weapons/lance_in_hand.png` | `Items/Weapons/Lance/SpriteInHand.png` | The spearman's spear |
 | `weapons/bow.png` | `Items/Weapons/Bow/Sprite.png` | The archer's bow |
 | `weapons/arrow.png` | `Items/Weapons/Bow/Arrow.png` | Arrows |
@@ -83,8 +79,8 @@ Also from the pack, already copied in M1: the dirt floor of the rooms outside th
 - Licence: SIL Open Font License 1.1, text in
   `game/assets/fonts/fusion-pixel-font-12px-proportional-ttf-v2026.10.25/OFL.txt`
 - In use: `fusion-pixel-12px-proportional-zh_hans.ttf` (Simplified Chinese glyph forms), the
-  default UI font for English, Dutch and Chinese. The `latin`, `ja`, `ko`, `zh_hant`, `zh_hk` and
-  `zh_tw` variants are kept for future languages.
+  default UI font for English, Dutch and Chinese. Only this variant is in the repository; the
+  others (`latin`, `ja`, `ko`, `zh_hant`, ...) come with the release above.
 
 Fusion Pixel combines glyphs from these fonts, whose licences ship with it in `LICENSES/`:
 
@@ -96,7 +92,8 @@ Fusion Pixel combines glyphs from these fonts, whose licences ship with it in `L
 
 ## Drawn in code
 
-The glint (剑光), deflect, block, hit and finisher sparks, the shadows, the posture bars, the
+The title's close-up sword, its talisman seal and the soul's hand, the merit glitter and karma
+smoke, the tavern's glowing dust, the glint (剑光), deflect, block, hit and finisher sparks, the shadows, the posture bars, the
 finisher mark, the archer's aim line, the red thrust line, the jar's landing ring, the tavern's
 walls and tables and the boss bar are drawn in code (`game/scripts/Fx/`, `game/scripts/Actors/EnemyBars.cs`,
 `game/scripts/Ui/Hud.cs`).
@@ -109,4 +106,5 @@ walls and tables and the boss bar are drawn in code (`game/scripts/Fx/`, `game/s
 
 ## Tools
 
-Built with [Godot Engine](https://godotengine.org) (MIT).
+Built with [Godot Engine](https://godotengine.org) (MIT). The README GIFs are recorded with
+Godot's Movie Maker and converted with [FFmpeg](https://ffmpeg.org).

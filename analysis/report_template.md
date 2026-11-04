@@ -13,10 +13,10 @@ attacks in all). It answers four questions from the spec:
 
 | Question | Result |
 | --- | --- |
-| How fast does it learn a new player? | Median error $err_both_cal_5 ms after 5 attacks and $err_both_cal_15 ms after 15. After 15 attacks $w40_both_cal_15 of players are within 40 ms. The population prior helps for the first few attacks only. Calibration adds nothing measurable. |
+| How fast does it learn a new player? | Median error $err_both_nocal_5 ms after 5 attacks and $err_both_nocal_15 ms after 15. After 15 attacks $w40_both_nocal_15 of players are within 40 ms. The population prior helps for the first few attacks only. A calibration phase would add nothing measurable, so the game has none. |
 | Does it hit the chosen challenge? | $on_lognormal_Relaxed_adaptive / $on_lognormal_Standard_adaptive / $on_lognormal_Hard_adaptive of players are within 10 points of the Relaxed / Standard / Hard target, against $on_lognormal_Relaxed_fixed / $on_lognormal_Standard_fixed / $on_lognormal_Hard_fixed with the fixed 420 ms lead. |
 | Does it hold up on unfamiliar players? | Yes for faster players ($on_faster_both on target). For slower players $on_slower_both are on target: the slowest $slow_capped_share are limited by the 800 ms lead cap, not by learning. |
-| Does it survive a wrong model? | Mostly. With ex-Gaussian bots, $on_exgaussian_Standard_adaptive are on target at Standard. Success is pulled toward the middle (Relaxed $mean_exgaussian_Relaxed_adaptive, Hard $mean_exgaussian_Hard_adaptive), and the 80% interval covers the truth only $eg_cov_72 of the time. |
+| Does it survive a wrong model? | Mostly. With ex-Gaussian bots, $on_exgaussian_Standard_adaptive are on target at Standard. Success is pulled toward the middle (Relaxed $mean_exgaussian_Relaxed_adaptive, Hard $mean_exgaussian_Hard_adaptive), and the 80% interval covers the truth only $eg_cov_60 of the time. |
 
 The fifth question, "does it work on a real person?", needs your play logs and is left for the
 playtest.
@@ -32,16 +32,17 @@ after the impact is still timed, as in the game; later counts as no press. The t
 seed 7; the prior was fitted to 20,000 different players (seed 2026).
 
 **Director.** This is the shipped `src/Director` library, unchanged: a 2,976-cell grid
-filter, a 3% blur per attack, Psi calibration and control at the target. A session is 12
-calibration attacks and then 60 control attacks ("the run"). Run success is measured over the
-60 control attacks.
+filter, a 3% blur per attack, and control at the target. As in the game, there is no
+calibration phase: the director sets the lead from the first attack. A session is 60 attacks
+("the run"), and run success is measured over all of them.
 
 **Conditions.**
 
 - *Population prior only*: the shipped prior, never updated.
 - *Player data only*: a flat prior over the grid.
 - *Both*: the shipped prior plus the player's attacks (what the game does).
-- *Without calibration*: control from the first attack, 60 attacks in all.
+- *With calibration* (comparison only): 12 Psi calibration attacks, which choose the lead to
+  learn the most, before the 60 control attacks. Earlier builds did this in the tutorial.
 - *Fixed timing*: every attack at 420 ms, the designed default of the first slash.
 
 Error is $$|\hat{\text{median}} - \text{median}|$$, using the posterior median of $$e^m$$.
@@ -53,30 +54,31 @@ Error is $$|\hat{\text{median}} - \text{median}|$$, using the posterior median o
 | Median error (ms) after attack | 1 | 5 | 15 | 30 | 60 | Within 40 ms at 15 |
 | --- | --- | --- | --- | --- | --- | --- |
 | Population prior only | $err_prior_1 | $err_prior_5 | $err_prior_15 | $err_prior_30 | $err_prior_60 | $w40_prior_15 |
-| Player data only, calibration | $err_data_cal_1 | $err_data_cal_5 | $err_data_cal_15 | $err_data_cal_30 | $err_data_cal_60 | $w40_data_cal_15 |
-| Both, calibration (shipped) | $err_both_cal_1 | $err_both_cal_5 | $err_both_cal_15 | $err_both_cal_30 | $err_both_cal_60 | $w40_both_cal_15 |
-| Player data only, no calibration | $err_data_nocal_1 | $err_data_nocal_5 | $err_data_nocal_15 | $err_data_nocal_30 | $err_data_nocal_60 | $w40_data_nocal_15 |
-| Both, no calibration | $err_both_nocal_1 | $err_both_nocal_5 | $err_both_nocal_15 | $err_both_nocal_30 | $err_both_nocal_60 | $w40_both_nocal_15 |
+| Player data only | $err_data_nocal_1 | $err_data_nocal_5 | $err_data_nocal_15 | $err_data_nocal_30 | $err_data_nocal_60 | $w40_data_nocal_15 |
+| **Both (shipped)** | $err_both_nocal_1 | $err_both_nocal_5 | $err_both_nocal_15 | $err_both_nocal_30 | $err_both_nocal_60 | $w40_both_nocal_15 |
+| Player data only, with calibration | $err_data_cal_1 | $err_data_cal_5 | $err_data_cal_15 | $err_data_cal_30 | $err_data_cal_60 | $w40_data_cal_15 |
+| Both, with calibration | $err_both_cal_1 | $err_both_cal_5 | $err_both_cal_15 | $err_both_cal_30 | $err_both_cal_60 | $w40_both_cal_15 |
 
 The prior alone is off by $err_prior_1 ms for the typical player and never improves. That is the
-"unseen participant" gap. With the player's own attacks, the error falls to $err_both_cal_5 ms by attack 5
-and $err_both_cal_15 ms by attack 15, about one 60 Hz frame. The M2 target (40 ms after 15
-attacks for 80% of players) is met at $w40_both_cal_15.
+"unseen participant" gap. With the player's own attacks, the error falls to $err_both_nocal_5 ms by attack 5
+and $err_both_nocal_15 ms by attack 15, about one 60 Hz frame. The M2 target (40 ms after 15
+attacks for 80% of players) is met at $w40_both_nocal_15.
 
 Two findings were not expected:
 
 - **The prior matters only at the start.** It cuts the first-attack error from
-  $err_data_cal_1 to $err_both_cal_1 ms. By attack 5 the gap is $err_data_cal_5 against
-  $err_both_cal_5 ms, and by attack 15 the curves overlap.
-- **Calibration does not speed up learning here.** With and without the 12 Psi attacks, the
-  curves are the same within noise. The reason is the evidence. The game times every press up
+  $err_data_nocal_1 to $err_both_nocal_1 ms. By attack 5 the gap is $err_data_nocal_5 against
+  $err_both_nocal_5 ms, and by attack 15 the curves overlap.
+- **Calibration does not speed up learning here**, which is why the game has none. With and
+  without 12 Psi attacks first, the curves are the same within noise (fig. 1, right). The reason is the evidence. The game times every press up
   to 400 ms after the impact, so almost every attack yields an exact reaction time, whatever the
   lead. The lead only decides where the press is censored. Psi's careful choice of lead buys
   information that a timed press already gives for free. It would matter if only success or
-  failure were observed.
+  failure were observed. So the tutorial spends its attacks on teaching, and the director
+  controls from the first one.
 
 The estimate is honest about its doubt. The 80% interval holds the true median for
-$cov_both_cal_15 of players at attack 15 and $cov_both_cal_60 at attack 60. It is slightly
+$cov_both_nocal_15 of players at attack 15 and $cov_both_nocal_60 at attack 60. It is slightly
 conservative late on, because the per-attack blur keeps it wide enough to follow a player who
 changes.
 
@@ -117,17 +119,20 @@ same population with every median scaled by 0.75 (median of medians ≈ 250 ms) 
 
 | Population | Prior only: error | Both: error at 15 / 60 | Within 40 ms at 15 | On target (Standard): adaptive | Fixed 420 ms |
 | --- | --- | --- | --- | --- | --- |
-| Faster (×0.75) | $err_faster_prior_15 ms | $err_faster_both_cal_15 / $err_faster_both_cal_60 ms | $w40_faster_both_cal_15 | $on_faster_both (mean $mean_faster_both) | $on_faster_fixed (mean $mean_faster_fixed) |
-| Default | $err_default_prior_15 ms | $err_default_both_cal_15 / $err_default_both_cal_60 ms | $w40_default_both_cal_15 | $on_default_both (mean $mean_default_both) | $on_default_fixed (mean $mean_default_fixed) |
-| Slower (×1.4) | $err_slower_prior_15 ms | $err_slower_both_cal_15 / $err_slower_both_cal_60 ms | $w40_slower_both_cal_15 | $on_slower_both (mean $mean_slower_both) | $on_slower_fixed (mean $mean_slower_fixed) |
+| Faster (×0.75) | $err_faster_prior_15 ms | $err_faster_both_nocal_15 / $err_faster_both_nocal_60 ms | $w40_faster_both_nocal_15 | $on_faster_both (mean $mean_faster_both) | $on_faster_fixed (mean $mean_faster_fixed) |
+| Default | $err_default_prior_15 ms | $err_default_both_nocal_15 / $err_default_both_nocal_60 ms | $w40_default_both_nocal_15 | $on_default_both (mean $mean_default_both) | $on_default_fixed (mean $mean_default_fixed) |
+| Slower (×1.4) | $err_slower_prior_15 ms | $err_slower_both_nocal_15 / $err_slower_both_nocal_60 ms | $w40_slower_both_nocal_15 | $on_slower_both (mean $mean_slower_both) | $on_slower_fixed (mean $mean_slower_fixed) |
 
 A wrong prior costs a few attacks, not the session. On the slower population the prior
 starts far off and pulls the first estimates toward 330 ms. The shipped director then trails
 the flat prior for the first handful of attacks, and catches up by about attack 10. At attack
-15, $w40_slower_both_cal_15 are within 40 ms, below the 80% bar the default population meets.
-But the error keeps falling, to $err_slower_both_cal_60 ms by attack 60. The 2% floor in the
+15, $w40_slower_both_nocal_15 are within 40 ms, below the 80% bar the default population meets.
+But the error keeps falling, to $err_slower_both_nocal_60 ms by attack 60. The 2% floor in the
 prior is what makes this recovery possible. The faster population is learned *faster* than the
-default one, because short reaction times are less noisy in milliseconds.
+default one, because short reaction times are less noisy in milliseconds. With no calibration phase, though,
+the first attacks count toward the run. For faster players the prior's first guess is too slow,
+so the opening attacks are easy, and their mean success ends a little high ($mean_faster_both
+against 0.70).
 
 The remaining gap at the slow end is a design limit, not an estimation error. Leads stop at
 800 ms. A player whose median is above about $slow_capped_min_median ms cannot reach 70% at
@@ -168,8 +173,8 @@ out. Above the bulk, the long exponential tail holds more slow presses than the 
 so long (Relaxed) leads succeed less often than predicted. Below it, short (Hard) leads succeed
 more often.
 
-The median estimate is biased by $eg_bias_median ms (median, after 72 attacks). Its 80%
-interval covers the truth only $eg_cov_72 of the time, because the filter is confident in a
+The median estimate is biased by $eg_bias_median ms (median, after 60 attacks). Its 80%
+interval covers the truth only $eg_cov_60 of the time, because the filter is confident in a
 model that is not quite right. In play this means the three challenge settings are a little
 closer together than their labels say. For a real person, the logs will show whether this
 matters. If it does, the cheapest fix is a third shape parameter, or a per-challenge offset
@@ -185,9 +190,9 @@ learned from the predicted-against-observed record the F2 overlay already keeps.
 - **The lead cap (800 ms) is a design choice.** Section 3 shows its cost for very slow
   players: $slow_capped_share of a population 40% slower than ours. Raising it, or letting very slow
   players fall back to a lower target, is a playtest question.
-- **Calibration.** Since it does not speed up learning in this setting (section 1), the
-  tutorial could drop it and use those attacks for teaching, with no loss of accuracy. That is a
-  design decision for M3.
+- **Calibration.** It does not speed up learning when presses are timed (section 1), so the
+  game ships without it. If real players' presses turn out less clean than a bot's (mashing,
+  hesitating), the comparison arm is the place to check whether it should come back.
 
 ## Reproduce
 
