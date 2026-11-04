@@ -27,6 +27,7 @@ public partial class Cli : Node
     public override void _Ready()
     {
         ProcessMode = ProcessModeEnum.Always; // screenshots still count frames while paused
+        GD.Print($"Sword in the Forest {ProjectSettings.GetSetting("application/config/version")} · developer tools {(Core.DevTools.Enabled ? "on" : "off")}");
         var args = OS.GetCmdlineUserArgs();
         string? scenario = null;
         for (var i = 0; i < args.Length; i++)

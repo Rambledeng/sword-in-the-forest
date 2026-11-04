@@ -14,6 +14,7 @@ ui.settings.hard,Hard,Zwaar,困难
 ui.settings.on,On,Aan,开
 ui.settings.off,Off,Uit,关
 ui.run.hint,Esc pause · F2 director,Esc pauze · F2 regisseur,Esc 暂停 · F2 剑意观测
+ui.run.hint_release,Esc pause,Esc pauze,Esc 暂停
 ui.hud.spare_prompt,It begs. E / B: spare · Attack: finish,Het smeekt. E / B: sparen · Aanval: afmaken,它在求饶。E / B：饶恕 · 攻击：补刀
 ui.area.tutorial,The Bitter Bamboo,Het Bittere Bamboe,苦竹林
 ui.area.bamboo,Bamboo Forest,Bamboebos,竹林

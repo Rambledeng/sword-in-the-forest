@@ -96,7 +96,7 @@ public partial class RunScene : Node2D
 
         Camera = new ShakeCamera { Target = Player };
         AddChild(Camera);
-        Hud = new Hud { Player = Player, HintKey = "ui.run.hint" };
+        Hud = new Hud { Player = Player, HintKey = DevTools.Enabled ? "ui.run.hint" : "ui.run.hint_release" };
         AddChild(Hud);
         Voice = new SwordVoice();
         AddChild(Voice);

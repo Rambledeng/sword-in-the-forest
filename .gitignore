@@ -8,3 +8,4 @@ obj/
 game/*.sln
 __pycache__/
 analysis/out/
+build/

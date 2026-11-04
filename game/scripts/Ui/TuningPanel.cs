@@ -160,7 +160,7 @@ public partial class TuningPanel : CanvasLayer
 
     public override void _UnhandledInput(InputEvent e)
     {
-        if (e.IsActionPressed("debug_tuning"))
+        if (DevTools.Enabled && e.IsActionPressed("debug_tuning"))
         {
             Toggle();
             GetViewport().SetInputAsHandled();
