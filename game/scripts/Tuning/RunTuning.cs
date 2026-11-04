@@ -19,8 +19,19 @@ public partial class RunTuning : Resource
     /// <summary>Chance that a posture-broken enemy drops its weapon and begs instead of kneeling.</summary>
     [Export(PropertyHint.Range, "0,1,0.05")] public float SurrenderChance { get; set; }
     [Export(PropertyHint.Range, "8,120,1")] public float SpareRangePx { get; set; }
+    /// <summary>A fresh beggar ignores cuts this long (the rest of the combo that broke it).</summary>
+    [Export(PropertyHint.Range, "0,2000,50")] public int BegGraceMs { get; set; }
     /// <summary>After the first beggar of a run (always genuine), the chance that a beggar is a fake.</summary>
     [Export(PropertyHint.Range, "0,1,0.01")] public float FakeBegChance { get; set; }
+    /// <summary>A fake beggar strikes when you turn this far away from it (degrees between your facing and it)...</summary>
+    [Export(PropertyHint.Range, "0,180,5")] public float FakeTurnAwayDeg { get; set; }
+    /// <summary>...for this long...</summary>
+    [Export(PropertyHint.Range, "0,3000,50")] public int FakeTurnAwayMs { get; set; }
+    /// <summary>...within this distance, and not before it has begged this long.</summary>
+    [Export(PropertyHint.Range, "0,300,1")] public float FakeStrikeRangePx { get; set; }
+    [Export(PropertyHint.Range, "0,5000,50")] public int FakeMinBegMs { get; set; }
+    /// <summary>Its posture after it drops the act (fraction of full).</summary>
+    [Export(PropertyHint.Range, "0,1,0.05")] public float FakePostureAfter { get; set; }
     /// <summary>A spared enemy takes this long to stand up before it walks out.</summary>
     [Export(PropertyHint.Range, "0,3000,50")] public int SpareStandMs { get; set; }
     /// <summary>Its walking speed out of the room, as a fraction of its move speed.</summary>

@@ -56,6 +56,8 @@ public partial class RunBotScenario : Scenario
                 SurrenderOverride = Mode == "mercy" ? 1f : null,
             };
             AddChild(_run);
+            // Fakes have their own scenario (run_fake); here every beggar is genuine.
+            if (Mode == "mercy") _run.Mercy.FakeChance = 0;
             _bot = new RunBot(_run, _controls);
             var spared = 0;
             _bot.SparePolicy = _ => spared++ % 2 == 0;
@@ -70,6 +72,9 @@ public partial class RunBotScenario : Scenario
         }
         if (_service!.Leads.Mode == DirectorMode.Calibrate) _sawCalibrate = true;
         if (_run.Boss != null && GodotObject.IsInstanceValid(_run.Boss) && _run.Boss.Phase == 2) _sawPhase2 = true;
+        if (frame % 1200 == 0 && _run.Room != null && OS.HasEnvironment("SCENARIO_TRACE"))
+            GD.Print($"  frame {frame}: player {_run.Player.GlobalPosition.Round()} {_run.Player.Current}; " +
+                     string.Join(", ", _run.Room.Spawned.Where(GodotObject.IsInstanceValid).Select(e => $"{e.GetType().Name} {e.Current}{(e.IsFake ? " fake" : "")}{(e.Revealed ? " revealed" : "")} {e.GlobalPosition.Round()}")));
         if (Mode == "mercy") { CheckMercy(frame); return; }
         _bot.Step();
         if (_run.Summary == null) return;
@@ -122,7 +127,9 @@ public partial class RunBotScenario : Scenario
 
     private void CheckMercy(int frame)
     {
-        _bot.Step();
+        // Once the room is clear the bot waits, so the spared enemy can walk out before the room goes.
+        if (_mercyStage == 0) _bot.Step();
+        else _controls.MoveInput = Vector2.Zero;
         var s = _run.Stats;
         if (frame % 600 == 0 && _run.Room != null)
             GD.Print($"  frame {frame}: player {_run.Player.GlobalPosition.Round()} {_run.Player.Current}; " +

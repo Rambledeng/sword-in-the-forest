@@ -251,12 +251,18 @@ public partial class RunScene : Node2D
         e.LeadTimesOverride = FirstRed;
         if (e is Spearman) SayOnce("sword.first_spear");
         if (e is not TutorialGhost and not TavernBoss) e.BegRoll = en => Mercy.Decide(en.SurrenderChance, en.NextRoll);
-        e.Surrendered += _ => SayOnce("sword.first_surrender");
+        e.Surrendered += _ =>
+        {
+            // The first beggar (always genuine) teaches spare versus finish.
+            SayOnce("sword.first_surrender");
+        };
         e.Spared += _ =>
         {
             Stats.Spare();
             SayOnce("sword.first_spare");
+            SayOnce("sword.mercy.warn");
         };
+        e.Betrayed += _ => SayOnce("sword.first_fake");
         if (e is TavernBoss boss) boss.PhaseChanged += _ => SwordVoice.Say("sword.boss.phase2");
     }
 
@@ -264,7 +270,12 @@ public partial class RunScene : Node2D
     private void OnFinished(Enemy e)
     {
         Stats.Finished(e.DiedBegging);
-        if (e.DiedBegging) SayOnce("sword.first_karma");
+        if (e.DiedBegging)
+        {
+            SayOnce("sword.first_karma");
+            SayOnce("sword.mercy.warn");
+        }
+        else if (e.DiedFaking) SayOnce("sword.fake_seen");
         else if (e is not TavernBoss && e is not TutorialGhost) SayOnce("sword.first_finisher");
     }
 

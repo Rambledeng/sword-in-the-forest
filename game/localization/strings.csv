@@ -63,7 +63,7 @@ sword.tut.finish,It kneels. Strike now to finish it.,Het knielt. Sla nu toe om h
 sword.tut.done,The way north is open. Walk on.,De weg naar het noorden is open. Loop verder.,北面的路开了。走吧。
 sword.first_deflect,Steel on steel. Good.,Staal op staal. Goed.,铁碰铁。好。
 sword.first_finisher,One more evil ghost back to the dust. Merit.,Weer een kwade geest terug tot stof. Verdienste.,又一个恶鬼归于尘土。功德。
-sword.first_surrender,"It drops its blade and begs. Spare it, or cut it down.","Het laat zijn kling vallen en smeekt. Spaar het, of hak het neer.",它弃刀求饶。饶它，或者斩了它。
+sword.first_surrender,It drops its blade and begs. Spare it (E) and it walks away: merit. Cut it down: karma.,Het laat zijn kling vallen en smeekt. Spaar het (E) en het loopt weg: verdienste. Hak het neer: karma.,它弃刀求饶。饶它（E），它自会离去：功德。斩了它：业障。
 sword.first_spare,Mercy. I will remember that.,Genade. Dat onthoud ik.,慈悲。我记下了。
 sword.first_karma,It begged. I will remember that too.,Het smeekte. Ook dat onthoud ik.,它求过饶。这个我也记下了。
 sword.first_red,Red. Do not guard. Roll.,Rood. Niet blokkeren. Rollen.,红光！别挡，翻滚！
@@ -91,3 +91,6 @@ sword.verdict.loss_karma,"You fell, and the ones who begged laughed. Do better, 
 summary.next_soul,The next soul will take up the sword in {area}.,De volgende ziel neemt het zwaard op in {area}.,下一个游魂将在{area}拿起这把剑。
 sword.new_soul,A new hand. The last one fell here; we begin again where it did.,Een nieuwe hand. De vorige viel hier; we beginnen opnieuw waar zij viel.,新的手。上一个倒在这里，我们就从这里重来。
 sword.first_spear,"A spear. When its tip flashes red, no guard and no deflect will stop it. Roll.","Een speer. Flitst de punt rood, dan houdt geen blokkade of parade hem tegen. Rol.",枪客。枪尖红光一闪，挡不住，也弹不开。只能翻滚。
+sword.mercy.warn,Remember: not every beggar means it. Watch its eyes.,Onthoud: niet elke smekeling meent het. Let op zijn ogen.,记住：求饶的未必真心。看它的眼睛。
+sword.first_fake,A false tear! Its eyes were on you the whole time.,Valse tranen! Zijn ogen volgden je de hele tijd.,假意求饶！它的眼睛一直盯着你。
+sword.fake_seen,"It was lying, and you saw it. No karma for that cut.","Het loog, en jij zag het. Geen karma voor die slag.",它在装，你看穿了。这一刀不算业障。

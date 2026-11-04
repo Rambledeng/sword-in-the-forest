@@ -88,6 +88,12 @@ public abstract partial class Enemy : CharacterBody2D
     public Func<Enemy, BegKind>? BegRoll { get; set; }
     /// <summary>Its begging is a trick (only meaningful while it begs).</summary>
     public bool IsFake { get; private set; }
+    /// <summary>A fake beggar that dropped the act and attacked; it never begs again.</summary>
+    public bool Revealed { get; private set; }
+    /// <summary>It was cut down while only pretending to beg (no karma).</summary>
+    public bool DiedFaking { get; private set; }
+    /// <summary>A fake beggar attacks (spared, or the player turned away).</summary>
+    public event Action<Enemy>? Betrayed;
     /// <summary>A random number in [0, 1) from the enemy's own generator (the run's mercy rules use it).</summary>
     public double NextRoll() => Rng.NextDouble();
     /// <summary>Colour variant tint for the body (random per spawn).</summary>
@@ -271,6 +277,7 @@ public abstract partial class Enemy : CharacterBody2D
                 }
                 break;
             case State.Surrender:
+                if (IsFake && targetAlive && !DrillMode && TurnedAway(toTarget, dist)) Betray();
                 break;
             case State.Leave:
                 velocity = UpdateLeave();
@@ -324,6 +331,31 @@ public abstract partial class Enemy : CharacterBody2D
         var dir = SteerTo(to);
         Facing = dir;
         return dir * Tuning.MoveSpeed * r.SpareLeaveSpeedFactor;
+    }
+
+    private double _turnedAwayMs;
+
+    /// <summary>A fake beggar's chance: the player has had its back to it, close by, for a moment.</summary>
+    private bool TurnedAway(Vector2 toTarget, float dist)
+    {
+        var r = Tunables.Run;
+        var away = dist <= r.FakeStrikeRangePx && StateElapsedMs >= r.FakeMinBegMs &&
+                   Mathf.RadToDeg(Mathf.Abs(Target!.Facing.AngleTo(-toTarget))) >= r.FakeTurnAwayDeg;
+        _turnedAwayMs = away ? _turnedAwayMs + Clock.DeltaMs : 0;
+        return _turnedAwayMs >= r.FakeTurnAwayMs;
+    }
+
+    /// <summary>The fake drops the act: weapon back in hand, and it strikes at once (with the usual glint and lead).</summary>
+    private void Betray()
+    {
+        IsFake = false;
+        Revealed = true;
+        _turnedAwayMs = 0;
+        Posture.Reset(Posture.Max * Tunables.Run.FakePostureAfter);
+        if (Target != null && IsInstanceValid(Target)) Facing = AimDir = (Target.BodyGlobal - BodyGlobal).Normalized();
+        Sfx.Play("swing", 0.1f, 1.3f);
+        StartAttack(CounterAttack ?? ChooseAttack());
+        Betrayed?.Invoke(this);
     }
 
     private double _leaveFadeStartMs = -1;
@@ -564,6 +596,8 @@ public abstract partial class Enemy : CharacterBody2D
     public HitResult TakeHit(int damage, int posture, Vector2 dir)
     {
         if (Current == State.Dead) return HitResult.Ignored;
+        // The rest of a combo must not cut down an enemy that has only just begun to beg.
+        if (Current == State.Surrender && StateElapsedMs < Tunables.Run.BegGraceMs) return HitResult.Ignored;
         var feel = Tunables.Feel;
         _lastHitMs = Clock.NowMs;
         Flash(Colors.White, feel.FlashMs);
@@ -574,7 +608,8 @@ public abstract partial class Enemy : CharacterBody2D
                 OnPhaseFinisher(dir);
                 return HitResult.Finisher;
             }
-            Die(dir, begging: Current == State.Surrender);
+            DiedFaking = Current == State.Surrender && IsFake;
+            Die(dir, begging: Current == State.Surrender && !IsFake);
             return HitResult.Finisher;
         }
 
@@ -659,6 +694,12 @@ public abstract partial class Enemy : CharacterBody2D
     public bool Spare()
     {
         if (Current != State.Surrender) return false;
+        if (IsFake)
+        {
+            // It was never sorry.
+            Betray();
+            return true;
+        }
         WasSpared = true;
         Runner.Flush();
         _attack = null;
@@ -684,7 +725,7 @@ public abstract partial class Enemy : CharacterBody2D
         }
         Runner.Abort();
         _attack = null;
-        var beg = DrillMode ? BegKind.None
+        var beg = DrillMode || Revealed ? BegKind.None
             : BegRoll != null ? BegRoll(this)
             : SurrenderChance > 0 && Roll() < SurrenderChance ? BegKind.Genuine : BegKind.None;
         if (beg != BegKind.None)
@@ -806,11 +847,14 @@ public abstract partial class Enemy : CharacterBody2D
                 _body.Position = new Vector2(Mathf.Round(Mathf.Sin((float)now * 0.08f)), 0);
                 break;
             case State.Surrender:
-                // Weapon dropped, bowing low: begging for its life.
+                // Weapon dropped, bowing low: begging for its life. The tell of a fake: it does
+                // not tremble, and its eyes follow you instead of staying on the ground.
                 row = CharacterSprite.RowCrouch;
                 col = 0;
                 _weapon.Visible = false;
-                _body.Position = new Vector2(0, (int)(now / 260) % 2);
+                if (IsFake && Target != null && IsInstanceValid(Target))
+                    col = CharacterSprite.Column(Target.BodyGlobal - BodyGlobal);
+                else _body.Position = new Vector2(0, (int)(now / 260) % 2);
                 break;
             case State.Kneel:
                 row = CharacterSprite.RowCrouch;
