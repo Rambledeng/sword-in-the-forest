@@ -48,7 +48,7 @@ public partial class Sfx : Node
         _next = (_next + 1) % _voices.Count;
         voice.Stream = stream;
         voice.PitchScale = 1f + _rng.RandfRange(-pitchJitter, pitchJitter);
-        voice.VolumeDb = Mathf.LinearToDb(Mathf.Max(0.0001f, Tunables.Feel.SfxVolume * volumeScale));
+        voice.VolumeDb = Mathf.LinearToDb(Mathf.Max(0.0001f, Tunables.Feel.SfxVolume * UserSettings.Effects * volumeScale));
         voice.Play();
     }
 
@@ -63,12 +63,12 @@ public partial class Sfx : Node
         if (stream is AudioStreamOggVorbis ogg) ogg.Loop = true;
         if (_music.Stream == stream && _music.Playing) return;
         _music.Stream = stream;
-        _music.VolumeDb = Mathf.LinearToDb(Mathf.Max(0.0001f, Tunables.Feel.MusicVolume));
+        _music.VolumeDb = Mathf.LinearToDb(Mathf.Max(0.0001f, Tunables.Feel.MusicVolume * UserSettings.Music));
         _music.Play();
     }
 
     public override void _Process(double delta)
     {
-        if (_music != null) _music.VolumeDb = Mathf.LinearToDb(Mathf.Max(0.0001f, Tunables.Feel.MusicVolume));
+        if (_music != null) _music.VolumeDb = Mathf.LinearToDb(Mathf.Max(0.0001f, Tunables.Feel.MusicVolume * UserSettings.Music));
     }
 }

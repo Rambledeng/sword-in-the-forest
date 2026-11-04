@@ -54,6 +54,8 @@ public partial class Cli : Node
                     break;
             }
         }
+        // Test and screenshot runs are English unless told otherwise, whatever the machine's language.
+        if ((scenario != null || _screenshotScene != null) && !System.Array.Exists(args, a => a == "--locale")) TranslationServer.SetLocale("en");
         if (scenario != null)
         {
             StartScene($"res://scenes/scenarios/{scenario}.tscn");

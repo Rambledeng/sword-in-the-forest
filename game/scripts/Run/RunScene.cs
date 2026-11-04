@@ -453,6 +453,9 @@ public partial class RunScene : Node2D
 
     // ---- The end ---------------------------------------------------------------------------
 
+    /// <summary>Screenshot stage: end the run now.</summary>
+    public void EndForShot(bool won) => EndRun(won);
+
     private void EndRun(bool won)
     {
         if (Stats.Ended) return;

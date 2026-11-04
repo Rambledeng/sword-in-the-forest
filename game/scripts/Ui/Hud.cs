@@ -65,6 +65,8 @@ public partial class Hud : CanvasLayer
         _canvas.AddChild(_area);
         _bossName = new Label { Text = "combat.boss.name", HorizontalAlignment = HorizontalAlignment.Center, Visible = false, Modulate = new Color(1f, 0.85f, 0.8f) };
         _bossName.GrowHorizontal = Control.GrowDirection.Both;
+        _bossName.AddThemeConstantOverride("outline_size", 3);
+        _bossName.AddThemeColorOverride("font_outline_color", new Color(0.08f, 0.04f, 0.03f));
         _bossName.Position = new Vector2(0, 2);
         _canvas.AddChild(_bossName);
     }

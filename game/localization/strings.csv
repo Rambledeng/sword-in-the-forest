@@ -94,3 +94,14 @@ sword.first_spear,"A spear. When its tip flashes red, no guard and no deflect wi
 sword.mercy.warn,Remember: not every beggar means it. Watch its eyes.,Onthoud: niet elke smekeling meent het. Let op zijn ogen.,记住：求饶的未必真心。看它的眼睛。
 sword.first_fake,A false tear! Its eyes were on you the whole time.,Valse tranen! Zijn ogen volgden je de hele tijd.,假意求饶！它的眼睛一直盯着你。
 sword.fake_seen,"It was lying, and you saw it. No karma for that cut.","Het loog, en jij zag het. Geen karma voor die slag.",它在装，你看穿了。这一刀不算业障。
+ui.title.start,Start,Beginnen,开始
+ui.title.settings,Settings,Instellingen,设置
+ui.pause.settings,Settings,Instellingen,设置
+ui.settings.title,Settings,Instellingen,设置
+ui.settings.language,Language,Taal,语言
+ui.settings.master,Volume,Volume,总音量
+ui.settings.music,Music,Muziek,音乐
+ui.settings.effects,Effects,Effecten,音效
+ui.settings.challenge,Challenge,Uitdaging,挑战
+ui.settings.adaptive,Adaptive timing,Adaptieve timing,自适应时机
+ui.settings.back,Back,Terug,返回
