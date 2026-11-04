@@ -11,6 +11,8 @@ public sealed class SimConfig
     /// <summary>Off: every attack uses <see cref="FixedLeadMs"/> (the designed default).</summary>
     public bool Adaptive { get; init; } = true;
     public int FixedLeadMs { get; init; } = 420;
+    /// <summary>Off: the director never sees an attack, so it keeps its prior ("population prior only").</summary>
+    public bool Learn { get; init; } = true;
     /// <summary>The attack's designed range; the director also stays within 200–800 ms.</summary>
     public LeadTimeBounds AttackBounds { get; init; } = new(200, 800);
 }

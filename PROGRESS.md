@@ -124,6 +124,69 @@
   copied), title intro.
 - Volume sliders, settings button that opens the telemetry folder.
 
+## M5 · Evaluation (simulation study only) (2026-11-04)
+
+This session covers only the evaluation part of M5. The release, itch.io, README GIFs and
+cleanup are still to do. `game/` is untouched.
+
+### Done
+- **One command:** `tools/report.sh` (about 45 s). It runs the simulator's M5 study, draws
+  `docs/figures/fig1–5`, and writes `docs/report.md` (about 4 pages) from
+  `analysis/report_template.md`. Every number in the report is computed, so edit the
+  template, not the report. Reruns are byte-identical (checked). CI runs it with 100 players
+  so it can't rot. Needs `pip install -r analysis/requirements.txt`.
+- **Simulator** (`sim/`): `M5Study` (29 runs × 1,000 players, about 30 s) writes `runs.csv`,
+  `players.csv` and `attacks.csv`. Bots now take any `IReactionTime`: `LogNormalTime` (the
+  same random stream as before, so the M2 numbers are unchanged; there is a test for this) or
+  `ExGaussianTime` (unit-tested median, CDF and sampler). `SimConfig.Learn = false` gives "prior
+  only". Runs also record the predicted success and the 80% interval per attack.
+- **The four spec experiments** ("real person" is skipped as asked):
+  1. **Learning** (fig 1): median error 38 → 22 → 14 → 9 ms after 1 / 5 / 15 / 60 attacks;
+     88.2% within 40 ms at 15. The prior alone: 52 ms forever.
+  2. **Challenge** (fig 2, fig 5): 98.4 / 93.6 / 91.7% on target against 40.4 / 28.1 / 21.0%
+     fixed. The SD sits at the binomial floor for 60 attacks.
+  3. **Shifted populations** (fig 3): faster 93.4% on target, slower 89.0%. 74.2% of slower
+     players are within 40 ms at attack 15, which is under the 80% bar, but the error keeps
+     falling (12 ms at 60).
+  4. **Ex-Gaussian bots** (fig 4): still 87.6–94.6% on target. Success is pulled toward the
+     middle (Relaxed 0.820, Hard 0.582), and the 80% interval covers the truth only 69% of the
+     time.
+
+### Findings worth your attention
+- **Calibration does not help.** The 12 Psi attacks give the same error curve as running
+  control from attack 1. Presses are timed up to 400 ms after the impact, so nearly every attack
+  yields an exact reaction time whatever the lead, and choosing the lead buys little. M3 could
+  spend the tutorial's attacks on teaching instead. I did not change anything.
+- **The population prior helps only for the first ~5 attacks** (38 vs 49 ms at attack 1). On
+  a slower population it is briefly worse than a flat prior (85 vs 63 ms at attack 1), then it
+  catches up by attack ~10.
+- **The 800 ms lead cap.** 6.1% of the slower population (true median above about 620 ms)
+  can't reach 70% at any allowed lead; their mean is 0.54. The fastest players sit on the
+  200 ms floor and find it slightly easy.
+- **Wrong model:** the filter fits the whole reaction-time distribution, so a heavy-tailed
+  player gets a curve that is too steep. In play, the three challenges would sit a little
+  closer together than their labels say.
+
+### Next (rest of M5)
+- The release workflow (tag → Windows/Linux exports → GitHub Release → itch.io via butler,
+  using an `ITCH_API_KEY` secret).
+- README with GIFs (Movie Maker), the pitch, controls and architecture; asset pruning and
+  `CREDITS.md`.
+- Add "Does it work on a real person?" to the report once you have play logs: refit the prior
+  from them and plot your belief after three runs.
+
+### Questions for you
+- Drop calibration from the tutorial (M3), or keep it as a safety net for real players whose
+  presses are less clean than a bot's?
+- Raise the 800 ms cap, or let very slow players fall back to a lower target?
+- Is the report's length and tone right for your site and devlog?
+
+### Known issues
+- The M2 CLI (`--study m2`, the default) and the M5 study both write `analysis/out/players.csv`,
+  with different columns. Run `tools/report.sh` last.
+- PROGRESS still shows M3 and M4 as not done. This evaluation runs on the library alone and
+  does not depend on them.
+
 ## M2 · The director (2026-11-01)
 
 ### Done
