@@ -4,13 +4,20 @@ using SwordInTheForest.Director;
 using SwordInTheForest.Sim;
 
 // Simulated players against the Director library. Writes CSV for analysis/ and prints the M2
-// "Done when" numbers. Usage: dotnet run --project sim -c Release -- [--players N] [--out DIR]
+// "Done when" numbers. Usage: dotnet run --project sim -c Release -- [--study m2|m5] [--players N] [--out DIR]
 var players = M2Study.Players;
 var outDir = Path.Combine("analysis", "out");
+var studyName = "m2";
 for (var i = 0; i < args.Length - 1; i++)
 {
     if (args[i] == "--players") players = int.Parse(args[i + 1], CultureInfo.InvariantCulture);
     if (args[i] == "--out") outDir = args[i + 1];
+    if (args[i] == "--study") studyName = args[i + 1];
+}
+if (studyName == "m5")
+{
+    new M5Study(players).WriteCsv(outDir);
+    return;
 }
 Directory.CreateDirectory(outDir);
 var inv = CultureInfo.InvariantCulture;

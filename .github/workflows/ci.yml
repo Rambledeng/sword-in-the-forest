@@ -27,6 +27,12 @@ jobs:
       - name: Unit tests
         run: dotnet test SwordInTheForest.sln --no-build --logger "console;verbosity=minimal"
 
+      # M5: the report regenerates from one command (fewer players, so it stays fast; not committed).
+      - name: Report regenerates
+        run: |
+          pip install -q -r analysis/requirements.txt
+          tools/report.sh --players 100
+
       - name: Cache Godot
         id: godot-cache
         uses: actions/cache@v4
