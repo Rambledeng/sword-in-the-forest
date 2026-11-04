@@ -20,6 +20,7 @@ public partial class RunFakeScenario : Scenario
     private Enemy? _fake;
     private Enemy? _first;
     private int _betrayals;
+    private double _grabStartMs;
 
     protected override bool FailOnTimeout => true;
 
@@ -62,11 +63,21 @@ public partial class RunFakeScenario : Scenario
                     _fake = beggar;
                 }
                 if (_fake == null || _betrayals == 0) return;
-                Check(_fake.Revealed && _fake.Current == Enemy.State.Attack, $"the spared fake is {_fake.Current}, not attacking");
+                Check(_fake.Revealed && _fake.Current == Enemy.State.Grab && _fake.WeaponOnGround, $"the spared fake is {_fake.Current}, not grabbing its weapon");
                 Check(_run.Stats.Spared == 1 && _run.Stats.Merit == 1, "sparing a fake gave merit");
                 Check(_run.Voice.Spoken.Contains("sword.first_spare"), "the sword said nothing about the genuine beggar walking away");
                 Check(_run.Voice.Spoken.Contains("sword.spared_fake"), "the sword did not scorn sparing the fake");
-                GD.Print($"  frame {frame}: spared fake attacked");
+                GD.Print($"  frame {frame}: spared fake grabs its weapon");
+                _grabStartMs = GameClock.Instance.NowMs;
+                _stage = 10;
+                return;
+            case 10: // the grab: weapon off the ground, then the normal attack
+                _bot.Step();
+                if (_fake!.Current == Enemy.State.Grab) return;
+                var grabMs = GameClock.Instance.NowMs - _grabStartMs;
+                Check(_fake.Current == Enemy.State.Attack && !_fake.WeaponOnGround, $"after the grab the fake is {_fake.Current}");
+                Check(System.Math.Abs(grabMs - Tunables.Run.FakeGrabMs) < 40, $"the grab took {grabMs:0} ms, not {Tunables.Run.FakeGrabMs}");
+                GD.Print($"  frame {frame}: spared fake attacked after a {grabMs:0} ms grab");
                 _run.Mercy.ForceNext = BegKind.Fake;
                 _fake = null;
                 _stage = 2;
