@@ -10,7 +10,9 @@ namespace SwordInTheForest.Ui;
 
 /// <summary>
 /// The run summary: win or loss, the sword's closing verdict, merit, karma, kills, souls fallen,
-/// and what the sword learned (your median reaction time with its 80% range). New soul or title.
+/// and what the sword learned. Until the first ending (and afterwards unless Detail mode is on)
+/// merit, karma and the numbers stay hidden: the sword's reading is a word (quick, learning, slow).
+/// New soul or title.
 /// </summary>
 public partial class SummaryScreen : CanvasLayer
 {
@@ -33,6 +35,9 @@ public partial class SummaryScreen : CanvasLayer
     }
 
     public SummaryScreen() => _stats = new RunStats();
+
+    /// <summary>This win was the first ending: say that Detail mode is now in the settings.</summary>
+    public bool FirstEnding { get; set; }
 
     public event Action? RetryRequested;
     public event Action? TitleRequested;
@@ -60,7 +65,8 @@ public partial class SummaryScreen : CanvasLayer
         stack.AddChild(new Control { CustomMinimumSize = new Vector2(0, 4) });
 
         var t = TimeSpan.FromMilliseconds(_stats.ElapsedMs);
-        Add(stack, Fill("summary.merit_karma", ("merit", _stats.Merit), ("karma", _stats.Karma)));
+        var details = UserSettings.ShowDetails;
+        if (details) Add(stack, Fill("summary.merit_karma", ("merit", _stats.Merit), ("karma", _stats.Karma)));
         Add(stack, Fill("summary.kills_spared", ("kills", _stats.Kills), ("spared", _stats.Spared)));
         Add(stack, Fill("summary.souls", ("deaths", _soulsFallen)));
         Add(stack, Fill("summary.rooms", ("rooms", _stats.RoomsCleared), ("total", _totalRooms))
@@ -70,9 +76,17 @@ public partial class SummaryScreen : CanvasLayer
         stack.AddChild(new Control { CustomMinimumSize = new Vector2(0, 4) });
 
         var e = _estimate;
-        Add(stack, Fill("summary.reading", ("median", (int)Math.Round(e.MedianMs)), ("low", (int)Math.Round(e.LowMs)), ("high", (int)Math.Round(e.HighMs))), new Color(0.7f, 0.9f, 1f));
-        Add(stack, Fill("summary.attunement", ("pct", (int)Math.Round(e.Attunement * 100)), ("n", e.Observations)), new Color(0.7f, 0.9f, 1f));
+        if (details)
+        {
+            Add(stack, Fill("summary.reading", ("median", (int)Math.Round(e.MedianMs)), ("low", (int)Math.Round(e.LowMs)), ("high", (int)Math.Round(e.HighMs))), new Color(0.7f, 0.9f, 1f));
+            Add(stack, Fill("summary.attunement", ("pct", (int)Math.Round(e.Attunement * 100)), ("n", e.Observations)), new Color(0.7f, 0.9f, 1f));
+        }
+        else
+        {
+            Add(stack, Tr(ReadingKey(e)), new Color(0.7f, 0.9f, 1f));
+        }
         if (!_adaptive) Add(stack, Tr("summary.adaptive_off"), new Color(1f, 0.7f, 0.5f));
+        if (FirstEnding) Add(stack, Tr("summary.detail_unlocked"), new Color(1f, 0.85f, 0.6f));
         if (_nextArea is Area area)
         {
             stack.AddChild(new Control { CustomMinimumSize = new Vector2(0, 4) });
@@ -90,6 +104,16 @@ public partial class SummaryScreen : CanvasLayer
         title.Pressed += () => TitleRequested?.Invoke();
         buttons.AddChild(title);
         _retry.CallDeferred(Control.MethodName.GrabFocus);
+    }
+
+    /// <summary>The sword's reading in a word: unread, quick, learning or slow.</summary>
+    public static string ReadingKey(Estimate e)
+    {
+        var r = Tunables.Run;
+        if (e.Observations == 0 || e.Attunement < r.ReadingAttunedAt) return "summary.reading.unread";
+        if (e.MedianMs <= r.ReadingQuickMs) return "summary.reading.quick";
+        if (e.MedianMs >= r.ReadingSlowMs) return "summary.reading.slow";
+        return "summary.reading.learning";
     }
 
     public static string AreaKey(Area area) => area switch

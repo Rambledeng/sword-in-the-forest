@@ -5,3 +5,4 @@
 [node name="MenuPauseSettings" type="Node"]
 script = ExtResource("1")
 Mode = "pause_settings"
+AfterEnding = true

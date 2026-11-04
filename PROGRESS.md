@@ -1,5 +1,72 @@
 # Progress
 
+## M4 follow-up · The sword's voice, hidden values and display settings (2026-11-04)
+
+Four items, one commit each. Unit tests: 174 pass (Combat 136, Director 35, Localization 3).
+Scenarios: 28 pass (new: `hidden_values`; `run_bot`, `run_fake`, `run_continue` and `settings`
+check more).
+
+### Done
+1. **Hidden values until the first ending.** Merit and karma counters, the reaction-time numbers
+   and the attunement meter (人剑合一) are gone from the HUD and run summary. Instead merit plays a
+   short **gold glitter** on the player and karma a **wisp of dark smoke** (code-drawn, `MeritFx`;
+   lengths and counts in feel.tres). The summary words the sword's reading instead: "has not read
+   your hand yet", "quick", "still learning" or "slow" (`ReadingQuickMs` 300 / `ReadingSlowMs` 370
+   in run.tres). Beating the boss once is saved in settings.cfg (`[progress] ending_seen`); that
+   summary says Detail mode is now in the settings, and the settings then show **Detail mode**
+   (`[ui] detail_mode`, off by default), which brings every number back. The F1/F2 developer
+   panels are unchanged.
+2. **The sword's character.** Every sword line is rewritten in en, nl and zh_CN as the vengeful
+   will of 风源虹: impatient in the tutorial, hungry for blood, reading you only in words. At the
+   first beggar it says "Kill it." It never warns about fakes (`sword.mercy.warn` is deleted).
+   A spared fake that attacks draws scorn (new `sword.spared_fake`); a fake that strikes at your
+   back gets `sword.first_fake`; a spared genuine beggar gets the grim `sword.first_spare`. Its
+   backstory shows only in hints ("No one spared mine", "Sixty years, and still it is not enough").
+3. **Each new soul gets a slight colour tint**, a random hue seeded by the run seed and the souls
+   fallen (`SoulTintStrength` 0.22 in player.tres).
+4. **Display settings:** windowed, borderless fullscreen and fullscreen, and a window size in whole
+   multiples of 480×270 that fit the screen (×3 = 1440×810 by default, as before). Saved in
+   settings.cfg (`[display] mode, scale`) and applied at launch. The window size only applies to
+   a window; in both full-screen modes it reads "Fits the screen" (the integer stretch already picks
+   the largest multiple). Scenario and screenshot runs never touch the window.
+
+### For your Chinese review (rewritten or new lines)
+All in game/localization/strings.csv. Rewritten: `sword.tut.wake`, `tut.move`, `tut.glint`,
+`tut.block`, `tut.roll`, `tut.gourd`, `tut.break`, `tut.finish`, `tut.done`, `first_deflect`,
+`first_finisher`, `first_surrender`, `first_spare`, `first_karma`, `first_fake`, `fake_seen`,
+`first_red`, `first_arrow`, `first_spear`, `low_health`, `room_clear`, `upgrade`, `death`,
+`new_soul`, `area.bamboo`, `area.outside`, `area.tavern`, `boss.intro`, `boss.phase2`,
+`boss.dead`, `read.attuned`, `read.quicker`, `read.slower`, and the six `verdict.*`.
+Unchanged: `sword.boss.jar`. New: `sword.spared_fake`, `summary.reading.{unread,quick,learning,slow}`,
+`summary.detail_unlocked`, `ui.settings.{detail,display,windowed,borderless,fullscreen,resolution,fit_screen}`.
+Lines I am least sure of: `first_karma` (当年，又有谁饶过我的…… trails off on purpose),
+`first_spare` (愚不可及), `verdict.win_merit` (慈悲是债), `first_spear` (开它的膛).
+
+### Not done / known issues
+- The window mode and size are applied only in a real window; I could test the cycling and
+  saving headless but not the window itself. Check by hand (below).
+- Exclusive fullscreen cannot change the monitor's resolution in Godot; it fills the screen at the
+  largest whole multiple, with black bars if the screen is not a multiple of 480×270.
+- The first-launch window is still the project's 1440×810 until settings.cfg exists; on a screen
+  smaller than that, the saved size is clamped on the next launch.
+- `docs/screens/` regenerated (30 screens); pause_settings now shows the after-ending form.
+
+### Playtest checklist
+1. **Fresh profile** (delete `settings.cfg`): no attunement meter, no merit/karma or ms in the
+   summary. Finish a kneeler (glitter), cut a beggar (smoke), spare one (glitter).
+2. **Beat the boss:** the summary mentions Detail mode; Settings now has it. Turn it on: the meter
+   and numbers return. Quit and relaunch: still there.
+3. **The sword:** play the tutorial and the first beggar in each language. Spare a fake (scorn),
+   spare a genuine one (grim), turn your back on a fake.
+4. **Die twice:** each new soul is a slightly different colour.
+5. **Display:** try all three modes and every window size; relaunch and check they stuck.
+
+### Questions for the playtest
+- Is the glitter/smoke readable in a busy fight, or should it be bigger (feel.tres)?
+- Is the tint too subtle at 0.22?
+- Does the sword's voice feel cruel enough, or too much in the tutorial?
+- Should Detail mode default to on once unlocked?
+
 ## M4 · Playtest fixes, intro, languages and polish (2026-11-04)
 
 All ten items of the kickoff list are done, in order, one commit each (items 1 and 2 share one).

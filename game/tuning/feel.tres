@@ -26,3 +26,7 @@ FlashMs = 90
 GlintVisibleMs = 220
 SfxVolume = 0.8
 MusicVolume = 0.35
+MeritFxMs = 700
+MeritFxSparkles = 12
+KarmaFxMs = 1200
+KarmaFxPuffs = 8

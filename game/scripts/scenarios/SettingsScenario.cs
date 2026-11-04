@@ -6,7 +6,8 @@ namespace SwordInTheForest.Scenarios;
 
 /// <summary>
 /// The language picker on the title switches the language at once (en → nl → zh_CN → en), the
-/// settings panel opens from the title and from the pause menu, and its volume changes apply.
+/// settings panel opens from the title and from the pause menu, its volume changes apply, and the
+/// display mode and window size cycle.
 /// </summary>
 public partial class SettingsScenario : Scenario
 {
@@ -44,6 +45,25 @@ public partial class SettingsScenario : Scenario
             case 4:
                 Check(_title.Settings.IsOpen, "settings did not open from the title");
                 Check(!_title.StartRequested, "opening settings started the game");
+                // Display: windowed → borderless → fullscreen → windowed; the window size cycles
+                // through the multiples of 480×270 that fit, and only applies to a window.
+                var panel = _title.Settings;
+                Check(UserSettings.Display == DisplayMode.Windowed && !panel.ResolutionButton.Disabled, "does not start windowed with a window size");
+                var start = UserSettings.Scale;
+                for (var i = 0; i < UserSettings.MaxScale(); i++)
+                {
+                    panel.ResolutionButton.EmitSignal(BaseButton.SignalName.Pressed);
+                    Check(UserSettings.Scale >= 1 && UserSettings.Scale <= UserSettings.MaxScale(), $"window size ×{UserSettings.Scale} does not fit");
+                    Check(panel.ResolutionButton.Text.Contains($"{480 * UserSettings.Scale}×{270 * UserSettings.Scale}"), $"window size reads {panel.ResolutionButton.Text}");
+                }
+                Check(UserSettings.Scale == start, "the window size did not wrap around");
+                panel.DisplayButton.EmitSignal(BaseButton.SignalName.Pressed);
+                Check(UserSettings.Display == DisplayMode.Borderless && panel.ResolutionButton.Disabled, "borderless did not take over the window size");
+                Check(panel.DisplayButton.Text.Contains(Tr("ui.settings.borderless")), "the display button does not say borderless");
+                panel.DisplayButton.EmitSignal(BaseButton.SignalName.Pressed);
+                Check(UserSettings.Display == DisplayMode.Fullscreen, "no fullscreen after borderless");
+                panel.DisplayButton.EmitSignal(BaseButton.SignalName.Pressed);
+                Check(UserSettings.Display == DisplayMode.Windowed && !panel.ResolutionButton.Disabled, "did not come back to windowed");
                 UserSettings.SetVolumes(master: 0.5f, music: 0.25f, effects: 0.75f);
                 Check(Mathf.IsEqualApprox(AudioServer.GetBusVolumeDb(0), Mathf.LinearToDb(0.5f)), "master volume not applied");
                 Input.ParseInputEvent(new InputEventAction { Action = "ui_cancel", Pressed = true });

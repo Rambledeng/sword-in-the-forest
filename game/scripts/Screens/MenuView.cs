@@ -10,6 +10,8 @@ namespace SwordInTheForest.Screens;
 public partial class MenuView : Node
 {
     [Export] public string Mode { get; set; } = "pause";
+    /// <summary>Stage it after the first ending with Detail mode on (the settings' longest form).</summary>
+    [Export] public bool AfterEnding { get; set; }
 
     private RunScene? _run;
     private int _frame;
@@ -17,6 +19,7 @@ public partial class MenuView : Node
     public override void _Ready()
     {
         ProcessMode = ProcessModeEnum.Always;
+        Core.UserSettings.SetProgressForTest(AfterEnding, AfterEnding);
         if (Mode == "title_settings")
         {
             var title = GD.Load<PackedScene>("res://scenes/Title.tscn").Instantiate<Title>();

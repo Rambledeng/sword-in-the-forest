@@ -91,7 +91,8 @@ public partial class RunBotScenario : Scenario
         Check(_sawPhase2, "boss phase 2 never triggered");
         Check(attacks.Contains("boss_charge") || attacks.Contains("boss_cleave_1"), "no phase 1 boss attacks");
         Check(spoken.Contains("sword.boss.phase2") && spoken.Contains("sword.boss.dead"), "boss lines missing");
-        Check(_run.Summary.Lines.Any(l => l.Contains(" ms")), "the summary does not show the reading");
+        Check(!_run.Summary.Lines.Any(l => l.Contains(" ms")), "the summary shows milliseconds before Detail mode");
+        Check(UserSettings.EndingSeen, "beating the boss did not mark the first ending");
         if (Mode == "full")
         {
             Check(s.RoomsCleared == 7, $"cleared {s.RoomsCleared} of 7 rooms");

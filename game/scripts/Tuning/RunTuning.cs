@@ -55,6 +55,10 @@ public partial class RunTuning : Resource
     /// <summary>It comments again when its median has moved this much (fraction).</summary>
     [Export(PropertyHint.Range, "0,1,0.01")] public float ReadingShift { get; set; }
     [Export(PropertyHint.Range, "1,100,1")] public int ReadingMinGap { get; set; }
+    /// <summary>The summary (without Detail mode) calls a median at or below this "quick"...</summary>
+    [Export(PropertyHint.Range, "100,600,5")] public int ReadingQuickMs { get; set; }
+    /// <summary>...and at or above this "slow"; in between, "your hand is learning".</summary>
+    [Export(PropertyHint.Range, "100,800,5")] public int ReadingSlowMs { get; set; }
 
     [ExportGroup("Rooms")]
     [Export(PropertyHint.Range, "0,5000,50")] public int DeathToSummaryMs { get; set; }

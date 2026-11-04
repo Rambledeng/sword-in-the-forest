@@ -69,4 +69,8 @@ public partial class PlayerTuning : Resource
     [Export(PropertyHint.Range, "0,1000,10")] public int InputBufferMs { get; set; }
     /// <summary>A guard press this soon after the previous one only blocks: mashing guard does not deflect.</summary>
     [Export(PropertyHint.Range, "0,1000,10")] public int DeflectMashLockoutMs { get; set; }
+
+    [ExportGroup("Look")]
+    /// <summary>Each new soul's tint: saturation of its random hue (0 = no tint).</summary>
+    [Export(PropertyHint.Range, "0,1,0.01")] public float SoulTintStrength { get; set; }
 }

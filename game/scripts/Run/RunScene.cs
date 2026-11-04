@@ -85,11 +85,14 @@ public partial class RunScene : Node2D
         Telemetry.Instance.StartRun();
         GD.Print($"Run seed {seed}");
 
-        Player = new Player { Invulnerable = Invulnerable };
+        // Each new soul looks a little different: its tint is seeded by the run and the souls fallen.
+        Player = new Player { Invulnerable = Invulnerable, Tint = Player.SoulTint(unchecked(seed * 7919 + (DirectorService.Instance?.SoulsFallen ?? 0))) };
         if (Controls != null) Player.Controls = Controls;
         Player.Died += _ => EndRun(false);
         Player.FinisherLanded += (_, e) => { if (e.IsGone) OnFinished(e); };
         Player.SparedEnemy += (_, _) => { };
+        Stats.MeritGained += () => ValueFx(karma: false);
+        Stats.KarmaGained += () => ValueFx(karma: true);
 
         Camera = new ShakeCamera { Target = Player };
         AddChild(Camera);
@@ -370,17 +373,27 @@ public partial class RunScene : Node2D
         if (e is not TutorialGhost and not TavernBoss) e.BegRoll = en => Mercy.Decide(en.SurrenderChance, en.NextRoll);
         e.Surrendered += _ =>
         {
-            // The first beggar (always genuine) teaches spare versus finish.
+            // The sword wants every beggar dead, and never warns about fakes.
             SayOnce("sword.first_surrender");
         };
         e.Spared += _ =>
         {
             Stats.Spare();
+            // A genuine beggar walks away: the sword is grim about it.
             SayOnce("sword.first_spare");
-            SayOnce("sword.mercy.warn");
         };
-        e.Betrayed += _ => SayOnce("sword.first_fake");
+        // A spared fake attacks: scorn. A fake that strikes at your back: cut it down.
+        e.Betrayed += en => SayOnce(en.BetrayedOnSpare ? "sword.spared_fake" : "sword.first_fake");
         if (e is TavernBoss boss) boss.PhaseChanged += _ => SwordVoice.Say("sword.boss.phase2");
+    }
+
+    /// <summary>Merit and karma are felt, not counted: glitter or smoke on the player.</summary>
+    public int ValueFxPlayed { get; private set; }
+
+    private void ValueFx(bool karma)
+    {
+        ValueFxPlayed++;
+        MeritFx.Play(Player, Player.BodyCenter, karma, Plan.Seed * 31 + ValueFxPlayed);
     }
 
     /// <summary>A finisher killed <paramref name="e"/>.</summary>
@@ -390,7 +403,6 @@ public partial class RunScene : Node2D
         if (e.DiedBegging)
         {
             SayOnce("sword.first_karma");
-            SayOnce("sword.mercy.warn");
         }
         else if (e.DiedFaking) SayOnce("sword.fake_seen");
         else if (e is not TavernBoss && e is not TutorialGhost) SayOnce("sword.first_finisher");
@@ -453,6 +465,9 @@ public partial class RunScene : Node2D
 
     // ---- The end ---------------------------------------------------------------------------
 
+    /// <summary>This run's win was the player's first ending.</summary>
+    public bool FirstEnding { get; private set; }
+
     /// <summary>Screenshot stage: end the run now.</summary>
     public void EndForShot(bool won) => EndRun(won);
 
@@ -461,6 +476,12 @@ public partial class RunScene : Node2D
         if (Stats.Ended) return;
         Stats.End(won);
         _coach?.End();
+        if (won)
+        {
+            // The first ending unlocks Detail mode (saved in settings.cfg).
+            FirstEnding = !UserSettings.EndingSeen;
+            UserSettings.MarkEndingSeen();
+        }
         if (!won)
         {
             DirectorService.Instance?.AddSoulFallen();
@@ -474,7 +495,7 @@ public partial class RunScene : Node2D
         var d = DirectorService.Instance;
         var est = d?.Director.Estimate() ?? default;
         Summary = new SummaryScreen(Stats, est, d?.Leads.Adaptive ?? false, d?.SoulsFallen ?? 0, Plan.Rooms.Count(),
-            Stats.Won ? null : FellIn);
+            Stats.Won ? null : FellIn) { FirstEnding = FirstEnding };
         Summary.RetryRequested += Retry;
         Summary.TitleRequested += ToTitle;
         AddChild(Summary);
@@ -548,12 +569,12 @@ public partial class RunScene : Node2D
         if (d == null || Stats.Ended) return;
         var est = d.Director.Estimate();
         var change = _watcher.Observe(est.MedianMs, est.Attunement, est.Observations);
-        var args = new Dictionary<string, string> { ["ms"] = ((int)Math.Round(est.MedianMs)).ToString() };
+        // The sword reads the player in words (quick, slow, learning), never in numbers.
         switch (change)
         {
-            case ReadingChange.Attuned: SwordVoice.Say("sword.read.attuned", args); break;
-            case ReadingChange.Quicker: SwordVoice.Say("sword.read.quicker", args); break;
-            case ReadingChange.Slower: SwordVoice.Say("sword.read.slower", args); break;
+            case ReadingChange.Attuned: SwordVoice.Say("sword.read.attuned"); break;
+            case ReadingChange.Quicker: SwordVoice.Say("sword.read.quicker"); break;
+            case ReadingChange.Slower: SwordVoice.Say("sword.read.slower"); break;
         }
     }
 

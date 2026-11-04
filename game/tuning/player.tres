@@ -51,3 +51,4 @@ BrokenMs = 1000
 HurtMs = 260
 InputBufferMs = 100
 DeflectMashLockoutMs = 200
+SoulTintStrength = 0.22

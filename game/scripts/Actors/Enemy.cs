@@ -92,6 +92,8 @@ public abstract partial class Enemy : CharacterBody2D
     public bool Revealed { get; private set; }
     /// <summary>It was cut down while only pretending to beg (no karma).</summary>
     public bool DiedFaking { get; private set; }
+    /// <summary>The fake dropped the act because it was spared (not because the player turned away).</summary>
+    public bool BetrayedOnSpare { get; private set; }
     /// <summary>A fake beggar attacks (spared, or the player turned away).</summary>
     public event Action<Enemy>? Betrayed;
     /// <summary>A random number in [0, 1) from the enemy's own generator (the run's mercy rules use it).</summary>
@@ -697,6 +699,7 @@ public abstract partial class Enemy : CharacterBody2D
         if (IsFake)
         {
             // It was never sorry.
+            BetrayedOnSpare = true;
             Betray();
             return true;
         }

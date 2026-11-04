@@ -79,6 +79,18 @@ public partial class Player : CharacterBody2D, IThreatTarget
     public PlayerMods Mods { get; set; } = new();
     /// <summary>Test runs: attacks still resolve and log, but take no health.</summary>
     public bool Invulnerable { get; set; }
+    /// <summary>This wandering soul's own colour tint (seeded per soul; see <see cref="SoulTint"/>).</summary>
+    public Color Tint { get; set; } = Colors.White;
+
+    /// <summary>
+    /// A slight, seeded colour for each new soul, so each death brings a different wielder: a random
+    /// hue at <c>SoulTintStrength</c> saturation, never darker than full brightness.
+    /// </summary>
+    public static Color SoulTint(int seed)
+    {
+        var rng = new System.Random(seed);
+        return Color.FromHsv((float)rng.NextDouble(), Tunables.Player.SoulTintStrength, 1f);
+    }
     /// <summary>Drugged wine: movement is slowed until this game time.</summary>
     public double SlowedUntilMs { get; private set; }
     public bool IsSlowed => Clock.NowMs < SlowedUntilMs;
@@ -731,6 +743,6 @@ public partial class Player : CharacterBody2D, IThreatTarget
         var flashing = now < _flashUntilMs;
         _body.SetFlash(flashing ? 0.6f : 0f, _flashColor);
         // Drugged wine: a sickly purple tint while it lasts.
-        _body.SelfModulate = IsSlowed ? new Color(0.85f, 0.7f, 1f) : Colors.White;
+        _body.SelfModulate = IsSlowed ? new Color(0.85f, 0.7f, 1f) * Tint : Tint;
     }
 }

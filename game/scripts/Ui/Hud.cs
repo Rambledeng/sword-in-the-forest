@@ -29,6 +29,8 @@ public partial class Hud : CanvasLayer
     public string HintKey { get; set; } = "ui.arena.hint";
     /// <summary>Shows the boss's name and health bar at the top while set.</summary>
     public Enemy? Boss { get; set; }
+    /// <summary>The attunement meter is on screen (Detail mode only).</summary>
+    public bool AttunementShown => _attunement.Visible;
 
     public override void _Ready()
     {
@@ -162,12 +164,13 @@ public partial class Hud : CanvasLayer
         _canvas.DrawRect(frame, new Color(0.6f, 0.45f, 0.4f, 0.8f), false, 1f);
     }
 
-    /// <summary>The attunement meter (人剑合一): how sure the sword is about the player's reaction time.</summary>
+    /// <summary>The attunement meter (人剑合一): how sure the sword is about the player's reaction time (Detail mode only).</summary>
     private void DrawAttunement()
     {
         var director = DirectorService.Instance;
-        _attunement.Visible = director != null;
-        if (director == null) return;
+        // Hidden until the first ending, then shown in Detail mode.
+        _attunement.Visible = director != null && UserSettings.ShowDetails;
+        if (!_attunement.Visible) return;
         var a = (float)director.Director.Estimate().Attunement;
         const float w = 44;
         var y = _attunement.Position.Y + _attunement.Size.Y + 1;
