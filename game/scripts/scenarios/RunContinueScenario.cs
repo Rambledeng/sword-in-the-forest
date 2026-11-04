@@ -15,6 +15,7 @@ public partial class RunContinueScenario : Scenario
     private RunScene _run = null!;
     private int _stage;
     private int _wait;
+    private Color _firstTint;
 
     protected override bool FailOnTimeout => true;
 
@@ -32,6 +33,8 @@ public partial class RunContinueScenario : Scenario
                 return;
             case 1:
                 Check(_run.Room is { Plan.Area: Area.Outside }, "did not start outside the tavern");
+                _firstTint = _run.Player.Tint;
+                Check(_firstTint != Colors.White, "the soul has no tint");
                 _run.Player.Kill();
                 _stage = 2;
                 return;
@@ -58,6 +61,8 @@ public partial class RunContinueScenario : Scenario
                 Check(_run.Stats.Upgrades.SequenceEqual(new[] { Upgrade.Vitality }), "the upgrade was not kept");
                 Check(_run.Player.MaxHealth == Tunables.Player.MaxHealth + Tunables.Run.VitalityHealth, "Vitality's health is missing");
                 Check(RunScene.NextArea == null, "the continuation was not consumed");
+                Check(_run.Player.Tint != _firstTint, "the new soul has the same tint as the last");
+                Check(Mathf.Min(_run.Player.Tint.R, Mathf.Min(_run.Player.Tint.G, _run.Player.Tint.B)) >= 1f - Tunables.Player.SoulTintStrength - 0.01f, "the tint is more than slight");
                 GD.Print($"  new soul at step {_run.StepIndex} ({_run.Room!.Plan.Template.Id}), upgrades {string.Join(",", _run.Stats.Upgrades)}");
                 Pass();
                 return;

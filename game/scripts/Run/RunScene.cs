@@ -85,7 +85,8 @@ public partial class RunScene : Node2D
         Telemetry.Instance.StartRun();
         GD.Print($"Run seed {seed}");
 
-        Player = new Player { Invulnerable = Invulnerable };
+        // Each new soul looks a little different: its tint is seeded by the run and the souls fallen.
+        Player = new Player { Invulnerable = Invulnerable, Tint = Player.SoulTint(unchecked(seed * 7919 + (DirectorService.Instance?.SoulsFallen ?? 0))) };
         if (Controls != null) Player.Controls = Controls;
         Player.Died += _ => EndRun(false);
         Player.FinisherLanded += (_, e) => { if (e.IsGone) OnFinished(e); };
