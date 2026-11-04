@@ -82,6 +82,8 @@ public abstract partial class Enemy : CharacterBody2D
 
     /// <summary>Chance it begs instead of kneeling when its posture breaks (0 in the test arena).</summary>
     public float SurrenderChance { get; set; }
+    /// <summary>Where its lead times come from (null: the game's, through <see cref="CombatServices"/>).</summary>
+    public ILeadTimeSource? LeadTimesOverride { get; set; }
     /// <summary>The run's mercy rules decide kneel, beg or fake beg at a posture break (null: roll <see cref="SurrenderChance"/>).</summary>
     public Func<Enemy, BegKind>? BegRoll { get; set; }
     /// <summary>Its begging is a trick (only meaningful while it begs).</summary>
@@ -174,7 +176,7 @@ public abstract partial class Enemy : CharacterBody2D
 
         Health = Tuning.MaxHealth;
         Posture.Max = Tuning.MaxPosture;
-        Runner.LeadTimes = CombatServices.LeadTimes;
+        Runner.LeadTimes = LeadTimesOverride ?? CombatServices.LeadTimes;
         Runner.Glint += OnGlint;
         Runner.Swing += OnSwing;
         Runner.Impact += OnImpact;
@@ -414,7 +416,7 @@ public abstract partial class Enemy : CharacterBody2D
     {
         _attack = attack;
         _swingStartMs = -1;
-        Runner.LeadTimes = CombatServices.LeadTimes;
+        Runner.LeadTimes = LeadTimesOverride ?? CombatServices.LeadTimes;
         Runner.Start(attack.ToSpec(WindupFactor), Clock.NowMs, attack.SwingMs);
         Enter(State.Attack);
     }

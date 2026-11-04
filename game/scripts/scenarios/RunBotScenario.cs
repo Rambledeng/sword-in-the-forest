@@ -68,7 +68,7 @@ public partial class RunBotScenario : Scenario
             _steps = _run.StepIndex;
             GD.Print($"  frame {frame}: step {_steps} {(_run.Step.Room?.Template.Id ?? "upgrade")}");
         }
-        if (_service!.Leads.Mode == DirectorMode.Calibrate && _run.Step.Room?.Area == Area.Tutorial) _sawCalibrate = true;
+        if (_service!.Leads.Mode == DirectorMode.Calibrate) _sawCalibrate = true;
         if (_run.Boss != null && GodotObject.IsInstanceValid(_run.Boss) && _run.Boss.Phase == 2) _sawPhase2 = true;
         if (Mode == "mercy") { CheckMercy(frame); return; }
         _bot.Step();
@@ -92,8 +92,12 @@ public partial class RunBotScenario : Scenario
             Check(s.RoomsCleared == 7, $"cleared {s.RoomsCleared} of 7 rooms");
             Check(_rooms.Count == 7, $"visited {_rooms.Count} rooms");
             Check(_bot.UpgradesChosen == 2 && s.Upgrades.Count == 2, "expected two upgrade choices");
-            Check(_sawCalibrate, "the tutorial ghost never calibrated");
-            Check(_service.Leads.Mode == DirectorMode.Control, "still calibrating after the tutorial");
+            Check(!_sawCalibrate, "the director calibrated (it must control from the first attack)");
+            var tutorialAttacks = lines.Where(l => (string)l["attack"]! == "ghost_slash").ToList();
+            Check(tutorialAttacks.All(l => (string)l["glint"]! == "white"), "a red attack in the tutorial");
+            var firstRed = lines.FirstOrDefault(l => (string)l["glint"]! == "red");
+            Check(firstRed != null && Convert.ToDouble(firstRed["lead_ms"]) >= Tunables.Run.FirstRedLeadMs, "the first red attack did not get the generous lead");
+            Check(spoken.Contains("sword.first_spear"), "the sword never introduced the spearman's red");
             foreach (var id in new[] { "ghost_slash", "saber_slash_1", "archer_shot" })
                 Check(attacks.Contains(id), $"no {id} in telemetry");
             Check(attacks.Contains("spear_thrust") || attacks.Contains("spear_sweep"), "no spearman attacks");

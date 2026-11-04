@@ -66,6 +66,8 @@ public partial class RunScene : Node2D
     public Area? ContinuedFrom { get; private set; }
     /// <summary>Kneel, beg or fake beg at each posture break (first beggar genuine).</summary>
     public MercyRules Mercy { get; private set; } = null!;
+    /// <summary>The run's first red attack gets a generous lead.</summary>
+    public FirstRedLead FirstRed { get; private set; } = null!;
 
     public event Action<Room>? RoomEntered;
 
@@ -76,6 +78,7 @@ public partial class RunScene : Node2D
         NextSeed = null;
         Plan = RunPlan.Build(seed);
         Mercy = new MercyRules(Tunables.Run.FakeBegChance);
+        FirstRed = new FirstRedLead(() => CombatServices.LeadTimes, Tunables.Run.FirstRedLeadMs);
         Telemetry.Instance.StartRun();
         GD.Print($"Run seed {seed}");
 
@@ -245,6 +248,8 @@ public partial class RunScene : Node2D
 
     private void HookEnemy(Enemy e)
     {
+        e.LeadTimesOverride = FirstRed;
+        if (e is Spearman) SayOnce("sword.first_spear");
         if (e is not TutorialGhost and not TavernBoss) e.BegRoll = en => Mercy.Decide(en.SurrenderChance, en.NextRoll);
         e.Surrendered += _ => SayOnce("sword.first_surrender");
         e.Spared += _ =>

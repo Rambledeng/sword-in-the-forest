@@ -12,6 +12,8 @@ public partial class RunTuning : Resource
     /// <summary>Fewer for a returning player whose reading already has this many observations.</summary>
     [Export(PropertyHint.Range, "0,40,1")] public int TutorialAttacksReturning { get; set; }
     [Export(PropertyHint.Range, "0,1000,5")] public int ReturningObservations { get; set; }
+    /// <summary>The run's first red attack (the spearman's thrust) gets at least this lead.</summary>
+    [Export(PropertyHint.Range, "200,1500,10")] public int FirstRedLeadMs { get; set; }
 
     [ExportGroup("Mercy")]
     /// <summary>Chance that a posture-broken enemy drops its weapon and begs instead of kneeling.</summary>

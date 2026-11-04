@@ -56,9 +56,9 @@ sword.tut.wake,"Sixty years in the bitter bamboo. Your hand is cold, soul. Let m
 sword.tut.move,Walk with WASD or the stick. Strike with attack.,Loop met WASD of de stick. Sla toe met aanvallen.,WASD 或摇杆移动，攻击键出剑。
 sword.tut.glint,"When its blade flashes, tap guard. That is a deflect.","Flitst zijn kling, tik dan op blokkeren. Zo pareer je.",刀光一闪，轻按格挡。这便是弹反。
 sword.tut.block,Hold guard to block. Each block weighs on your posture.,Houd blokkeren ingedrukt. Elke blokkade drukt op je houding.,按住格挡可以挡下，但每一挡都压在你的架势上。
-sword.tut.roll,Roll through a blow. Against a red flash it is the only answer.,Rol door een slag heen. Tegen een rode flits is dat het enige antwoord.,翻滚可以躲过一击。见到红光，唯有翻滚。
+sword.tut.roll,Roll through a blow. For most of the roll nothing can touch you.,Rol door een slag heen. Tijdens het grootste deel van de rol raakt niets je.,翻滚可以穿过一击。滚动之间，刀剑近不了身。
 sword.tut.gourd,"Hurt? Drink from the gourd. Three sips each area, and drinking is slow.","Gewond? Drink uit de kalebas. Drie slokken per gebied, en drinken gaat traag.",受伤了？喝一口酒葫芦。每个区域三口，喝得慢，小心。
-sword.tut.break,Enough. I know your hand now. Break the ghost.,Genoeg. Ik ken je hand nu. Breek de geest.,够了，我已识得你的手。破了这鬼魂。
+sword.tut.break,Enough practice. Break the ghost.,Genoeg geoefend. Breek de geest.,练够了。破了这鬼魂。
 sword.tut.finish,It kneels. Strike now to finish it.,Het knielt. Sla nu toe om het af te maken.,它跪下了。出剑，补刀。
 sword.tut.done,The way north is open. Walk on.,De weg naar het noorden is open. Loop verder.,北面的路开了。走吧。
 sword.first_deflect,Steel on steel. Good.,Staal op staal. Goed.,铁碰铁。好。
@@ -89,4 +89,5 @@ sword.verdict.loss_merit,You fell with clean hands. That is not nothing.,Je viel
 sword.verdict.loss_balanced,You fell. I will remember your hand; the next soul will feel it.,Je viel. Ik onthoud je hand; de volgende ziel zal het voelen.,你倒下了。我记得你的手，下一个游魂会感觉到。
 sword.verdict.loss_karma,"You fell, and the ones who begged laughed. Do better, next soul.","Je viel, en wie smeekten lachten. Doe het beter, volgende ziel.",你倒下了，求饶的人在笑。下一个游魂，好好做。
 summary.next_soul,The next soul will take up the sword in {area}.,De volgende ziel neemt het zwaard op in {area}.,下一个游魂将在{area}拿起这把剑。
-sword.new_soul,"A new hand. The last one fell here; we begin again where it did.","Een nieuwe hand. De vorige viel hier; we beginnen opnieuw waar zij viel.",新的手。上一个倒在这里，我们就从这里重来。
+sword.new_soul,A new hand. The last one fell here; we begin again where it did.,Een nieuwe hand. De vorige viel hier; we beginnen opnieuw waar zij viel.,新的手。上一个倒在这里，我们就从这里重来。
+sword.first_spear,"A spear. When its tip flashes red, no guard and no deflect will stop it. Roll.","Een speer. Flitst de punt rood, dan houdt geen blokkade of parade hem tegen. Rol.",枪客。枪尖红光一闪，挡不住，也弹不开。只能翻滚。

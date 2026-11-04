@@ -8,6 +8,7 @@ script = ExtResource("1_script")
 TutorialAttacks = 12
 TutorialAttacksReturning = 6
 ReturningObservations = 40
+FirstRedLeadMs = 900
 SurrenderChance = 0.25
 SpareRangePx = 40.0
 FakeBegChance = 0.33
