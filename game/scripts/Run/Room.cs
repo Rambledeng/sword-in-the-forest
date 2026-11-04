@@ -24,6 +24,19 @@ public partial class Room : Node2D, INav
     private static readonly Rect2 Barrel = new(144, 144, 16, 16);
     private static readonly Rect2 Rock = new(256, 144, 16, 16);
     private static readonly Rect2 BigRock = new(208, 128, 32, 32);
+    // The tavern, from the pack's house tileset.
+    private const string House = "res://assets/third_party/ninja_adventure/tiles/tileset_house.png";
+    private static readonly Rect2[] TableCloth = { new(256, 256, 16, 32), new(272, 256, 16, 32), new(288, 256, 16, 32), new(304, 256, 16, 32) }; // left, middle, right, single
+    private static readonly Rect2[] Counter = { new(272, 288, 16, 16), new(288, 288, 16, 16), new(304, 288, 16, 16), new(256, 288, 16, 16) };
+    private static readonly Rect2 HouseBarrel = new(256, 240, 16, 16);
+    private static readonly Rect2 HouseBarrelOpen = new(272, 240, 16, 16);
+    private static readonly Rect2 WineJar = new(288, 176, 16, 16);
+    private static readonly Rect2 DoorClosed = new(400, 288, 16, 16);
+    private static readonly Rect2 DoorOpen = new(416, 288, 16, 16);
+    private static readonly Rect2 PaperWindow = new(0, 48, 16, 16);
+    private static readonly Rect2 LatticeWindow = new(16, 48, 16, 16);
+    private static readonly Rect2[] Banners = { new(368, 320, 16, 16), new(400, 320, 16, 16), new(352, 320, 16, 16) };
+    private Texture2D? _house;
 
     private readonly List<Enemy> _alive = new();
     private readonly List<Node2D> _gate = new();
@@ -55,6 +68,7 @@ public partial class Room : Node2D, INav
     public override void _Ready()
     {
         _nature = GD.Load<Texture2D>(Nature);
+        if (Plan.Area == Area.Tavern) _house = GD.Load<Texture2D>(House);
         _rng = new RandomNumberGenerator { Seed = (ulong)(uint)Plan.Seed };
         AddChild(MakeFloor());
         Actors = new Node2D { YSortEnabled = true, Name = "Actors" };
@@ -126,6 +140,9 @@ public partial class Room : Node2D, INav
         _gateBody = null;
         foreach (var g in _gate) g.QueueFree();
         _gate.Clear();
+        // The tavern's door stands open.
+        if (_house != null)
+            foreach (var e in T.Exits) Place(DoorOpen, TileCenter(e) + new Vector2(0, 7), 1f, _house);
         QueueRedraw();
         Cleared?.Invoke(this);
     }
@@ -251,7 +268,7 @@ public partial class Room : Node2D, INav
             switch (T.Area)
             {
                 case Area.Tavern:
-                    _gate.Add(Box(at - new Vector2(8, 15), new Vector2(16, 15), new Color(0.36f, 0.22f, 0.12f), new Color(0.5f, 0.33f, 0.18f)));
+                    _gate.Add(Place(DoorClosed, at, 1f, _house));
                     break;
                 case Area.Outside:
                     _gate.Add(Place(Bush, at, 0.95f));
@@ -313,14 +330,8 @@ public partial class Room : Node2D, INav
         switch (T.Area)
         {
             case Area.Tavern:
-            {
-                var wide = T.At(new TilePos(p.X - 1, p.Y)) == Tile.Obstacle || T.At(new TilePos(p.X + 1, p.Y)) == Tile.Obstacle;
-                var tall = T.At(new TilePos(p.X, p.Y - 1)) == Tile.Obstacle || T.At(new TilePos(p.X, p.Y + 1)) == Tile.Obstacle;
-                if (wide && !tall) Box(feet - new Vector2(8, 12), new Vector2(16, 12), new Color(0.42f, 0.26f, 0.14f), new Color(0.6f, 0.4f, 0.22f));
-                else if (wide || tall) Box(feet - new Vector2(8, 14), new Vector2(16, 14), new Color(0.45f, 0.28f, 0.15f), new Color(0.62f, 0.42f, 0.24f));
-                else Place(Barrel, feet, 1f);
+                DecorTavern(p, feet);
                 break;
-            }
             case Area.Outside:
             {
                 var r = _rng.Randf();
@@ -332,6 +343,39 @@ public partial class Room : Node2D, INav
                 Place(Stalk, feet + new Vector2(4, 2), _rng.RandfRange(0.85f, 1f));
                 Place(Bush, feet + new Vector2(0, 3), 1f);
                 break;
+        }
+    }
+
+    private bool Obstacle(int x, int y) => T.At(new TilePos(x, y)) == Tile.Obstacle;
+
+    /// <summary>
+    /// Tavern furniture by the shape of the obstacle block: two rows deep is a table with a cloth,
+    /// one row a counter, taller blocks stacked barrels and crates, and a lone tile a wine jar.
+    /// </summary>
+    private void DecorTavern(TilePos p, Vector2 feet)
+    {
+        var top = p.Y;
+        while (Obstacle(p.X, top - 1)) top--;
+        var bottom = p.Y;
+        while (Obstacle(p.X, bottom + 1)) bottom++;
+        var height = bottom - top + 1;
+        var left = Obstacle(p.X - 1, p.Y);
+        var right = Obstacle(p.X + 1, p.Y);
+        var piece = left && right ? 1 : right ? 0 : left ? 2 : 3;
+        if (height == 2)
+        {
+            // The table sprite is two tiles tall; draw it once, from its bottom row.
+            if (p.Y == bottom) Place(TableCloth[piece], feet, 1f, _house);
+        }
+        else if (height == 1)
+        {
+            Place(piece == 3 ? (_rng.Randf() < 0.5f ? WineJar : HouseBarrel) : Counter[piece], feet, 1f, _house);
+            if (piece != 3 && _rng.Randf() < 0.35f) Place(WineJar, feet + new Vector2(0, -9), 1f, _house);
+        }
+        else
+        {
+            var r = _rng.Randf();
+            Place(r < 0.45f ? HouseBarrel : r < 0.7f ? HouseBarrelOpen : Counter[3], feet, 1f, _house);
         }
     }
 
@@ -352,16 +396,26 @@ public partial class Room : Node2D, INav
         Rect(new Rect2(TilePx - 2, TilePx, 2, h - 2 * TilePx), trim);
         Rect(new Rect2(w - TilePx, 0, TilePx, h), wall);
         Rect(new Rect2(w - TilePx, TilePx, 2, h - 2 * TilePx), trim);
-        // Lanterns along the top wall.
-        for (var x = 3 * TilePx; x < w - 2 * TilePx; x += 6 * TilePx)
-            Rect(new Rect2(x, 4, 4, 6), new Color(0.95f, 0.45f, 0.25f));
+        // Planks on the walls.
+        for (var x = 5; x < w; x += 7) Rect(new Rect2(x, 1, 1, TilePx - 4), new Color(0.2f, 0.12f, 0.08f));
+        // Windows, banners and lanterns along the top wall (not over the door).
+        var exits = T.Exits.Select(e => e.X).ToHashSet();
+        var i = 0;
+        for (var tx = 2; tx < T.Width - 2; tx += 3)
+        {
+            if (exits.Contains(tx) || exits.Contains(tx - 1) || exits.Contains(tx + 1)) continue;
+            var at = new Vector2(tx * TilePx + TilePx / 2f, TilePx);
+            var region = (i++ % 3) switch { 0 => PaperWindow, 1 => Banners[i / 3 % Banners.Length], _ => LatticeWindow };
+            layer.AddChild(new Sprite2D { Texture = _house, RegionEnabled = true, RegionRect = region, Position = at - new Vector2(0, 8), TextureFilter = TextureFilterEnum.Nearest });
+            if (i % 3 == 0) Rect(new Rect2(at.X + 9, 4, 3, 5), new Color(0.95f, 0.45f, 0.25f));
+        }
     }
 
-    private Node2D Place(Rect2 region, Vector2 feet, float tint)
+    private Node2D Place(Rect2 region, Vector2 feet, float tint, Texture2D? sheet = null)
     {
         var s = new Sprite2D
         {
-            Texture = _nature,
+            Texture = sheet ?? _nature,
             RegionEnabled = true,
             RegionRect = region,
             Offset = new Vector2(0, -region.Size.Y / 2),
