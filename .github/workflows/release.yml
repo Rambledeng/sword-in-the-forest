@@ -79,7 +79,7 @@ jobs:
           timeout 600 "$godot" --headless --path game --import > .logs/import.log 2>&1 || true
           timeout 600 "$godot" --headless --path game --export-release "Linux" ../build/linux/SwordInTheForest.x86_64 > .logs/export-linux.log 2>&1
           timeout 600 "$godot" --headless --path game --export-release "Windows" ../build/windows/SwordInTheForest.exe > .logs/export-windows.log 2>&1
-          tail -5 .logs/export-*.log
+          tail -n 5 .logs/export-*.log
           test -x build/linux/SwordInTheForest.x86_64
           test -f build/windows/SwordInTheForest.exe
           cp LICENSE CREDITS.md build/linux/
