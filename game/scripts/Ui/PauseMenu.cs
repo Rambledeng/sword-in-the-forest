@@ -33,7 +33,7 @@ public partial class PauseMenu : CanvasLayer
         _resume = new Button { Text = "ui.pause.resume" };
         _resume.Pressed += () => Toggle(false);
         stack.AddChild(_resume);
-        var quit = new Button { Text = "ui.pause.quit" };
+        var quit = QuitButton = new Button { Text = "ui.pause.quit" };
         quit.Pressed += () =>
         {
             Toggle(false);
@@ -41,6 +41,16 @@ public partial class PauseMenu : CanvasLayer
         };
         stack.AddChild(quit);
     }
+
+    public override void _UnhandledInput(InputEvent e)
+    {
+        // The run is paused while this is open, so the menu closes itself.
+        if (!IsOpen || !e.IsActionPressed("pause")) return;
+        GetViewport().SetInputAsHandled();
+        Toggle(false);
+    }
+
+    public Button QuitButton { get; private set; } = null!;
 
     public void Toggle(bool open)
     {

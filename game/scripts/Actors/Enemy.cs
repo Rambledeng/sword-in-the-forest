@@ -302,7 +302,21 @@ public abstract partial class Enemy : CharacterBody2D
 
     private double _circleMs;
     private int _circleSign = 1;
-    protected bool CircleDone => StateElapsedMs >= _circleMs;
+    protected bool CircleDone => StateElapsedMs >= _circleMs && AttackSlotFree;
+
+    /// <summary>Fewer than MaxConcurrentAttacks other enemies are between their windup and impact.</summary>
+    protected bool AttackSlotFree
+    {
+        get
+        {
+            var max = Tunables.Combat.MaxConcurrentAttacks;
+            if (max <= 0) return true;
+            var busy = 0;
+            foreach (var e in All(this))
+                if (e != this && e.Current == State.Attack && e.Runner.Phase is AttackPhase.Windup or AttackPhase.Lead) busy++;
+            return busy < max;
+        }
+    }
     protected int CircleSign => _circleSign;
 
     protected virtual Vector2 UpdateCircle(Vector2 toTarget, float dist, bool targetAlive)
@@ -312,7 +326,7 @@ public abstract partial class Enemy : CharacterBody2D
         if (dist > Tuning.CircleDistancePx * 1.8f) { Enter(State.Approach); return Vector2.Zero; }
         // A posture-broken player is punished at once with the fast counter.
         var punish = Target!.Current == Player.State.Broken && CounterAttack != null && dist <= Tuning.AttackRangePx * 1.5f;
-        if (StateElapsedMs >= _circleMs || punish)
+        if (CircleDone || punish)
         {
             StartAttack(punish ? CounterAttack! : ChooseAttack());
             return Vector2.Zero;

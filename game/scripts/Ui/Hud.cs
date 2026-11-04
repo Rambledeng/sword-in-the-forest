@@ -55,18 +55,15 @@ public partial class Hud : CanvasLayer
         _fallen.GrowVertical = Control.GrowDirection.Both;
         _canvas.AddChild(_fallen);
         _prompt = new Label { Text = "ui.hud.spare_prompt", HorizontalAlignment = HorizontalAlignment.Center, Visible = false, Modulate = new Color(1f, 0.95f, 0.75f) };
-        _prompt.SetAnchorsPreset(Control.LayoutPreset.CenterBottom);
         _prompt.GrowHorizontal = Control.GrowDirection.Both;
         _prompt.Position = new Vector2(0, -36);
         _canvas.AddChild(_prompt);
         _area = new Label { HorizontalAlignment = HorizontalAlignment.Center, Visible = false, AutoTranslateMode = AutoTranslateModeEnum.Disabled };
         _area.AddThemeFontSizeOverride("font_size", 24);
-        _area.SetAnchorsPreset(Control.LayoutPreset.CenterTop);
         _area.GrowHorizontal = Control.GrowDirection.Both;
         _area.Position = new Vector2(0, 44);
         _canvas.AddChild(_area);
         _bossName = new Label { Text = "combat.boss.name", HorizontalAlignment = HorizontalAlignment.Center, Visible = false, Modulate = new Color(1f, 0.85f, 0.8f) };
-        _bossName.SetAnchorsPreset(Control.LayoutPreset.CenterTop);
         _bossName.GrowHorizontal = Control.GrowDirection.Both;
         _bossName.Position = new Vector2(0, 2);
         _canvas.AddChild(_bossName);
@@ -86,6 +83,12 @@ public partial class Hud : CanvasLayer
         _sips.Text = Tr("ui.hud.gourd_sips").Replace("{sips}", Player.Sips.ToString());
         _fallen.Visible = Player.IsDead;
         _hint.Text = HintKey;
+        var bossShown = Boss != null && IsInstanceValid(Boss) && !Boss.IsGone;
+        _hint.Visible = !bossShown;
+        var w = _canvas.Size.X;
+        _bossName.Position = new Vector2(Mathf.Round((w - _bossName.Size.X) / 2), 2);
+        _area.Position = new Vector2(Mathf.Round((w - _area.Size.X) / 2), 44);
+        _prompt.Position = new Vector2(Mathf.Round((w - _prompt.Size.X) / 2), _canvas.Size.Y - 70);
         _prompt.Visible = !Player.IsDead && Player.SpareCandidate() != null;
         if (_area.Visible)
         {
@@ -93,7 +96,7 @@ public partial class Hud : CanvasLayer
             _area.Visible = left > 0;
             _area.Modulate = new Color(1f, 0.93f, 0.75f, Mathf.Clamp((float)left / 600f, 0f, 1f));
         }
-        _bossName.Visible = Boss != null && IsInstanceValid(Boss) && !Boss.IsGone;
+        _bossName.Visible = bossShown;
         _hint.Position = new Vector2(_canvas.Size.X - _hint.Size.X - 4, 2);
         _canvas.QueueRedraw();
     }

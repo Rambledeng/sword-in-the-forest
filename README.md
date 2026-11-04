@@ -16,7 +16,7 @@ tools/screenshot.sh Title        # render a scene to docs/screens/ (needs a disp
 tools/screenshot.sh screens/Showcase "" 6000 x   # staged fight: saves combat_*.png
 ```
 
-Open `game/project.godot` in Godot to play. Title → attack starts the test arena.
+Open `game/project.godot` in Godot to play. Title → attack starts a run (tutorial → bamboo forest → outside the tavern → tavern → boss). `Arena.tscn` is the old test arena.
 
 ## Controls
 
@@ -28,9 +28,9 @@ Open `game/project.godot` in Godot to play. Title → attack starts the test are
 | Guard (hold) / deflect (tap after the glint) | Right click or K | LB / L1 |
 | Roll | Space or L | A / ✕ |
 | Gourd | R | Y / △ |
-| Spare (later) | E | B / ○ |
-| Back to title | Esc | Start |
-| Tuning panel | F1 | |
+| Spare a begging enemy | E | B / ○ |
+| Pause (resume, quit to title) | Esc | Start |
+| Tuning panel / director overlay | F1 / F2 | |
 
 ![Glint](docs/screens/combat_glint.png) ![Deflect](docs/screens/combat_deflect.png)
 

@@ -182,7 +182,7 @@ public partial class Room : Node2D, INav
             Area.Outside => new ArenaFloor
             {
                 SizeTiles = size, Seed = Plan.Seed, Plain = new Vector2I(1, 8),
-                Variants = new[] { new Vector2I(8, 9), new Vector2I(9, 10), new Vector2I(11, 12) }, VariantChance = 0.1f,
+                Variants = new[] { new Vector2I(8, 9), new Vector2I(9, 10) }, VariantChance = 0.1f,
             },
             Area.Tavern => new ArenaFloor
             {
