@@ -18,6 +18,7 @@ Code: MIT, see LICENSE.
 | --- | --- | --- |
 | `actors/ninja_gray.png` | `Actor/Character/NinjaGray/SpriteSheet.png` | The player (the wandering soul) |
 | `actors/ninja_gray_faceset.png` | `Actor/Character/NinjaGray/Faceset.png` | Player portrait (later) |
+| `actors/skeleton.png` | `Actor/Character/Skeleton/SpriteSheet.png` | The skeleton beside the sword on the title |
 | `actors/camouflage_red.png` | `Actor/Character/CamouflageRed/SpriteSheet.png` | Saber bandit (刀客) |
 | `actors/camouflage_red_faceset.png` | `Actor/Character/CamouflageRed/Faceset.png` | Bandit portrait (later) |
 | `weapons/katana_in_hand.png` | `Items/Weapons/Katana/SpriteInHand.png` | The player's sword (鸣不平) |

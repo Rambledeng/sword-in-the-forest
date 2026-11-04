@@ -26,6 +26,9 @@ public partial class RunScene : Node2D
     private bool _changing;
     private int _lastHealth;
 
+    /// <summary>The title's start sequence ran: open the tutorial on the intro (zoom out, ghosts barge in).</summary>
+    public static bool PlayIntro { get; set; }
+
     /// <summary>The seed for the next run started by Retry (null: random).</summary>
     public static int? NextSeed { get; set; }
 
@@ -229,7 +232,12 @@ public partial class RunScene : Node2D
         if (plan.Area == Area.Tutorial)
         {
             var ghost = Room.Spawned.OfType<TutorialGhost>().FirstOrDefault();
-            if (ghost != null)
+            if (ghost != null && PlayIntro)
+            {
+                PlayIntro = false;
+                StartIntro(ghost);
+            }
+            else if (ghost != null)
             {
                 var d = DirectorService.Instance;
                 var r = Tunables.Run;
@@ -244,6 +252,107 @@ public partial class RunScene : Node2D
             SwordVoice.Say("sword.boss.intro");
         }
         RoomEntered?.Invoke(Room);
+    }
+
+    // ---- The intro: the view pulls back from the sword to the grove, then ghosts barge in ----
+
+    private double _introT = -1;
+    private TutorialGhost? _introGhost;
+    private Vector2 _ghostFrom, _ghostTo;
+    private IPlayerControls? _savedControls;
+    private readonly List<(Node2D Node, Vector2 From, Vector2 To)> _wisps = new();
+    private const double IntroZoomEnd = 1.6, IntroBargeAt = 1.3, IntroEnd = 2.5;
+
+    public bool InIntro => _introT >= 0;
+    private CanvasLayer? _introFade;
+
+    private void StartIntro(TutorialGhost ghost)
+    {
+        _introT = 0;
+        _introGhost = ghost;
+        _savedControls = Player.Controls;
+        Player.Controls = new BotControls();
+        // The soul stands where the sword was, in the middle of the grove.
+        Player.Position = Room!.SizePx / 2 + new Vector2(0, 24);
+        Camera.Zoom = new Vector2(3.5f, 3.5f);
+        Camera.GlobalPosition = Player.GlobalPosition;
+        Camera.ResetSmoothing();
+        _ghostTo = ghost.Position;
+        _ghostFrom = new Vector2(Room.SizePx.X / 2, -12);
+        ghost.DrillMode = true;
+        ghost.Visible = false;
+        // From the title's black, the grove fades in.
+        _introFade = new CanvasLayer { Layer = 40 };
+        var black = new ColorRect { Color = Colors.Black, MouseFilter = Control.MouseFilterEnum.Ignore };
+        black.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        _introFade.AddChild(black);
+        AddChild(_introFade);
+        ghost.Position = _ghostFrom;
+    }
+
+    private void TickIntro(double dtMs)
+    {
+        _introT += dtMs / 1000.0;
+        var t = _introT;
+        var z = (float)Mathf.Clamp(t / IntroZoomEnd, 0, 1);
+        var zoom = Mathf.Lerp(3.5f, 1f, 1 - (1 - z) * (1 - z));
+        Camera.Zoom = new Vector2(zoom, zoom);
+        if (_introFade != null) _introFade.GetChild<ColorRect>(0).Modulate = new Color(1, 1, 1, (float)Mathf.Clamp(1 - t / 0.7, 0, 1));
+        if (_introGhost != null && IsInstanceValid(_introGhost) && t >= IntroBargeAt)
+        {
+            if (!_introGhost.Visible)
+            {
+                _introGhost.Visible = true;
+                SheetFx.Spawn("smoke", 6, 14, _introGhost.BodyGlobal, z: 10);
+                Sfx.Play("swing", 0.1f, 0.8f);
+                SpawnWisps();
+            }
+            var k = (float)Mathf.Clamp((t - IntroBargeAt) / (IntroEnd - IntroBargeAt), 0, 1);
+            _introGhost.Position = _ghostFrom.Lerp(_ghostTo, 1 - (1 - k) * (1 - k));
+        }
+        foreach (var (node, from, to) in _wisps)
+        {
+            if (!IsInstanceValid(node)) continue;
+            var k = (float)Mathf.Clamp((t - IntroBargeAt) / (IntroEnd - IntroBargeAt + 0.4), 0, 1);
+            node.Position = from.Lerp(to, k);
+            node.Modulate = new Color(0.8f, 0.95f, 1f, 0.55f * (1 - k));
+        }
+        if (t < IntroEnd) return;
+        EndIntro();
+    }
+
+    /// <summary>Two more spirits rush through the grove and fade (only the one stays to fight).</summary>
+    private void SpawnWisps()
+    {
+        var tex = GD.Load<Texture2D>("res://assets/third_party/ninja_adventure/actors/spirit.png");
+        var size = Room!.SizePx;
+        foreach (var (from, to) in new[] { (new Vector2(size.X * 0.3f, -10), new Vector2(size.X * 0.1f, size.Y * 0.7f)), (new Vector2(size.X * 0.7f, -10), new Vector2(size.X * 0.92f, size.Y * 0.6f)) })
+        {
+            var s = new CharacterSprite(tex);
+            Room.Fx.AddChild(s);
+            s.Position = from;
+            _wisps.Add((s, from, to));
+        }
+    }
+
+    private void EndIntro()
+    {
+        _introT = -1;
+        Camera.Zoom = Vector2.One;
+        _introFade?.QueueFree();
+        _introFade = null;
+        if (_savedControls != null) Player.Controls = _savedControls;
+        foreach (var (node, _, _) in _wisps) if (IsInstanceValid(node)) node.QueueFree();
+        _wisps.Clear();
+        var ghost = _introGhost;
+        _introGhost = null;
+        if (ghost == null || !IsInstanceValid(ghost)) return;
+        ghost.Position = _ghostTo;
+        ghost.DrillMode = false;
+        var d = DirectorService.Instance;
+        var r = Tunables.Run;
+        var returning = d != null && d.Director.Observations >= r.ReturningObservations;
+        _coach = new TutorialCoach(ghost, returning ? r.TutorialAttacksReturning : r.TutorialAttacks);
     }
 
     private void HookEnemy(Enemy e)
@@ -396,6 +505,7 @@ public partial class RunScene : Node2D
             return;
         }
         Stats.ElapsedMs += clock.DeltaMs;
+        if (InIntro) TickIntro(clock.DeltaMs);
         _coach?.Tick();
         if (Player.Deflects > 0) SayOnce("sword.first_deflect");
         if (Player.IsSlowed) SayOnce("sword.boss.jar");
