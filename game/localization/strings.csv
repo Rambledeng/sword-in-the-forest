@@ -2,7 +2,7 @@ keys,en,nl,zh_CN
 ui.title.name,Sword in the Forest,Zwaard in het Woud,林中剑
 ui.title.press_start,Press attack to begin,Druk op aanvallen om te beginnen,按攻击键开始
 ui.hud.gourd_sips,×{sips},×{sips},×{sips}
-ui.arena.fallen,You have fallen. The sword waits.,Je bent gevallen. Het zwaard wacht.,你倒下了。剑在等你。
+ui.arena.fallen,You have fallen. The sword waits.,Je bent gevallen. Het zwaard wacht.,你倒下了。剑，仍在等。
 ui.arena.hint,F1 tuning · F2 director · Esc title,F1 afstellen · F2 regisseur · Esc titel,F1 调参 · F2 剑意观测 · Esc 返回标题
 ui.hud.attunement,Attunement,Afstemming,人剑合一
 ui.title.challenge,Challenge: {value},Uitdaging: {value},挑战：{value}
@@ -39,8 +39,8 @@ upgrade.iron_deflect.name,Iron Deflect,IJzeren Parade,铁弹
 upgrade.iron_deflect.desc,Deflects deal {pct}% more posture damage.,Parades doen {pct}% meer houdingsschade.,弹反的架势伤害 +{pct}%。
 upgrade.merciful_cut.name,Merciful Cut,Genadige Snede,慈悲一刀
 upgrade.merciful_cut.desc,Finishers heal {health} health.,Genadeslagen genezen {health} leven.,补刀回复 {health} 点生命。
-summary.title.win,The tavern falls silent.,De herberg valt stil.,酒馆归于寂静。
-summary.title.loss,The wandering soul fades.,De dolende ziel vervaagt.,游魂消散。
+summary.title.win,The tavern falls silent.,De herberg valt stil.,酒馆归于死寂。
+summary.title.loss,The wandering soul fades.,De dolende ziel vervaagt.,游魂散去。
 summary.merit_karma,Merit: {merit}   Karma: {karma},Verdienste: {merit}   Karma: {karma},功德：{merit}　业障：{karma}
 summary.kills_spared,Kills: {kills}   Spared: {spared},Gedood: {kills}   Gespaard: {spared},斩杀（怨）：{kills}　饶恕：{spared}
 summary.souls,Souls fallen: {deaths},Gevallen zielen: {deaths},游魂陨落（仇）：{deaths}
@@ -52,47 +52,47 @@ summary.attunement,Attunement: {pct}% after {n} attacks,Afstemming: {pct}% na {n
 summary.adaptive_off,Adaptive timing was off: every attack used its fixed timing.,Adaptieve timing stond uit: elke aanval had zijn vaste timing.,自适应时机已关闭：每次攻击都用固定时机。
 summary.retry,New soul,Nieuwe ziel,新的游魂
 summary.to_title,Title,Titel,标题
-sword.tut.wake,"Sixty years in the bitter bamboo, and they send me a cold hand. Move it, soul. I am thirsty.","Zestig jaar in het bittere bamboe, en dan krijg ik een koude hand. Beweeg, ziel. Ik heb dorst.",苦竹林中枯等六十载，来的却是一只冷手。动起来，游魂。我渴了。
-sword.tut.move,"WASD or the stick to walk. Attack to strike. Strike, I said.","WASD of de stick om te lopen. Aanvallen om toe te slaan. Sla toe, zei ik.",WASD 或摇杆走动，攻击键出剑。我说了，出剑！
-sword.tut.glint,"Its blade flashes: tap guard, now. That is a deflect. I will not show you twice.","Flitst zijn kling, tik dan op blokkeren, nu. Dat is pareren. Ik laat het je geen twee keer zien.",刀光一闪，即刻轻按格挡，这便是弹反。我不教第二遍。
-sword.tut.block,Hold guard to block. Each block weighs on your posture. Do not cower behind me for long.,Houd blokkeren ingedrukt. Elke blokkade drukt op je houding. Kruip niet te lang achter mij weg.,按住格挡可挡下一击，每挡一次，架势便沉一分。别总缩在我身后。
-sword.tut.roll,Roll through the blow; for most of the roll nothing can touch you. Then cut back.,Rol door de slag heen; bijna de hele rol raakt niets je. Sla dan terug.,翻滚穿过来招，滚动之间刀剑近不了身。滚完，就还它一刀。
-sword.tut.gourd,"Bleeding already? Drink from the gourd. Three sips each area, and drinking is slow. Be quick.","Bloed je nu al? Drink uit de kalebas. Drie slokken per gebied, en drinken gaat traag. Schiet op.",这就见血了？喝一口酒葫芦。每处三口，喝得慢，快些。
-sword.tut.break,Enough games. Break it.,Genoeg gespeeld. Breek het.,玩够了。破了它。
-sword.tut.finish,It kneels. Finish it. Now.,Het knielt. Maak het af. Nu.,它跪了。补刀，现在！
-sword.tut.done,North. There is more to kill.,Naar het noorden. Daar valt meer te doden.,往北走。那边还有得杀。
-sword.first_deflect,"Steel on steel. Again, and harder.","Staal op staal. Nog eens, en harder.",铁碰铁。再来，更狠些。
-sword.first_finisher,One more evil ghost back to the dust. More.,Weer een kwade geest tot stof. Meer.,又一个恶鬼归于尘土。再来。
-sword.first_surrender,It drops its blade and begs. Kill it.,Het laat zijn kling vallen en smeekt. Dood het.,它弃刀求饶。杀了它。
-sword.first_spare,You let it go. It will kill more innocents. A poor choice.,Je liet het gaan. Het zal meer onschuldigen doden. Een slechte keuze.,你放它走了。它还会再害无辜。愚不可及。
-sword.first_karma,Good. Begging changes nothing. No one spared mine.,Goed. Smeken verandert niets. Niemand spaarde de mijnen.,好。求饶又有何用？当年，又有谁饶过我的……
-sword.first_red,Red! No guard will hold it. Roll.,Rood! Geen blokkade houdt dat tegen. Rol.,红光！挡不住，翻滚！
-sword.first_arrow,An arrow is only a blade that flies. Knock it aside and go for the archer's throat.,Een pijl is maar een vliegende kling. Sla hem weg en ga de boogschutter naar de keel.,箭不过是会飞的刃。弹开它，直取弓手咽喉。
-sword.low_health,"You are bleeding, soul. Drink. I am not done with you.","Je bloedt, ziel. Drink. Ik ben nog niet klaar met je.",游魂，你在流血。喝。我还没用完你。
-sword.room_clear,Quiet. I hate the quiet. On.,Stil. Ik haat de stilte. Verder.,静了。我最恨静。走。
-sword.upgrade,Choose. I will teach you one more way to kill.,Kies. Ik leer je nog een manier om te doden.,选吧。我再教你一种杀法。
-sword.death,Another soft hand. I will wait for the next.,Weer een slappe hand. Ik wacht op de volgende.,又一只软手。我等下一个。
-sword.area.bamboo,The bamboo forest. Bandits sleep here with their sabres. Wake them.,Het bamboebos. Hier slapen bandieten met hun sabels. Maak ze wakker.,竹林。刀客枕刀而眠。叫醒他们。
-sword.area.outside,Smoke and wine. Spears and bows outside the tavern. Let them come.,Rook en wijn. Speren en bogen buiten de herberg. Laat ze maar komen.,炊烟酒香，酒馆外枪弓林立。让他们来。
-sword.area.tavern,"The tavern. Mind the wine, and spill the blood.","De herberg. Pas op voor de wijn, en vergiet het bloed.",酒馆到了。酒别沾，血要见。
-sword.boss.intro,She keeps a black inn. Her cleavers have sent many travellers to the pot. Her life is mine.,Zij houdt een zwarte herberg. Haar hakmessen stuurden menig reiziger de pot in. Haar leven is van mij.,这是一家黑店。她那对刀，送过不少过客下锅。她的命，归我。
-sword.boss.phase2,"Now she is angry. Good. Faster, and watch for the jar.","Nu is ze kwaad. Goed. Sneller, en let op de kruik.",她动怒了。好。更快了，当心酒坛。
-sword.boss.jar,Drugged wine. Your legs are heavy; keep your guard.,Bedwelmde wijn. Je benen zijn zwaar; blijf op je hoede.,蒙汗药！腿发沉了，稳住。
-sword.boss.dead,"She is dead. Sixty years, and still it is not enough. It will never be enough.","Ze is dood. Zestig jaar, en nog is het niet genoeg. Het zal nooit genoeg zijn.",她死了。六十年了，还是不够。永远不够。
-sword.read.attuned,Your hand is learning. I know its pace now.,Je hand leert. Ik ken haar tempo nu.,你的手在学。快慢深浅，我已摸清。
-sword.read.quicker,Quick. Quicker than before. Then I will press harder.,Snel. Sneller dan eerst. Dan zet ik harder aan.,快了，比先前快。那我便逼得更紧。
-sword.read.slower,"Slow. You are slowing. I will give you room, this once.","Traag. Je wordt trager. Ik geef je ruimte, voor deze keer.",慢了，你在变慢。这一回，我给你留些余地。
-sword.verdict.win_merit,"You won, but you let too many walk. Mercy is a debt, and others will pay it.","Je won, maar je liet er te veel gaan. Genade is een schuld, en anderen zullen haar betalen.",你赢了，却放走太多。慈悲是债，自有旁人替你偿还。
-sword.verdict.win_balanced,"You won. Some begged, and you listened. I never listen.","Je won. Sommigen smeekten, en jij luisterde. Ik luister nooit.",你赢了。有人求饶，你听了。我从来不听。
-sword.verdict.win_karma,"You won, and the beggars bled. Good. Begging never saved the ones I lost.","Je won, en de smekelingen bloedden. Goed. Smeken heeft de mijnen nooit gered.",你赢了，求饶的都见了血。好。当年求饶，也没能救下我的人。
-sword.verdict.loss_merit,You fell with soft hands. Soft hands always fall.,Je viel met zachte handen. Zachte handen vallen altijd.,你倒下了，手太软。手软的，总是先死。
-sword.verdict.loss_balanced,You fell. I will remember your hand; the next one will be quicker.,Je viel. Ik onthoud je hand; de volgende wordt sneller.,你倒下了。你的手我记得，下一只会更快。
-sword.verdict.loss_karma,"You fell, but you cut true. The next soul will finish what you began.","Je viel, maar je sneed zuiver. De volgende ziel maakt af wat jij begon.",你倒下了，但刀刀见血。下一个游魂，会替你杀完。
+sword.tut.wake,"Sixty years in the bitter bamboo, and they send me a cold hand. Move it, soul. I am thirsty.","Zestig jaar in het bittere bamboe, en dan krijg ik een koude hand. Beweeg, ziel. Ik heb dorst.",苦竹林中，封锋六十载。等来的，竟是一只冷手。动，游魂。剑渴了。
+sword.tut.move,"WASD or the stick to walk. Attack to strike. Strike, I said.","WASD of de stick om te lopen. Aanvallen om toe te slaan. Sla toe, zei ik.",WASD 或摇杆行走，攻击键出剑。出剑！还愣着作甚？
+sword.tut.glint,"Its blade flashes: tap guard, now. That is a deflect. I will not show you twice.","Flitst zijn kling, tik dan op blokkeren, nu. Dat is pareren. Ik laat het je geen twee keer zien.",刀光乍现，便点格挡——此谓弹反。我只说一遍。
+sword.tut.block,Hold guard to block. Each block weighs on your posture. Do not cower behind me for long.,Houd blokkeren ingedrukt. Elke blokkade drukt op je houding. Kruip niet te lang achter mij weg.,按住格挡，可硬接一刀；然每接一刀，架势便沉一分。莫久缩我身后。
+sword.tut.roll,Roll through the blow; for most of the roll nothing can touch you. Then cut back.,Rol door de slag heen; bijna de hele rol raakt niets je. Sla dan terug.,翻身避其锋芒，翻滚之间，刀枪近不得身。起身，便还他一刀。
+sword.tut.gourd,"Bleeding already? Drink from the gourd. Three sips each area, and drinking is slow. Be quick.","Bloed je nu al? Drink uit de kalebas. Drie slokken per gebied, en drinken gaat traag. Schiet op.",这便见红了？饮一口葫芦酒。每处只得三口，饮时身形迟滞，趁隙再喝。
+sword.tut.break,Enough games. Break it.,Genoeg gespeeld. Breek het.,戏耍够了。破它架势。
+sword.tut.finish,It kneels. Finish it. Now.,Het knielt. Maak het af. Nu.,它跪了。补刀！
+sword.tut.done,North. There is more to kill.,Naar het noorden. Daar valt meer te doden.,往北去。北边，还有人该死。
+sword.first_deflect,"Steel on steel. Again, and harder.","Staal op staal. Nog eens, en harder.",铁鸣如磬。再来，再狠些。
+sword.first_finisher,One more evil ghost back to the dust. More.,Weer een kwade geest tot stof. Meer.,又一恶鬼，归于尘土。不够，再来。
+sword.first_surrender,It drops its blade and begs. Kill it.,Het laat zijn kling vallen en smeekt. Dood het.,弃刀乞命？杀了它，休要迟疑。
+sword.first_spare,You let it go. It will kill more innocents. A poor choice.,Je liet het gaan. Het zal meer onschuldigen doden. Een slechte keuze.,放了？此獠来日必再害人。妇人之仁！
+sword.first_karma,Good. Begging changes nothing. No one spared mine.,Goed. Smeken verandert niets. Niemand spaarde de mijnen.,好。乞命何用？当年……又有谁饶过我妻儿。
+sword.first_red,Red! No guard will hold it. Roll.,Rood! Geen blokkade houdt dat tegen. Rol.,红芒！挡不得，滚！
+sword.first_arrow,An arrow is only a blade that flies. Knock it aside and go for the archer's throat.,Een pijl is maar een vliegende kling. Sla hem weg en ga de boogschutter naar de keel.,箭不过是会飞的刀。拨开它，直取弓手咽喉。
+sword.low_health,"You are bleeding, soul. Drink. I am not done with you.","Je bloedt, ziel. Drink. Ik ben nog niet klaar met je.",血流成这般？饮酒。我还没用完你。
+sword.room_clear,Quiet. I hate the quiet. On.,Stil. Ik haat de stilte. Verder.,静了。我恨这静。走。
+sword.upgrade,Choose. I will teach you one more way to kill.,Kies. Ik leer je nog een manier om te doden.,择一。我再授你一种杀法。
+sword.death,Another soft hand. I will wait for the next.,Weer een slappe hand. Ik wacht op de volgende.,又一只软手。无妨，我等下一个。
+sword.area.bamboo,The bamboo forest. Bandits sleep here with their sabres. Wake them.,Het bamboebos. Hier slapen bandieten met hun sabels. Maak ze wakker.,竹林。刀客枕刀而眠——叫醒他们。
+sword.area.outside,Smoke and wine. Spears and bows outside the tavern. Let them come.,Rook en wijn. Speren en bogen buiten de herberg. Laat ze maar komen.,炊烟酒气，枪弓林立。来得正好。
+sword.area.tavern,"The tavern. Mind the wine, and spill the blood.","De herberg. Pas op voor de wijn, en vergiet het bloed.",酒馆。酒莫沾，血要见。
+sword.boss.intro,She keeps a black inn. Her cleavers have sent many travellers to the pot. Her life is mine.,Zij houdt een zwarte herberg. Haar hakmessen stuurden menig reiziger de pot in. Haar leven is van mij.,黑店。这对菜刀，不知剁过多少过客下锅。她的命，是我的。
+sword.boss.phase2,"Now she is angry. Good. Faster, and watch for the jar.","Nu is ze kwaad. Goed. Sneller, en let op de kruik.",动怒了？好。刀更快了——当心酒坛。
+sword.boss.jar,Drugged wine. Your legs are heavy; keep your guard.,Bedwelmde wijn. Je benen zijn zwaar; blijf op je hoede.,蒙汗药！腿脚发沉，稳住架势。
+sword.boss.dead,"She is dead. Sixty years, and still it is not enough. It will never be enough.","Ze is dood. Zestig jaar, en nog is het niet genoeg. Het zal nooit genoeg zijn.",死了。六十年……还是不够。永远不够。
+sword.read.attuned,Your hand is learning. I know its pace now.,Je hand leert. Ik ken haar tempo nu.,你这只手，快慢深浅，我已摸清。
+sword.read.quicker,Quick. Quicker than before. Then I will press harder.,Snel. Sneller dan eerst. Dan zet ik harder aan.,快了。那我便逼得更紧些。
+sword.read.slower,"Slow. You are slowing. I will give you room, this once.","Traag. Je wordt trager. Ik geef je ruimte, voor deze keer.",慢了。这一回，我且容你。
+sword.verdict.win_merit,"You won, but you let too many walk. Mercy is a debt, and others will pay it.","Je won, maar je liet er te veel gaan. Genade is een schuld, en anderen zullen haar betalen.",赢了，却放走太多。慈悲是债，自有旁人替你还。
+sword.verdict.win_balanced,"You won. Some begged, and you listened. I never listen.","Je won. Sommigen smeekten, en jij luisterde. Ik luister nooit.",赢了。有人乞命，你听了。我从不听。
+sword.verdict.win_karma,"You won, and the beggars bled. Good. Begging never saved the ones I lost.","Je won, en de smekelingen bloedden. Goed. Smeken heeft de mijnen nooit gered.",赢了。乞命者尽数见血。好——当年乞命，也没换回我的人。
+sword.verdict.loss_merit,You fell with soft hands. Soft hands always fall.,Je viel met zachte handen. Zachte handen vallen altijd.,倒了。手太软。手软之人，总是先死。
+sword.verdict.loss_balanced,You fell. I will remember your hand; the next one will be quicker.,Je viel. Ik onthoud je hand; de volgende wordt sneller.,倒了。你的手我记下了。下一只，会更快。
+sword.verdict.loss_karma,"You fell, but you cut true. The next soul will finish what you began.","Je viel, maar je sneed zuiver. De volgende ziel maakt af wat jij begon.",倒了，却刀刀见血。剩下的，下一个游魂替你杀。
 summary.next_soul,The next soul will take up the sword in {area}.,De volgende ziel neemt het zwaard op in {area}.,下一个游魂将在{area}拿起这把剑。
-sword.new_soul,A new hand. The last one fell here. Take me up; we are not done.,Een nieuwe hand. De vorige viel hier. Neem me op; we zijn nog niet klaar.,新的手。上一个倒在这里。拿起我，还没杀完。
-sword.first_spear,"A spear. When its tip flashes red, no guard and no deflect will stop it. Roll, then gut it.","Een speer. Flitst de punt rood, dan houdt geen blokkade of parade hem tegen. Rol, en rijg hem dan.",枪客。枪尖红光一闪，挡不住，也弹不开。翻滚，再开它的膛。
-sword.first_fake,It lied. They all lie. Cut it down.,Het loog. Ze liegen allemaal. Hak het neer.,它在骗你。它们都在骗。斩！
-sword.fake_seen,It was lying. No matter: it dies all the same.,Het loog. Maakt niet uit: het sterft toch.,它是装的。装不装，都是一死。
+sword.new_soul,A new hand. The last one fell here. Take me up; we are not done.,Een nieuwe hand. De vorige viel hier. Neem me op; we zijn nog niet klaar.,新的手。前一个倒在此处。握紧我，账还没算完。
+sword.first_spear,"A spear. When its tip flashes red, no guard and no deflect will stop it. Roll, then gut it.","Een speer. Flitst de punt rood, dan houdt geen blokkade of parade hem tegen. Rol, en rijg hem dan.",枪客。枪尖红芒一现，挡不得，弹不开。翻身闪过，再剖其胸。
+sword.first_fake,It lied. They all lie. Cut it down.,Het loog. Ze liegen allemaal. Hak het neer.,诈降！它们都会骗。斩！
+sword.fake_seen,It was lying. No matter: it dies all the same.,Het loog. Maakt niet uit: het sterft toch.,装的。装与不装，左右一死。
 ui.title.start,Start,Beginnen,开始
 ui.title.settings,Settings,Instellingen,设置
 ui.pause.settings,Settings,Instellingen,设置
@@ -106,10 +106,10 @@ ui.settings.adaptive,Adaptive timing,Adaptieve timing,自适应时机
 ui.settings.back,Back,Terug,返回
 ui.settings.detail,Detail mode,Detailmodus,详细模式
 summary.detail_unlocked,"Detail mode is now in the settings: merit, karma and the sword's numbers.","Detailmodus staat nu in de instellingen: verdienste, karma en de getallen van het zwaard.",设置中已开放详细模式：功德、业障与剑的读数。
-summary.reading.unread,The sword has not read your hand yet.,Het zwaard heeft je hand nog niet gelezen.,剑还未读透你的手。
-summary.reading.quick,The sword found your hand quick.,Het zwaard vond je hand snel.,剑说：你的手快。
-summary.reading.learning,The sword found your hand still learning.,Het zwaard vond dat je hand nog leert.,剑说：你的手还在学。
-summary.reading.slow,The sword found your hand slow.,Het zwaard vond je hand traag.,剑说：你的手慢。
+summary.reading.unread,The sword has not read your hand yet.,Het zwaard heeft je hand nog niet gelezen.,剑尚未读透你的手。
+summary.reading.quick,The sword found your hand quick.,Het zwaard vond je hand snel.,剑言：你出手快。
+summary.reading.learning,The sword found your hand still learning.,Het zwaard vond dat je hand nog leert.,剑言：你的手尚在学。
+summary.reading.slow,The sword found your hand slow.,Het zwaard vond je hand traag.,剑言：你出手慢。
 sword.spared_fake,"Why did you spare it? They deserve death, and death alone.","Waarom spaarde je het? Zij verdienen de dood, en niets dan de dood.",为何饶它？此等恶徒，唯死而已！
 ui.settings.display,Display,Weergave,显示
 ui.settings.windowed,Windowed,Venster,窗口
