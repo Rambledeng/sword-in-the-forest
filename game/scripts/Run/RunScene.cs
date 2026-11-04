@@ -226,7 +226,7 @@ public partial class RunScene : Node2D
         }
         if (PlayMusic)
         {
-            var music = plan.IsBoss ? "fight" : plan.Area is Area.Outside or Area.Tavern ? "lost_village" : "dark_forest";
+            var music = MusicFor(plan);
             Sfx.Instance.PlayMusic($"{MusicDir}/{music}.ogg");
         }
         if (plan.Area == Area.Tutorial)
@@ -354,6 +354,14 @@ public partial class RunScene : Node2D
         var returning = d != null && d.Director.Observations >= r.ReturningObservations;
         _coach = new TutorialCoach(ghost, returning ? r.TutorialAttacksReturning : r.TutorialAttacks);
     }
+
+    /// <summary>Each area has its own music: the grove, the village outside, the tavern's tension, the boss's fight.</summary>
+    public static string MusicFor(RoomPlan plan) => plan.IsBoss ? "fight" : plan.Area switch
+    {
+        Area.Outside => "lost_village",
+        Area.Tavern => "tension",
+        _ => "dark_forest",
+    };
 
     private void HookEnemy(Enemy e)
     {

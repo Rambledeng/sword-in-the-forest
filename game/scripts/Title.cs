@@ -58,6 +58,7 @@ public partial class Title : Control
         name.AutowrapMode = TextServer.AutowrapMode.WordSmart;
         name.CustomMinimumSize = new Vector2(230, 0);
         Refresh();
+        Sfx.Instance?.PlayMusic("res://assets/third_party/ninja_adventure/music/melancholia.ogg");
     }
 
     public override void _Input(InputEvent e)

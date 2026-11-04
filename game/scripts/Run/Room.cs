@@ -64,6 +64,7 @@ public partial class Room : Node2D, INav
         BuildCollision();
         BuildDecor();
         BuildGate();
+        AddChild(new Fx.Atmosphere(Plan.Area, SizePx, Plan.Seed) { Name = "Atmosphere" });
     }
 
     // ---- Enemies -------------------------------------------------------------------------

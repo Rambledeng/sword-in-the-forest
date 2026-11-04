@@ -57,7 +57,11 @@ Code: MIT, see LICENSE.
 | `weapons/cleaver_in_hand.png` | `Items/Weapons/Sword/SpriteInHand.png` | The boss's twin cleavers |
 | `weapons/wine_jar.png` | `Items/Potion/EmptyPot.png` | The thrown jar of drugged wine (蒙汗药) |
 | `tiles/tileset_interior_floor.png` | `Backgrounds/Tilesets/Interior/TilesetInteriorFloor.png` | Tavern floor planks |
-| `music/lost_village.ogg` | `Audio/Musics/26 - Lost Village.ogg` | Outside the tavern and the tavern |
+| `music/lost_village.ogg` | `Audio/Musics/26 - Lost Village.ogg` | Outside the tavern |
+| `music/tension.ogg` | `Audio/Musics/28 - Tension.ogg` | The tavern (before the boss) |
+| `music/melancholia.ogg` | `Audio/Musics/16 - Melancholia.ogg` | Title screen |
+| `fx/bamboo_particle.png` | `FX/Particle/Bamboo.png` | Falling bamboo leaves (bamboo forest) |
+| `fx/petal.png` | `FX/Particle/LeafPink.png` | Drifting petals (outside the tavern) |
 | `music/fight.ogg` | `Audio/Musics/17 - Fight.ogg` | Boss fight |
 | `sounds/arrow_shot.wav` | `Audio/Sounds/Whoosh & Slash/Launch.wav` | Arrow release |
 | `sounds/jar_break.wav` | `Audio/Sounds/Hit & Impact/Impact2.wav` | Wine jar shatters |
