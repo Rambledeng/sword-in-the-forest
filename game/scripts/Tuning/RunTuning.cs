@@ -51,6 +51,19 @@ public partial class RunTuning : Resource
     [Export(PropertyHint.Range, "0,5,1")] public int DeepGourdSips { get; set; }
     [Export(PropertyHint.Range, "1,4,0.05")] public float IronDeflectFactor { get; set; }
     [Export(PropertyHint.Range, "0,10,1")] public int MercifulCutHeal { get; set; }
+    /// <summary>瞬步: the dash covers this distance...</summary>
+    [Export(PropertyHint.Range, "10,160,1")] public float FlashStepDistancePx { get; set; }
+    /// <summary>...in this time...</summary>
+    [Export(PropertyHint.Range, "40,500,5")] public int FlashStepMs { get; set; }
+    /// <summary>...cutting every enemy within this distance of its path...</summary>
+    [Export(PropertyHint.Range, "0,40,1")] public float FlashStepWidthPx { get; set; }
+    /// <summary>...for this damage and posture damage...</summary>
+    [Export(PropertyHint.Range, "0,10,1")] public int FlashStepDamage { get; set; }
+    [Export(PropertyHint.Range, "0,100,1")] public int FlashStepPosture { get; set; }
+    /// <summary>...and is ready again after this long.</summary>
+    [Export(PropertyHint.Range, "500,20000,100")] public int FlashStepCooldownMs { get; set; }
+    /// <summary>Taking it again multiplies the cooldown by this.</summary>
+    [Export(PropertyHint.Range, "0.1,1,0.05")] public float FlashStepRepeatCooldownFactor { get; set; }
 
     [ExportGroup("Food")]
     /// <summary>Chance that a defeated enemy (not the tutorial ghost or the boss) drops food.</summary>

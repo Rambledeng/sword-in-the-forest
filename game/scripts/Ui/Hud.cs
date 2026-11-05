@@ -32,6 +32,18 @@ public partial class Hud : CanvasLayer
     /// <summary>The attunement meter is on screen (Detail mode only).</summary>
     public bool AttunementShown => _attunement.Visible;
 
+    /// <summary>瞬步, once taken: its icon beside the gourd, dim with a filling line while it recharges.</summary>
+    private void DrawFlashStep()
+    {
+        if (!Player!.Mods.FlashStep) return;
+        var at = new Vector2(42, 22);
+        var charge = Player.FlashStepCharge;
+        _canvas.DrawTexture(PixelIcons.Drawn("flash_step"), at, charge >= 1f ? Colors.White : new Color(1, 1, 1, 0.35f));
+        if (charge >= 1f) return;
+        _canvas.DrawRect(new Rect2(at + new Vector2(1, 15), new Vector2(14, 2)), new Color(0, 0, 0, 0.6f));
+        _canvas.DrawRect(new Rect2(at + new Vector2(1, 15), new Vector2(Mathf.Round(14 * charge), 2)), new Color(0.6f, 0.85f, 1f));
+    }
+
     public override void _Ready()
     {
         Layer = 10;
@@ -117,6 +129,7 @@ public partial class Hud : CanvasLayer
             _canvas.DrawTextureRectRegion(_heart, new Rect2(4 + i * 15, 4, 16, 16), new Rect2(frame * 16, 0, 16, 16));
         }
         _canvas.DrawTexture(_gourd, new Vector2(6, 24), Player.Sips > 0 ? Colors.White : new Color(1, 1, 1, 0.35f));
+        DrawFlashStep();
         DrawAttunement();
 
         // Posture bar.

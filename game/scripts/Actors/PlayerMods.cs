@@ -11,4 +11,8 @@ public sealed class PlayerMods
     /// <summary>Multiplies the posture damage your deflects deal.</summary>
     public float DeflectFactor { get; set; } = 1f;
     public int FinisherHeal { get; set; }
+    /// <summary>瞬步 is taken.</summary>
+    public bool FlashStep { get; set; }
+    /// <summary>Multiplies its cooldown (each repeat take shortens it).</summary>
+    public float FlashStepCooldownFactor { get; set; } = 1f;
 }

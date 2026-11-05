@@ -30,6 +30,7 @@ public partial class UpgradeScreen : CanvasLayer
         Upgrade.KeenEdge => "keen_edge",
         Upgrade.DeepGourd => "deep_gourd",
         Upgrade.IronDeflect => "iron_deflect",
+        Upgrade.FlashStep => "flash_step",
         _ => "merciful_cut",
     };
 
@@ -43,7 +44,9 @@ public partial class UpgradeScreen : CanvasLayer
             .Replace("{posture}", Mathf.RoundToInt(r.BroadStancePosture).ToString())
             .Replace("{pct}", Pct(u == Upgrade.SteadyBreath ? r.SteadyBreathFactor : r.IronDeflectFactor))
             .Replace("{damage}", r.KeenEdgeDamage.ToString())
-            .Replace("{sips}", r.DeepGourdSips.ToString());
+            .Replace("{sips}", r.DeepGourdSips.ToString())
+            .Replace("{seconds}", (r.FlashStepCooldownMs / 1000f).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture))
+            .Replace("{flash_damage}", r.FlashStepDamage.ToString());
     }
 
     public override void _Ready()

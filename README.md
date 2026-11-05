@@ -25,6 +25,7 @@ or grab a build from [Releases](../../releases).
 | Guard (hold) / deflect (tap after the glint) | Right click or K | LB / L1 |
 | Roll (the only answer to a red glint) | Space or L | A / ✕ |
 | Gourd (heal) | R | Y / △ |
+| Flash step 瞬步 (once the upgrade is taken) | Shift | RT / R2 |
 | Spare a begging enemy | E | B / ○ |
 | Pause, settings | Esc | Start |
 

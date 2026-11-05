@@ -65,14 +65,16 @@ namespace SwordInTheForest.Run
         public static RunPlan Build(int seed)
         {
             var rng = new Random(seed);
+            // Upgrades draw from their own stream, so adding one never moves the rooms.
+            var upgradeRng = new Random(unchecked(seed * 7919 + 101));
             var steps = new List<RunStep>
             {
                 RunStep.ForRoom(PlaceRoom(RoomTemplates.Tutorial, new[] { EnemyKind.Ghost }, 0, rng)),
             };
             AddArea(steps, Area.Bamboo, BambooSets, rng);
-            steps.Add(RunStep.ForUpgrade(DrawUpgrades(rng)));
+            steps.Add(RunStep.ForUpgrade(DrawUpgrades(upgradeRng)));
             AddArea(steps, Area.Outside, OutsideSets, rng);
-            steps.Add(RunStep.ForUpgrade(DrawUpgrades(rng)));
+            steps.Add(RunStep.ForUpgrade(DrawUpgrades(upgradeRng)));
             AddArea(steps, Area.Tavern, TavernSets, rng);
             steps.Add(RunStep.ForRoom(PlaceRoom(RoomTemplates.Boss, new[] { EnemyKind.Boss }, 1, rng)));
             return new RunPlan(seed, steps);

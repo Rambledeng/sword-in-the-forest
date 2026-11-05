@@ -1,6 +1,6 @@
 namespace SwordInTheForest.Run
 {
-    /// <summary>The sword-intent (剑意) upgrades. Flash step is not built in the demo.</summary>
+    /// <summary>The sword-intent (剑意) upgrades.</summary>
     public enum Upgrade
     {
         Vitality,
@@ -10,5 +10,7 @@ namespace SwordInTheForest.Run
         DeepGourd,
         IronDeflect,
         MercifulCut,
+        /// <summary>瞬步: a short dash-strike through enemies, on a cooldown.</summary>
+        FlashStep,
     }
 }

@@ -485,6 +485,10 @@ public partial class RunScene : Node2D
             case Upgrade.DeepGourd: m.SipsBonus += r.DeepGourdSips; break;
             case Upgrade.IronDeflect: m.DeflectFactor *= r.IronDeflectFactor; break;
             case Upgrade.MercifulCut: m.FinisherHeal += r.MercifulCutHeal; break;
+            case Upgrade.FlashStep:
+                if (m.FlashStep) m.FlashStepCooldownFactor *= r.FlashStepRepeatCooldownFactor;
+                m.FlashStep = true;
+                break;
         }
     }
 

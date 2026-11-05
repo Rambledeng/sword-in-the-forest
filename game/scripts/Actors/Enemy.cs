@@ -623,8 +623,11 @@ public abstract partial class Enemy : CharacterBody2D
 
     // ---- Being hit ----------------------------------------------------------------------
 
-    /// <summary>A player's cut. <paramref name="dir"/> points from the player to this enemy.</summary>
-    public HitResult TakeHit(int damage, int posture, Vector2 dir)
+    /// <summary>
+    /// A player's cut. <paramref name="dir"/> points from the player to this enemy. An
+    /// <paramref name="unblockable"/> cut (the flash step) gets past a raised guard.
+    /// </summary>
+    public HitResult TakeHit(int damage, int posture, Vector2 dir, bool unblockable = false)
     {
         if (Current == State.Dead) return HitResult.Ignored;
         // The rest of a combo must not cut down an enemy that has only just begun to beg.
@@ -644,7 +647,7 @@ public abstract partial class Enemy : CharacterBody2D
             return HitResult.Finisher;
         }
 
-        if (IsBlocking)
+        if (IsBlocking && !unblockable)
         {
             Block(posture, dir);
             return Current == State.Kneel ? HitResult.Kneel : HitResult.Blocked;

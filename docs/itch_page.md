@@ -46,7 +46,8 @@ timing off. Beat the boss once to unlock Detail mode and see what it learned abo
 - English, Nederlands and 简体中文, switchable in game. Keyboard and mouse or a gamepad.
 
 **Controls:** WASD move · mouse aim · left click attack · right click guard / deflect ·
-Space roll · R gourd · E spare · Esc pause. Gamepad: X attack, LB guard, A roll, Y gourd, B spare.
+Space roll · R gourd · E spare · Shift flash step (an upgrade) · Esc pause. Gamepad: X attack, LB guard,
+A roll, Y gourd, B spare, RT flash step.
 
 **How it works.** The director, its evaluation on 1,000 simulated players (it lands 93% of
 players within 10 points of the Standard target, against 28% with fixed timing) and the full

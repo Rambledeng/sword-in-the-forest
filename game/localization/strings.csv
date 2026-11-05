@@ -40,6 +40,8 @@ upgrade.iron_deflect.name,Iron Deflect,IJzeren Parade,铁弹
 upgrade.iron_deflect.desc,Deflects deal {pct}% more posture damage.,Parades doen {pct}% meer houdingsschade.,弹反的架势伤害 +{pct}%。
 upgrade.merciful_cut.name,Merciful Cut,Genadige Snede,慈悲一刀
 upgrade.merciful_cut.desc,Finishers heal {health} health.,Genadeslagen genezen {health} leven.,补刀回复 {health} 点生命。
+upgrade.flash_step.name,Flash Step,Flitsstap,瞬步
+upgrade.flash_step.desc,"Shift / RT: dash through foes, {flash_damage} damage each. Every {seconds} s.","Shift / RT: flits door vijanden, {flash_damage} schade elk. Elke {seconds} s.",Shift / RT：一步穿敌，每人伤害 {flash_damage}。每 {seconds} 秒一次。
 summary.title.win,The tavern falls silent.,De herberg valt stil.,酒馆归于死寂。
 summary.title.loss,The wandering soul fades.,De dolende ziel vervaagt.,游魂散去。
 summary.merit_karma,Merit: {merit}   Karma: {karma},Verdienste: {merit}   Karma: {karma},功德：{merit}　业障：{karma}

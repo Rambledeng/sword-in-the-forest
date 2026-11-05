@@ -135,6 +135,26 @@ public static class PixelIcons
             ".....kkkkkk.....",
             "................",
         },
+        // 瞬步: a blade darting forward, speed lines behind it.
+        ["flash_step"] = new[]
+        {
+            "................",
+            "................",
+            "kkkkkkk.........",
+            "kcccccck........",
+            "kkkkkkk.........",
+            "........k.......",
+            "..kkkk.kokkkkkk.",
+            ".kcccckbyksswwwk",
+            "..kkkk.kokkkkkk.",
+            "........k.......",
+            "kkkkkkk.........",
+            "kcccccck........",
+            "kkkkkkk.........",
+            "................",
+            "................",
+            "................",
+        },
         // 米饭: a bowl of rice, blue-and-white porcelain.
         ["rice"] = new[]
         {

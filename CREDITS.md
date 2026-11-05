@@ -99,7 +99,8 @@ walls and tables and the boss bar are drawn in code (`game/scripts/Fx/`, `game/s
 `game/scripts/Ui/Hud.cs`).
 
 The 16×16 upgrade icons (Broad Stance's shield, Steady Breath's wind, Keen Edge's blade, Iron
-Deflect's crossed blades, Merciful Cut's lotus) and the food drops (米饭 rice bowl, 酱牛肉 braised
+Deflect's crossed blades, Merciful Cut's lotus, Flash Step's darting blade, also its HUD
+cooldown icon) and the food drops (米饭 rice bowl, 酱牛肉 braised
 beef, 烧鸡 roast chicken leg, 12×12) are pixel maps drawn in code in the Ninja
 Adventure style, by Claude for this project (`game/scripts/Ui/PixelIcons.cs`, same licence as
 the code).
