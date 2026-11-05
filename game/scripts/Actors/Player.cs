@@ -153,6 +153,9 @@ public partial class Player : CharacterBody2D, IThreatTarget
         Flash(new Color(0.6f, 1f, 0.6f), 160);
     }
 
+    /// <summary>Developer and tests: loses health without a hit (never below 1).</summary>
+    public void Wound(int amount) => Health = Mathf.Max(1, Health - Mathf.Max(0, amount));
+
     /// <summary>Refills health and posture without changing state (test drills).</summary>
     public void RefillForDrill()
     {

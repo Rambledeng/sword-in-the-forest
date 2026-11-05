@@ -52,6 +52,21 @@ public partial class RunTuning : Resource
     [Export(PropertyHint.Range, "1,4,0.05")] public float IronDeflectFactor { get; set; }
     [Export(PropertyHint.Range, "0,10,1")] public int MercifulCutHeal { get; set; }
 
+    [ExportGroup("Food")]
+    /// <summary>Chance that a defeated enemy (not the tutorial ghost or the boss) drops food.</summary>
+    [Export(PropertyHint.Range, "0,1,0.01")] public float FoodDropChance { get; set; }
+    /// <summary>Relative chances of each food when something drops: 米饭 rice...</summary>
+    [Export(PropertyHint.Range, "0,10,0.05")] public float RiceWeight { get; set; }
+    /// <summary>...酱牛肉 braised beef...</summary>
+    [Export(PropertyHint.Range, "0,10,0.05")] public float BeefWeight { get; set; }
+    /// <summary>...and 烧鸡 roast chicken.</summary>
+    [Export(PropertyHint.Range, "0,10,0.05")] public float ChickenWeight { get; set; }
+    [Export(PropertyHint.Range, "0,10,1")] public int RiceHeal { get; set; }
+    [Export(PropertyHint.Range, "0,10,1")] public int BeefHeal { get; set; }
+    [Export(PropertyHint.Range, "0,10,1")] public int ChickenHeal { get; set; }
+    /// <summary>You pick food up by walking this close to it, and only while hurt.</summary>
+    [Export(PropertyHint.Range, "2,60,1")] public float FoodPickupPx { get; set; }
+
     [ExportGroup("Sword's lines")]
     [Export(PropertyHint.Range, "500,10000,100")] public int SwordLineMs { get; set; }
     /// <summary>The sword names your speed once attunement reaches this.</summary>

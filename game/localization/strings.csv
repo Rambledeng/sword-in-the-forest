@@ -118,3 +118,7 @@ ui.settings.borderless,Borderless,Randloos,无边框全屏
 ui.settings.fullscreen,Fullscreen,Volledig scherm,全屏
 ui.settings.resolution,Window size,Venstergrootte,窗口尺寸
 ui.settings.fit_screen,Fits the screen,Past op het scherm,适配屏幕
+combat.food.rice,Rice,Rijst,米饭
+combat.food.braised_beef,Braised beef,Gestoofd rundvlees,酱牛肉
+combat.food.roast_chicken,Roast chicken,Geroosterde kip,烧鸡
+combat.food.eaten,{food} +{health},{food} +{health},{food} +{health}

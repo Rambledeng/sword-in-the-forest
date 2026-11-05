@@ -135,6 +135,54 @@ public static class PixelIcons
             ".....kkkkkk.....",
             "................",
         },
+        // 米饭: a bowl of rice, blue-and-white porcelain.
+        ["rice"] = new[]
+        {
+            "....kkkk....",
+            "..kkwwwwkk..",
+            ".kwwwwewwwk.",
+            "kwwewwwwwewk",
+            "kkkkkkkkkkkk",
+            "kBcBBBBBBBBk",
+            "kBBcBBBBBBBk",
+            ".kBBBBBBBBk.",
+            "..kBBBBBBk..",
+            "...kkkkkk...",
+            "....kBBk....",
+            "....kkkk....",
+        },
+        // 酱牛肉: slices of braised beef on a plate.
+        ["braised_beef"] = new[]
+        {
+            "............",
+            "...kkkkkk...",
+            "..knnnonnk..",
+            ".knnonnnnnk.",
+            ".knnnnnnonk.",
+            ".kkkkkkkkkk.",
+            "knnnonnnnonk",
+            "knonnnnnnnnk",
+            ".kkkkkkkkkk.",
+            "kssswsssssgk",
+            ".kgggggggggk",
+            "..kkkkkkkkk.",
+        },
+        // 烧鸡: a roast chicken leg.
+        ["roast_chicken"] = new[]
+        {
+            ".....kkkkk..",
+            "....kyyyook.",
+            "...kyyoooook",
+            "..kyoooooook",
+            "..kooooooobk",
+            "..koooooobk.",
+            "...kboobbk..",
+            "..kwkkbkk...",
+            ".kwwk.kk....",
+            "kwwk........",
+            "kewk........",
+            ".kk.........",
+        },
     };
 
     private static readonly Dictionary<string, Texture2D> Cache = new();
@@ -160,6 +208,14 @@ public static class PixelIcons
         Cache[name] = tex;
         return tex;
     }
+
+    /// <summary>The icon for a food drop (12×12).</summary>
+    public static Texture2D For(Food f) => Drawn(f switch
+    {
+        Food.Rice => "rice",
+        Food.BraisedBeef => "braised_beef",
+        _ => "roast_chicken",
+    });
 
     /// <summary>All code-drawn icon names (for tests and the credits check).</summary>
     public static IEnumerable<string> DrawnNames => Maps.Keys;

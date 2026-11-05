@@ -71,6 +71,11 @@ public partial class RunScene : Node2D
     public MercyRules Mercy { get; private set; } = null!;
     /// <summary>The run's first red attack gets a generous lead.</summary>
     public FirstRedLead FirstRed { get; private set; } = null!;
+    /// <summary>Defeated enemies sometimes drop food (rates in run.tres).</summary>
+    public FoodDrops FoodRules { get; private set; } = null!;
+    private Random _foodRng = null!;
+    /// <summary>Food dropped this run (tests watch it).</summary>
+    public event Action<FoodPickup>? FoodDropped;
 
     public event Action<Room>? RoomEntered;
 
@@ -82,6 +87,10 @@ public partial class RunScene : Node2D
         Plan = RunPlan.Build(seed);
         Mercy = new MercyRules(Tunables.Run.FakeBegChance);
         FirstRed = new FirstRedLead(() => CombatServices.LeadTimes, Tunables.Run.FirstRedLeadMs);
+        var rt = Tunables.Run;
+        FoodRules = new FoodDrops(rt.FoodDropChance, rt.RiceWeight, rt.BeefWeight, rt.ChickenWeight);
+        // Its own stream, so food never shifts the layout or the enemies' rolls.
+        _foodRng = new Random(unchecked(seed * 104_729 + 17));
         Telemetry.Instance.StartRun();
         GD.Print($"Run seed {seed}");
 
@@ -372,6 +381,7 @@ public partial class RunScene : Node2D
         if (e is Spearman) SayOnce("sword.first_spear");
         if (e is not TutorialGhost and not TavernBoss) e.BegRoll = en => Mercy.Decide(en.SurrenderChance, en.NextRoll);
         e.GrabMsRoll = () => Mercy.NextGrabMs(Tunables.Run.FirstFakeGrabMs, Tunables.Run.FakeGrabMs);
+        if (e is not TutorialGhost and not TavernBoss) e.Died += DropFood;
         e.Surrendered += _ =>
         {
             // The sword wants every beggar dead, and never warns about fakes.
@@ -386,6 +396,20 @@ public partial class RunScene : Node2D
         // A spared fake attacks: scorn. A fake that strikes at your back: cut it down.
         e.Betrayed += en => SayOnce(en.BetrayedOnSpare ? "sword.spared_fake" : "sword.first_fake");
         if (e is TavernBoss boss) boss.PhaseChanged += _ => SwordVoice.Say("sword.boss.phase2");
+    }
+
+    /// <summary>A defeated enemy may drop food where it fell (F1 edits to the rates apply at once).</summary>
+    private void DropFood(Enemy e)
+    {
+        var r = Tunables.Run;
+        FoodRules.Chance = r.FoodDropChance;
+        FoodRules.RiceWeight = r.RiceWeight;
+        FoodRules.BeefWeight = r.BeefWeight;
+        FoodRules.ChickenWeight = r.ChickenWeight;
+        if (Room == null || FoodRules.Roll(_foodRng.NextDouble) is not Food kind) return;
+        var pickup = new FoodPickup(kind, e.GlobalPosition + new Vector2(0, -8), e.GlobalPosition) { Player = Player };
+        Room.Actors.AddChild(pickup);
+        FoodDropped?.Invoke(pickup);
     }
 
     /// <summary>Merit and karma are felt, not counted: glitter or smoke on the player.</summary>
