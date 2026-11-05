@@ -48,9 +48,8 @@ tag). Unit tests: 179 pass (Combat 141, Director 35, Localization 3). Scenarios:
   `screens_all.sh` now also captures `food_<locale>.png` and `flash_step_<locale>.png` from the
   `food_drop` and `flash_step` scenarios. The rooms in the shots and GIFs are the new seed-7
   layouts.
-- Older bug, still there: in Dutch, the win summary's last line ("Detailmodus staat nu in de
-  instellingen: ...") runs off the right edge (`summary_win_nl.png`). Shorten the nl text of
-  `summary.detail_unlocked` or let the line wrap.
+- Fixed: the Dutch win summary's last line ran off the right edge. Every summary line now
+  wraps at 440 px, so long lines fit in any language (`summary_*` screens regenerated).
 - Gamepad RT for flash step is mapped as a trigger axis; I could not test a real pad here.
 
 ### Playtest checklist

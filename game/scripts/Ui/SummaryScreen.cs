@@ -131,6 +131,9 @@ public partial class SummaryScreen : CanvasLayer
         return s;
     }
 
+    /// <summary>Every line wraps at this width, so long lines in any language stay on the 480 px screen (layout, not tuning).</summary>
+    private const float LineWidthPx = 440;
+
     private Label Add(Container parent, string text, Color? color = null)
     {
         var l = new Label
@@ -139,6 +142,8 @@ public partial class SummaryScreen : CanvasLayer
             AutoTranslateMode = Node.AutoTranslateModeEnum.Disabled,
             HorizontalAlignment = HorizontalAlignment.Center,
             Modulate = color ?? Colors.White,
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            CustomMinimumSize = new Vector2(LineWidthPx, 0),
         };
         parent.AddChild(l);
         Lines.Add(text);
