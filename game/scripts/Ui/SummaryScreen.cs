@@ -71,6 +71,8 @@ public partial class SummaryScreen : CanvasLayer
         Add(stack, Fill("summary.souls", ("deaths", _soulsFallen)));
         Add(stack, Fill("summary.rooms", ("rooms", _stats.RoomsCleared), ("total", _totalRooms))
             + "   " + Tr("summary.time").Replace("{time}", $"{(int)t.TotalMinutes}:{t.Seconds:00}"));
+        if (_stats.Perk is Run.StarterPerk perk)
+            Add(stack, Tr("summary.perk").Replace("{perk}", PerkText.Name(perk)));
         if (_stats.Upgrades.Count > 0)
             Add(stack, Tr("summary.upgrades").Replace("{list}", string.Join(", ", _stats.Upgrades.Select(u => Tr($"upgrade.{UpgradeScreen.Key(u)}.name")))));
         stack.AddChild(new Control { CustomMinimumSize = new Vector2(0, 4) });

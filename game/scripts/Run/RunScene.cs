@@ -94,8 +94,13 @@ public partial class RunScene : Node2D
         Telemetry.Instance.StartRun();
         GD.Print($"Run seed {seed}");
 
-        // Each new soul looks a little different: its tint is seeded by the run and the souls fallen.
-        Player = new Player { Invulnerable = Invulnerable, Tint = Player.SoulTint(unchecked(seed * 7919 + (DirectorService.Instance?.SoulsFallen ?? 0))) };
+        // Each new soul looks a little different and has one minor trait: both seeded by the run
+        // and the souls fallen.
+        var soulSeed = unchecked(seed * 7919 + (DirectorService.Instance?.SoulsFallen ?? 0));
+        Player = new Player { Invulnerable = Invulnerable, Tint = Player.SoulTint(soulSeed) };
+        Perk = StarterPerks.Pick(soulSeed);
+        ApplyPerk(Perk);
+        Stats.Perk = Perk;
         if (Controls != null) Player.Controls = Controls;
         Player.Died += _ => EndRun(false);
         Player.FinisherLanded += (_, e) => { if (e.IsGone) OnFinished(e); };
@@ -147,6 +152,29 @@ public partial class RunScene : Node2D
             Stats.Take(u);
         }
         if (ContinuedFrom != null) SwordVoice.Say("sword.new_soul");
+        // Shown once, as the soul takes up the sword.
+        Hud.ShowPerk(PerkText.Icon(Perk), Tr("ui.hud.perk").Replace("{perk}", PerkText.Name(Perk)).Replace("{desc}", PerkText.Describe(Perk)));
+    }
+
+    /// <summary>This soul's starter perk.</summary>
+    public StarterPerk Perk { get; private set; }
+
+    /// <summary>
+    /// A perk is a weaker upgrade, applied before the soul first stands in a room (so its health,
+    /// sips and posture bar start full).
+    /// </summary>
+    private void ApplyPerk(StarterPerk p)
+    {
+        var r = Tunables.Run;
+        var m = Player.Mods;
+        switch (p)
+        {
+            case StarterPerk.Hale: m.HealthBonus += r.PerkHealth; break;
+            case StarterPerk.Sturdy: m.PostureBonus += r.PerkPosture; break;
+            case StarterPerk.EvenBreath: m.PostureDrainFactor *= r.PerkBreathFactor; break;
+            case StarterPerk.SpareSip: m.SipsBonus += r.PerkSips; break;
+            case StarterPerk.SteadyHand: m.DeflectFactor *= r.PerkDeflectFactor; break;
+        }
     }
 
     public override void _ExitTree()

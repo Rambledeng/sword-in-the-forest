@@ -21,6 +21,11 @@ public partial class Hud : CanvasLayer
 
     private Label _prompt = null!;
     private Label _area = null!;
+    private HBoxContainer _perk = null!;
+    private double _perkUntilMs;
+    /// <summary>The starter-perk line under the area title is on screen (tests).</summary>
+    public bool PerkShown => _perk.Visible;
+    public string PerkLine { get; private set; } = "";
     private Label _bossName = null!;
     private double _areaUntilMs = -1;
 
@@ -77,6 +82,11 @@ public partial class Hud : CanvasLayer
         _area.GrowHorizontal = Control.GrowDirection.Both;
         _area.Position = new Vector2(0, 44);
         _canvas.AddChild(_area);
+        _perk = new HBoxContainer { Visible = false, MouseFilter = Control.MouseFilterEnum.Ignore };
+        _perk.AddThemeConstantOverride("separation", 4);
+        _perk.AddChild(new TextureRect { StretchMode = TextureRect.StretchModeEnum.KeepCentered, MouseFilter = Control.MouseFilterEnum.Ignore });
+        _perk.AddChild(new Label { AutoTranslateMode = AutoTranslateModeEnum.Disabled, VerticalAlignment = VerticalAlignment.Center });
+        _canvas.AddChild(_perk);
         _bossName = new Label { Text = "combat.boss.name", HorizontalAlignment = HorizontalAlignment.Center, Visible = false, Modulate = new Color(1f, 0.85f, 0.8f) };
         _bossName.GrowHorizontal = Control.GrowDirection.Both;
         _bossName.AddThemeConstantOverride("outline_size", 3);
@@ -93,6 +103,17 @@ public partial class Hud : CanvasLayer
         _areaUntilMs = Time.GetTicksMsec() + (double)Tunables.Run.AreaTitleMs;
     }
 
+    /// <summary>A short line with an icon under the area title: the new soul's starter perk.</summary>
+    public void ShowPerk(Texture2D icon, string text)
+    {
+        ((TextureRect)_perk.GetChild(0)).Texture = icon;
+        ((Label)_perk.GetChild(1)).Text = text;
+        PerkLine = text;
+        _perk.Visible = true;
+        _perk.ResetSize();
+        _perkUntilMs = Time.GetTicksMsec() + (double)Tunables.Run.AreaTitleMs;
+    }
+
     public override void _Process(double delta)
     {
         if (Player == null || !IsInstanceValid(Player)) return;
@@ -106,6 +127,13 @@ public partial class Hud : CanvasLayer
         _area.Position = new Vector2(Mathf.Round((w - _area.Size.X) / 2), 44);
         _prompt.Position = new Vector2(Mathf.Round((w - _prompt.Size.X) / 2), _canvas.Size.Y - 70);
         _prompt.Visible = !Player.IsDead && Player.SpareCandidate() != null;
+        _perk.Position = new Vector2(Mathf.Round((w - _perk.Size.X) / 2), 76);
+        if (_perk.Visible)
+        {
+            var left = _perkUntilMs - Time.GetTicksMsec();
+            _perk.Visible = left > 0;
+            _perk.Modulate = new Color(1f, 0.95f, 0.85f, Mathf.Clamp((float)left / 600f, 0f, 1f));
+        }
         if (_area.Visible)
         {
             var left = _areaUntilMs - Time.GetTicksMsec();

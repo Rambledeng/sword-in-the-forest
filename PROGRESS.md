@@ -3,7 +3,7 @@
 ## M5 follow-up · Polish after v0.1.0 (2026-11-05)
 
 Eight items, one commit each, on `claude/blissful-rubin-xy8iln` (pull request to main; no new
-tag). Unit tests: 179 pass (Combat 141, Director 35, Localization 3). Scenarios: 32 pass
+tag). Unit tests: 183 pass (Combat 145, Director 35, Localization 3). Scenarios: 32 pass
 (new: `food_drop`, `flash_step`, `upgrade_extras`; `run_fake` and `settings` check more).
 
 ### Done
@@ -34,9 +34,17 @@ tag). Unit tests: 179 pass (Combat 141, Director 35, Localization 3). Scenarios:
    centre above the sword's text box (four-line Dutch cards used to touch it). The
    `RunUpgrade` screenshot uses seed 175, which offers all three new upgrades.
 8. This entry, and M5 item 7 marked done below.
+9. **Starter perks** (follow-up). Each new soul, on a fresh run or as "New soul", gets one
+   minor trait, seeded like its tint (run seed and souls fallen): **Hale** (体健, max health +1),
+   **Sturdy** (站稳, posture bar +15), **Even Breath** (匀息, posture recovers 25% faster),
+   **Spare Sip** (余酒, +1 gourd sip per area) or **Steady Hand** (稳手, deflects +15% posture
+   damage). Each is a weaker form of an upgrade and uses that upgrade's icon. It shows once under
+   the area title as the soul takes up the sword, and the run summary lists it ("Soul's gift").
+   Numbers in run.tres (`Perk*`); `StarterPerks` unit tests; `run_continue` checks both souls.
 
 ### For your Chinese review (new lines)
-`combat.food.{rice,braised_beef,roast_chicken,eaten}`, `upgrade.flash_step.*`
+Starter perks: `upgrade.perk.*` (体健, 站稳, 匀息, 余酒, 稳手), `ui.hud.perk` (此魂：…),
+`summary.perk` (游魂天赋). `combat.food.{rice,braised_beef,roast_chicken,eaten}`, `upgrade.flash_step.*`
 (瞬步 / 一步穿敌而斩), `upgrade.dread.*` (余威 / 补刀震慑身旁敌人), `upgrade.still_water.*`
 (止水 / 弹反时自身架势少涨). Dutch: Flitsstap, Ontzag, Stil Water.
 
@@ -61,6 +69,8 @@ tag). Unit tests: 179 pass (Combat 141, Director 35, Localization 3). Scenarios:
    combo.
 
 ### Questions for the playtest
+- Starter perks: noticeable enough to feel like a different soul, or too mild? Should the
+  sword comment on them?
 - Is 12% too rare or too common? Should food also heal posture?
 - Flash step: 64 px and 5 s right? Should it dodge too (then it must tell the director)?
 - Should the first fake's grab be even slower than 1 s, or slower only in the bamboo forest?

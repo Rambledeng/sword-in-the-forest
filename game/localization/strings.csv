@@ -44,6 +44,18 @@ upgrade.dread.name,Dread,Ontzag,余威
 upgrade.dread.desc,Finishers shake foes near you: +{dread} posture.,Genadeslagen: vijanden bij je +{dread} houding.,补刀震慑身旁敌人：架势 +{dread}。
 upgrade.still_water.name,Still Water,Stil Water,止水
 upgrade.still_water.desc,Deflects fill {calm}% less of your posture.,Parades vullen je houding {calm}% minder.,弹反时自身架势少涨 {calm}%。
+upgrade.perk.hale.name,Hale,Kloek,体健
+upgrade.perk.hale.desc,Max health +{health}.,Maximaal leven +{health}.,生命上限 +{health}。
+upgrade.perk.sturdy.name,Sturdy,Stevig,站稳
+upgrade.perk.sturdy.desc,Posture bar +{posture}.,Houdingsbalk +{posture}.,架势条 +{posture}。
+upgrade.perk.even_breath.name,Even Breath,Gelijke Adem,匀息
+upgrade.perk.even_breath.desc,Posture recovers {pct}% faster.,Houding herstelt {pct}% sneller.,架势恢复快 {pct}%。
+upgrade.perk.spare_sip.name,Spare Sip,Extra Slok,余酒
+upgrade.perk.spare_sip.desc,Gourd sips per area +{sips}.,Slokken per gebied +{sips}.,每个区域酒葫芦 +{sips} 口。
+upgrade.perk.steady_hand.name,Steady Hand,Vaste Hand,稳手
+upgrade.perk.steady_hand.desc,Deflects deal {pct}% more posture damage.,Parades doen {pct}% meer houdingsschade.,弹反的架势伤害 +{pct}%。
+ui.hud.perk,This soul: {perk} · {desc},Deze ziel: {perk} · {desc},此魂：{perk} · {desc}
+summary.perk,Soul's gift: {perk},Gave van de ziel: {perk},游魂天赋：{perk}
 upgrade.flash_step.name,Flash Step,Flitsstap,瞬步
 upgrade.flash_step.desc,Shift/RT: a dash that cuts. Every {seconds} s.,Shift/RT: een snijdende flits. Elke {seconds} s.,Shift/RT：一步穿敌而斩。每 {seconds} 秒一次。
 summary.title.win,The tavern falls silent.,De herberg valt stil.,酒馆归于死寂。

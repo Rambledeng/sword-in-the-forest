@@ -71,6 +71,18 @@ public partial class RunTuning : Resource
     /// <summary>Taking it again multiplies the cooldown by this.</summary>
     [Export(PropertyHint.Range, "0.1,1,0.05")] public float FlashStepRepeatCooldownFactor { get; set; }
 
+    [ExportGroup("Starter perks")]
+    /// <summary>Each new soul's minor trait, a weaker upgrade: Hale's health...</summary>
+    [Export(PropertyHint.Range, "0,10,1")] public int PerkHealth { get; set; }
+    /// <summary>...Sturdy's posture bar...</summary>
+    [Export(PropertyHint.Range, "0,100,1")] public float PerkPosture { get; set; }
+    /// <summary>...Even Breath's posture recovery factor...</summary>
+    [Export(PropertyHint.Range, "1,3,0.05")] public float PerkBreathFactor { get; set; }
+    /// <summary>...Spare Sip's gourd sips...</summary>
+    [Export(PropertyHint.Range, "0,5,1")] public int PerkSips { get; set; }
+    /// <summary>...and Steady Hand's deflect posture factor.</summary>
+    [Export(PropertyHint.Range, "1,3,0.05")] public float PerkDeflectFactor { get; set; }
+
     [ExportGroup("Food")]
     /// <summary>Chance that a defeated enemy (not the tutorial ghost or the boss) drops food.</summary>
     [Export(PropertyHint.Range, "0,1,0.01")] public float FoodDropChance { get; set; }
