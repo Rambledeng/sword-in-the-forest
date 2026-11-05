@@ -43,8 +43,14 @@ tag). Unit tests: 179 pass (Combat 141, Director 35, Localization 3). Scenarios:
 ### Known issues
 - Flash step is unblockable but not invulnerable; whether that is right needs your hands on it.
 - Food only drops in rooms; leaving a room leaves its food behind.
-- The README GIFs and most of `docs/screens/` predate these items; only the `run_upgrade_*`
-  screens were regenerated.
+- README GIFs and `docs/screens/` regenerated after review (`tools/gifs.sh`,
+  `tools/screens_all.sh`). The bot runs never happen to show food or a flash step, so
+  `screens_all.sh` now also captures `food_<locale>.png` and `flash_step_<locale>.png` from the
+  `food_drop` and `flash_step` scenarios. The rooms in the shots and GIFs are the new seed-7
+  layouts.
+- Older bug, still there: in Dutch, the win summary's last line ("Detailmodus staat nu in de
+  instellingen: ...") runs off the right edge (`summary_win_nl.png`). Shorten the nl text of
+  `summary.detail_unlocked` or let the line wrap.
 - Gamepad RT for flash step is mapped as a trigger axis; I could not test a real pad here.
 
 ### Playtest checklist
