@@ -3,6 +3,10 @@
 Draft for <https://rambledeng.itch.io/sword-in-the-forest>. Edit freely; the GIFs are in
 `docs/gifs/` and the screenshots in `docs/screens/`.
 
+**Paste [`itch_page.html`](itch_page.html), not this file.** itch.io's description editor does
+not render Markdown; switch it to HTML (the `<>` source button) and paste the HTML version, which
+holds the same text one line per paragraph. Keep the two in step when you edit one.
+
 **Suggested page settings**
 
 - Kind: Downloadable. Classification: Game. Release status: Prototype (or In development).
