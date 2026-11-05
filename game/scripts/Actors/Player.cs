@@ -408,17 +408,32 @@ public partial class Player : CharacterBody2D, IThreatTarget
             if (result == Enemy.HitResult.Ignored) continue;
             any = true;
             SparkFx.Hit(e.BodyGlobal);
-            if (result == Enemy.HitResult.Finisher)
-            {
-                Finishers++;
-                Heal(Mods.FinisherHeal);
-                FinisherLanded?.Invoke(this, e);
-            }
+            if (result == Enemy.HitResult.Finisher) LandFinisher(e);
         }
         if (!any) return;
         Clock.HitStop(Tunables.Feel.HitStopHitMs);
         ShakeCamera.Shake(Tunables.Feel.ShakeHit);
     }
+
+    /// <summary>A finisher landed on <paramref name="e"/>: heal (慈悲一刀) and shake the others (余威).</summary>
+    private void LandFinisher(Enemy e)
+    {
+        Finishers++;
+        Heal(Mods.FinisherHeal);
+        FinisherLanded?.Invoke(this, e);
+        if (Mods.DreadPosture <= 0) return;
+        var shaken = 0;
+        foreach (var other in Enemy.All(this))
+        {
+            if (other == e || other.BodyGlobal.DistanceTo(BodyGlobal) > Tunables.Run.DreadRadiusPx + Enemy.Radius) continue;
+            if (other.Shake(Mods.DreadPosture)) shaken++;
+        }
+        DreadShaken += shaken;
+        if (shaken > 0) SheetFx.Spawn("smoke_circular", 8, 30, GlobalPosition + new Vector2(0, -2), z: -1).Scale = new Vector2(2.2f, 2.2f);
+    }
+
+    /// <summary>Enemies shaken by 余威 so far (tests).</summary>
+    public int DreadShaken { get; private set; }
 
     private Vector2 UpdateFree(double now)
     {
@@ -587,9 +602,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
             if (result == Enemy.HitResult.Finisher)
             {
                 finisher = true;
-                Finishers++;
-                Heal(Mods.FinisherHeal);
-                FinisherLanded?.Invoke(this, e);
+                LandFinisher(e);
             }
             SparkFx.Hit(origin + to * 0.7f);
         }
@@ -673,7 +686,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
                 Clock.HitStop(feel.HitStopDeflectMs);
                 ShakeCamera.Shake(feel.ShakeDeflect);
                 _knockback = dir * feel.KnockbackDeflect * 0.35f;
-                if (AddPosture(data.PostureDamage * T.DeflectPostureFactor)) BreakPosture();
+                if (AddPosture(data.PostureDamage * T.DeflectPostureFactor * Mods.DeflectSelfPostureFactor)) BreakPosture();
                 break;
             case Outcome.Blocked:
                 Blocks++;

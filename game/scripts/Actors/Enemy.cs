@@ -713,6 +713,19 @@ public abstract partial class Enemy : CharacterBody2D
     /// <summary>A finisher that does not kill (the boss's first): the subclass decides what follows.</summary>
     protected virtual void OnPhaseFinisher(Vector2 dir) { }
 
+    /// <summary>
+    /// 余威: a finisher nearby shakes it. Adds posture without a cut; a full bar breaks it as a
+    /// hit would (kneel or beg). Kneeling, begging, leaving and dead enemies are unmoved.
+    /// </summary>
+    public bool Shake(float posture)
+    {
+        if (posture <= 0 || Current is State.Dead or State.Leave or State.Kneel or State.Surrender) return false;
+        Flash(new Color(1f, 0.85f, 0.6f), Tunables.Feel.FlashMs);
+        SparkFx.Block(BodyGlobal);
+        if (Posture.Add(posture)) EnterKneel();
+        return true;
+    }
+
     /// <summary>Back on its feet at once (stagger state), with fresh posture.</summary>
     protected void Recover(float posture)
     {

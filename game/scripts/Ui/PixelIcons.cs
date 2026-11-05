@@ -155,6 +155,46 @@ public static class PixelIcons
             "................",
             "................",
         },
+        // 余威: a finishing cross-cut, its shock spreading out.
+        ["dread"] = new[]
+        {
+            "................",
+            "....yy....yy....",
+            "..yy........yy..",
+            ".y..kk....kk..y.",
+            ".y.krrk..krrk.y.",
+            "y...krrkkrrk...y",
+            "y....krrrrk....y",
+            "y.....krrk.....y",
+            "y....krrrrk....y",
+            "y...krrkkrrk...y",
+            ".y.krrk..krrk.y.",
+            ".y..kk....kk..y.",
+            "..yy........yy..",
+            "....yy....yy....",
+            "................",
+            "................",
+        },
+        // 止水: a drop falling into still water.
+        ["still_water"] = new[]
+        {
+            "................",
+            ".......kk.......",
+            "......kcck......",
+            "......kcck......",
+            ".....kcwcck.....",
+            ".....kcccBk.....",
+            ".....kccBBk.....",
+            "......kBBk......",
+            ".......kk.......",
+            "................",
+            "...kkkkkkkkkk...",
+            ".kkcccccccccckk.",
+            "kcckkkkkkkkkkcck",
+            ".kk..........kk.",
+            "................",
+            "................",
+        },
         // 米饭: a bowl of rice, blue-and-white porcelain.
         ["rice"] = new[]
         {

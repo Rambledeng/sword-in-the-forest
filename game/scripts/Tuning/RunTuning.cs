@@ -62,6 +62,12 @@ public partial class RunTuning : Resource
     [Export(PropertyHint.Range, "0,100,1")] public int FlashStepPosture { get; set; }
     /// <summary>...and is ready again after this long.</summary>
     [Export(PropertyHint.Range, "500,20000,100")] public int FlashStepCooldownMs { get; set; }
+    /// <summary>余威: a finisher deals this much posture to every other enemy...</summary>
+    [Export(PropertyHint.Range, "0,100,1")] public float DreadPosture { get; set; }
+    /// <summary>...within this distance of you.</summary>
+    [Export(PropertyHint.Range, "0,240,1")] public float DreadRadiusPx { get; set; }
+    /// <summary>止水: your deflects cost you this fraction of the posture they used to.</summary>
+    [Export(PropertyHint.Range, "0,1,0.05")] public float StillWaterFactor { get; set; }
     /// <summary>Taking it again multiplies the cooldown by this.</summary>
     [Export(PropertyHint.Range, "0.1,1,0.05")] public float FlashStepRepeatCooldownFactor { get; set; }
 

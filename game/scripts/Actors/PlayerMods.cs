@@ -15,4 +15,8 @@ public sealed class PlayerMods
     public bool FlashStep { get; set; }
     /// <summary>Multiplies its cooldown (each repeat take shortens it).</summary>
     public float FlashStepCooldownFactor { get; set; } = 1f;
+    /// <summary>余威: posture each finisher deals to the other enemies within reach.</summary>
+    public float DreadPosture { get; set; }
+    /// <summary>止水: multiplies the posture your own deflects cost you.</summary>
+    public float DeflectSelfPostureFactor { get; set; } = 1f;
 }

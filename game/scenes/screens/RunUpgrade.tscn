@@ -4,5 +4,6 @@
 
 [node name="RunUpgrade" type="Node"]
 script = ExtResource("1")
+Seed = 175
 StartStep = 3
 ChooseUpgrades = false
