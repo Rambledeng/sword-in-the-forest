@@ -75,6 +75,8 @@ public partial class UpgradeScreen : CanvasLayer
                 CustomMinimumSize = new Vector2(132, 92),
                 Alignment = HorizontalAlignment.Center,
                 VerticalIconAlignment = VerticalAlignment.Top,
+                IconAlignment = HorizontalAlignment.Center,
+                Icon = PixelIcons.For(u),
             };
             var index = i;
             b.Pressed += () => Choose(index);

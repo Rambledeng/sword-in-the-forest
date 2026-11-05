@@ -29,8 +29,8 @@ Code: MIT, see LICENSE.
 | `fx/smoke_circular.png` | `FX/Smoke/SmokeCircular/SpriteSheet.png` | Roll dust |
 | `tiles/tileset_floor.png` | `Backgrounds/Tilesets/TilesetFloor.png` | Grass and dirt floors |
 | `tiles/tileset_nature.png` | `Backgrounds/Tilesets/TilesetNature.png` | Bamboo fence and bushes |
-| `ui/heart.png` | `Ui/Receptacle/Heart.png` | Health hearts |
-| `ui/gourd.png` | `Items/Object/Gourd.png` | Gourd (酒葫芦) icon |
+| `ui/heart.png` | `Ui/Receptacle/Heart.png` | Health hearts; the Vitality upgrade icon |
+| `ui/gourd.png` | `Items/Object/Gourd.png` | Gourd (酒葫芦) icon; the Deep Gourd upgrade icon |
 | `sounds/glint_white.wav` | `Audio/Sounds/Alert/Alert3.wav` | White glint chime |
 | `sounds/glint_red.wav` | `Audio/Sounds/Alert/Alert2.wav` | Red glint (杀招) cue |
 | `sounds/deflect.wav` | `Audio/Sounds/Hit & Impact/Hit7.wav` | Deflect |
@@ -97,6 +97,11 @@ smoke, the tavern's glowing dust, the glint (剑光), deflect, block, hit and fi
 finisher mark, the archer's aim line, the red thrust line, the jar's landing ring, the tavern's
 walls and tables and the boss bar are drawn in code (`game/scripts/Fx/`, `game/scripts/Actors/EnemyBars.cs`,
 `game/scripts/Ui/Hud.cs`).
+
+The 16×16 upgrade icons (Broad Stance's shield, Steady Breath's wind, Keen Edge's blade, Iron
+Deflect's crossed blades, Merciful Cut's lotus) are pixel maps drawn in code in the Ninja
+Adventure style, by Claude for this project (`game/scripts/Ui/PixelIcons.cs`, same licence as
+the code).
 
 ## Translations
 
