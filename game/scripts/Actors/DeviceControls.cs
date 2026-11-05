@@ -71,6 +71,7 @@ public partial class DeviceControls : Node, IPlayerControls
         PlayerAction.Guard => "guard",
         PlayerAction.Roll => "roll",
         PlayerAction.Interact => "interact",
+        PlayerAction.FlashStep => "flash_step",
         _ => "drink",
     };
 }

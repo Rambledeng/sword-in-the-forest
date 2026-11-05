@@ -3,6 +3,10 @@
 Draft for <https://rambledeng.itch.io/sword-in-the-forest>. Edit freely; the GIFs are in
 `docs/gifs/` and the screenshots in `docs/screens/`.
 
+**Paste [`itch_page.html`](itch_page.html), not this file.** itch.io's description editor does
+not render Markdown; switch it to HTML (the `<>` source button) and paste the HTML version, which
+holds the same text one line per paragraph. Keep the two in step when you edit one.
+
 **Suggested page settings**
 
 - Kind: Downloadable. Classification: Game. Release status: Prototype (or In development).
@@ -42,7 +46,8 @@ timing off. Beat the boss once to unlock Detail mode and see what it learned abo
 - English, Nederlands and 简体中文, switchable in game. Keyboard and mouse or a gamepad.
 
 **Controls:** WASD move · mouse aim · left click attack · right click guard / deflect ·
-Space roll · R gourd · E spare · Esc pause. Gamepad: X attack, LB guard, A roll, Y gourd, B spare.
+Space roll · R gourd · E spare · Shift flash step (an upgrade) · Esc pause. Gamepad: X attack, LB guard,
+A roll, Y gourd, B spare, RT flash step.
 
 **How it works.** The director, its evaluation on 1,000 simulated players (it lands 93% of
 players within 10 points of the Standard target, against 28% with fixed timing) and the full

@@ -284,10 +284,10 @@ public abstract partial class Enemy : CharacterBody2D
                 if (IsFake && targetAlive && !DrillMode && TurnedAway(toTarget, dist)) Betray();
                 break;
             case State.Grab:
-                if (_dropped != null && StateElapsedMs >= Tunables.Run.FakeGrabMs * 0.5) PickUpWeapon();
+                if (_dropped != null && StateElapsedMs >= GrabMs * 0.5) PickUpWeapon();
                 // Weapon in hand: it turns to face you as it rises.
                 if (_dropped == null && targetAlive) Facing = AimDir = toTarget.Normalized();
-                if (StateElapsedMs >= Tunables.Run.FakeGrabMs)
+                if (StateElapsedMs >= GrabMs)
                 {
                     if (targetAlive) StartAttack(CounterAttack ?? ChooseAttack());
                     else BeginCircle();
@@ -365,6 +365,7 @@ public abstract partial class Enemy : CharacterBody2D
     /// </summary>
     private void Betray()
     {
+        GrabMs = GrabMsRoll?.Invoke() ?? Tunables.Run.FakeGrabMs;
         IsFake = false;
         Revealed = true;
         _turnedAwayMs = 0;
@@ -373,6 +374,11 @@ public abstract partial class Enemy : CharacterBody2D
         if (_dropped == null) PickUpWeapon();
         Betrayed?.Invoke(this);
     }
+
+    /// <summary>Picks how long this fake's grab lasts when it drops the act (the run makes the first one longer).</summary>
+    public Func<int>? GrabMsRoll { get; set; }
+    /// <summary>How long its grab lasts (set when it drops the act).</summary>
+    public double GrabMs { get; private set; }
 
     /// <summary>The dropped weapon leaves the ground and is back in hand.</summary>
     private void PickUpWeapon()
@@ -617,8 +623,11 @@ public abstract partial class Enemy : CharacterBody2D
 
     // ---- Being hit ----------------------------------------------------------------------
 
-    /// <summary>A player's cut. <paramref name="dir"/> points from the player to this enemy.</summary>
-    public HitResult TakeHit(int damage, int posture, Vector2 dir)
+    /// <summary>
+    /// A player's cut. <paramref name="dir"/> points from the player to this enemy. An
+    /// <paramref name="unblockable"/> cut (the flash step) gets past a raised guard.
+    /// </summary>
+    public HitResult TakeHit(int damage, int posture, Vector2 dir, bool unblockable = false)
     {
         if (Current == State.Dead) return HitResult.Ignored;
         // The rest of a combo must not cut down an enemy that has only just begun to beg.
@@ -638,7 +647,7 @@ public abstract partial class Enemy : CharacterBody2D
             return HitResult.Finisher;
         }
 
-        if (IsBlocking)
+        if (IsBlocking && !unblockable)
         {
             Block(posture, dir);
             return Current == State.Kneel ? HitResult.Kneel : HitResult.Blocked;
@@ -703,6 +712,19 @@ public abstract partial class Enemy : CharacterBody2D
 
     /// <summary>A finisher that does not kill (the boss's first): the subclass decides what follows.</summary>
     protected virtual void OnPhaseFinisher(Vector2 dir) { }
+
+    /// <summary>
+    /// 余威: a finisher nearby shakes it. Adds posture without a cut; a full bar breaks it as a
+    /// hit would (kneel or beg). Kneeling, begging, leaving and dead enemies are unmoved.
+    /// </summary>
+    public bool Shake(float posture)
+    {
+        if (posture <= 0 || Current is State.Dead or State.Leave or State.Kneel or State.Surrender) return false;
+        Flash(new Color(1f, 0.85f, 0.6f), Tunables.Feel.FlashMs);
+        SparkFx.Block(BodyGlobal);
+        if (Posture.Add(posture)) EnterKneel();
+        return true;
+    }
 
     /// <summary>Back on its feet at once (stagger state), with fresh posture.</summary>
     protected void Recover(float posture)
@@ -892,7 +914,7 @@ public abstract partial class Enemy : CharacterBody2D
             case State.Grab:
             {
                 // Reach down to the dropped weapon, snatch it, rise with it to face you.
-                var half = Mathf.Max(1, Tunables.Run.FakeGrabMs * 0.5);
+                var half = Mathf.Max(1, GrabMs * 0.5);
                 if (_dropped != null)
                 {
                     var toWeapon = _droppedAt - GlobalPosition;

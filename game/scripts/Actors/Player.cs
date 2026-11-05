@@ -19,7 +19,7 @@ namespace SwordInTheForest.Actors;
 /// </summary>
 public partial class Player : CharacterBody2D, IThreatTarget
 {
-    public enum State { Free, Attack, Guard, Deflect, Roll, Hurt, Broken, Drink, Dead }
+    public enum State { Free, Attack, Guard, Deflect, Roll, Hurt, Broken, Drink, Dead, FlashStep }
 
     /// <summary>The body's centre relative to the feet (the node origin).</summary>
     public static readonly Vector2 BodyCenter = new(0, -7);
@@ -103,6 +103,20 @@ public partial class Player : CharacterBody2D, IThreatTarget
     public bool IsDead => Current == State.Dead;
     public bool IsGuarding => Current is State.Guard or State.Deflect;
     public bool IsInvulnerable => Current == State.Roll && RollTimeline.IsInvulnerable(StateElapsedMs);
+
+    // ---- 瞬步 Flash step ---------------------------------------------------------------------
+    private double _flashReadyAtMs;
+    private Vector2 _flashDir;
+    private Vector2 _flashFrom;
+    private readonly HashSet<Enemy> _flashCut = new();
+    /// <summary>Flash steps taken (tests).</summary>
+    public int FlashSteps { get; private set; }
+    /// <summary>The flash step's cooldown now, with upgrades.</summary>
+    public double FlashStepCooldownMs => Tunables.Run.FlashStepCooldownMs * Mods.FlashStepCooldownFactor;
+    /// <summary>0 just used, 1 ready (also 1 without the upgrade).</summary>
+    public float FlashStepCharge => !Mods.FlashStep ? 1f :
+        Mathf.Clamp(1f - (float)((_flashReadyAtMs - Clock.NowMs) / Mathf.Max(1, FlashStepCooldownMs)), 0f, 1f);
+    public bool FlashStepReady => Mods.FlashStep && Clock.NowMs >= _flashReadyAtMs;
     public Vector2 BodyGlobal => GlobalPosition + BodyCenter;
 
     private static PlayerTuning T => Tunables.Player;
@@ -139,6 +153,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
         Posture.Reset();
         _knockback = Vector2.Zero;
         SlowedUntilMs = 0;
+        _flashReadyAtMs = 0;
         Enter(State.Free);
     }
 
@@ -152,6 +167,9 @@ public partial class Player : CharacterBody2D, IThreatTarget
         Health = Mathf.Min(MaxHealth, Health + amount);
         Flash(new Color(0.6f, 1f, 0.6f), 160);
     }
+
+    /// <summary>Developer and tests: loses health without a hit (never below 1).</summary>
+    public void Wound(int amount) => Health = Mathf.Max(1, Health - Mathf.Max(0, amount));
 
     /// <summary>Refills health and posture without changing state (test drills).</summary>
     public void RefillForDrill()
@@ -197,6 +215,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
             case State.Deflect: velocity = UpdateDeflect(now); break;
             case State.Attack: velocity = UpdateAttack(now); break;
             case State.Roll: velocity = UpdateRoll(now); break;
+            case State.FlashStep: velocity = UpdateFlashStep(now); break;
             case State.Hurt:
                 if (StateElapsedMs >= T.HurtMs) Enter(State.Free);
                 break;
@@ -233,7 +252,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
     private void Move(Vector2 desired, double dtMs)
     {
         var dt = (float)(dtMs / 1000.0);
-        if (Current is State.Roll or State.Attack or State.Deflect)
+        if (Current is State.Roll or State.Attack or State.Deflect or State.FlashStep)
             Velocity = desired;
         else
         {
@@ -254,7 +273,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
 
     private void Enter(State s)
     {
-        if (Current == State.Roll && s != State.Roll) CollisionMask = LayerWorld | LayerEnemy;
+        if (Current is State.Roll or State.FlashStep && s != Current) CollisionMask = LayerWorld | LayerEnemy;
         Current = s;
         _stateStartMs = Clock.NowMs;
         if (s != State.Attack) ComboStep = 0;
@@ -332,9 +351,93 @@ public partial class Player : CharacterBody2D, IThreatTarget
         if (Current != State.Deflect) Enter(State.Deflect);
     }
 
+    /// <summary>
+    /// 瞬步: once taken, the flash-step button dashes along the (assisted) aim, through enemies,
+    /// cutting each one near the path once, past their guard. Not a dodge: attacks still land.
+    /// </summary>
+    private bool TryFlashStep(double now)
+    {
+        if (!_buffer.TryConsume(PlayerAction.FlashStep, now) || !FlashStepReady) return false;
+        _flashDir = AssistedAim();
+        AttackDir = Facing = _flashDir;
+        _flashFrom = BodyGlobal;
+        _flashCut.Clear();
+        _deflecting.Clear();
+        CollisionMask = LayerWorld;
+        Enter(State.FlashStep);
+        FlashSteps++;
+        Sfx.Play("swing", 0.05f, 0.8f);
+        Sfx.Play("roll", 0.05f, 0.4f);
+        SheetFx.Spawn("smoke_circular", 8, 30, GlobalPosition + new Vector2(0, -2), z: -1);
+        return true;
+    }
+
+    private Vector2 UpdateFlashStep(double now)
+    {
+        var r = Tunables.Run;
+        CutAlongFlash(r);
+        if (StateElapsedMs >= r.FlashStepMs)
+        {
+            _flashReadyAtMs = now + FlashStepCooldownMs;
+            SheetFx.Spawn("slash_arc", 6, 34, BodyGlobal - _flashDir * (r.FlashStepDistancePx * 0.4f), _flashDir.Angle() - Mathf.Pi / 2, false, z: 15);
+            // A clean stop: no slide out of the dash.
+            Velocity = Vector2.Zero;
+            Enter(State.Free);
+            return Vector2.Zero;
+        }
+        if (now - _lastAfterImageMs >= 20)
+        {
+            _lastAfterImageMs = now;
+            AfterImage.From(_body, new Color(0.85f, 0.95f, 1f));
+        }
+        return _flashDir * (r.FlashStepDistancePx / (r.FlashStepMs / 1000f));
+    }
+
+    /// <summary>Cuts every enemy near the path walked so far (each once per flash step).</summary>
+    private void CutAlongFlash(RunTuning r)
+    {
+        var to = BodyGlobal;
+        var any = false;
+        foreach (var e in Enemy.All(this))
+        {
+            if (!e.CanBeHit || _flashCut.Contains(e)) continue;
+            var near = Geometry2D.GetClosestPointToSegment(e.BodyGlobal, _flashFrom, to);
+            if (near.DistanceTo(e.BodyGlobal) > r.FlashStepWidthPx + Enemy.Radius) continue;
+            _flashCut.Add(e);
+            var result = e.TakeHit(r.FlashStepDamage + Mods.DamageBonus, r.FlashStepPosture, _flashDir, unblockable: true);
+            if (result == Enemy.HitResult.Ignored) continue;
+            any = true;
+            SparkFx.Hit(e.BodyGlobal);
+            if (result == Enemy.HitResult.Finisher) LandFinisher(e);
+        }
+        if (!any) return;
+        Clock.HitStop(Tunables.Feel.HitStopHitMs);
+        ShakeCamera.Shake(Tunables.Feel.ShakeHit);
+    }
+
+    /// <summary>A finisher landed on <paramref name="e"/>: heal (慈悲一刀) and shake the others (余威).</summary>
+    private void LandFinisher(Enemy e)
+    {
+        Finishers++;
+        Heal(Mods.FinisherHeal);
+        FinisherLanded?.Invoke(this, e);
+        if (Mods.DreadPosture <= 0) return;
+        var shaken = 0;
+        foreach (var other in Enemy.All(this))
+        {
+            if (other == e || other.BodyGlobal.DistanceTo(BodyGlobal) > Tunables.Run.DreadRadiusPx + Enemy.Radius) continue;
+            if (other.Shake(Mods.DreadPosture)) shaken++;
+        }
+        DreadShaken += shaken;
+        if (shaken > 0) SheetFx.Spawn("smoke_circular", 8, 30, GlobalPosition + new Vector2(0, -2), z: -1).Scale = new Vector2(2.2f, 2.2f);
+    }
+
+    /// <summary>Enemies shaken by 余威 so far (tests).</summary>
+    public int DreadShaken { get; private set; }
+
     private Vector2 UpdateFree(double now)
     {
-        if (TryRoll(now) || TryGuard(now)) return Vector2.Zero;
+        if (TryRoll(now) || TryFlashStep(now) || TryGuard(now)) return Vector2.Zero;
         if (Controls.Held(PlayerAction.Guard))
         {
             Enter(State.Guard);
@@ -393,7 +496,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
 
     private Vector2 UpdateGuard(double now)
     {
-        if (TryRoll(now) || TryGuard(now)) return Vector2.Zero;
+        if (TryRoll(now) || TryFlashStep(now) || TryGuard(now)) return Vector2.Zero;
         if (!Controls.Held(PlayerAction.Guard))
         {
             Enter(State.Free);
@@ -458,7 +561,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
         }
         if (elapsed >= windup + T.ComboCancelFromMs)
         {
-            if (TryRoll(now) || TryGuard(now)) return Vector2.Zero;
+            if (TryRoll(now) || TryFlashStep(now) || TryGuard(now)) return Vector2.Zero;
             if (ComboStep < 3 && _buffer.TryConsume(PlayerAction.Attack, now))
             {
                 EnterAttack(ComboStep + 1, now);
@@ -499,9 +602,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
             if (result == Enemy.HitResult.Finisher)
             {
                 finisher = true;
-                Finishers++;
-                Heal(Mods.FinisherHeal);
-                FinisherLanded?.Invoke(this, e);
+                LandFinisher(e);
             }
             SparkFx.Hit(origin + to * 0.7f);
         }
@@ -585,7 +686,7 @@ public partial class Player : CharacterBody2D, IThreatTarget
                 Clock.HitStop(feel.HitStopDeflectMs);
                 ShakeCamera.Shake(feel.ShakeDeflect);
                 _knockback = dir * feel.KnockbackDeflect * 0.35f;
-                if (AddPosture(data.PostureDamage * T.DeflectPostureFactor)) BreakPosture();
+                if (AddPosture(data.PostureDamage * T.DeflectPostureFactor * Mods.DeflectSelfPostureFactor)) BreakPosture();
                 break;
             case Outcome.Blocked:
                 Blocks++;
@@ -711,6 +812,13 @@ public partial class Player : CharacterBody2D, IThreatTarget
                 _weapon.Visible = false;
                 _body.Position = new Vector2(0, -Mathf.Round(3 * Mathf.Sin(Mathf.Pi * (float)(StateElapsedMs / T.RollDurationMs))));
                 if (IsInvulnerable) _body.Modulate = new Color(0.8f, 0.9f, 1f, 0.75f);
+                break;
+            case State.FlashStep:
+                // Low and forward, blade swept back along the path.
+                row = CharacterSprite.RowAttack;
+                bladeAngle = aimAngle + Mathf.DegToRad(150) * (Facing.X < 0 ? -1 : 1);
+                weaponPivot = BodyCenter + _flashDir * 3;
+                _body.Modulate = new Color(0.9f, 0.97f, 1f, 0.8f);
                 break;
             case State.Hurt:
                 _body.Position = new Vector2(Mathf.Round(Mathf.Sin((float)now * 0.09f)), 0);

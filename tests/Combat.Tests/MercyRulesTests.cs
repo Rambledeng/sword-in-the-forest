@@ -15,6 +15,18 @@ public class MercyRulesTests
     }
 
     [Fact]
+    public void FirstReveal_GrabsLonger_LaterOnesUsual()
+    {
+        var m = new MercyRules(1.0);
+        Assert.Equal(1000, m.NextGrabMs(1000, 380));
+        Assert.Equal(380, m.NextGrabMs(1000, 380));
+        Assert.Equal(380, m.NextGrabMs(1000, 380));
+        Assert.Equal(3, m.Reveals);
+        // A "first" shorter than the usual grab never shortens it.
+        Assert.Equal(380, new MercyRules(1.0).NextGrabMs(200, 380));
+    }
+
+    [Fact]
     public void NoSurrender_Kneels()
     {
         var m = new MercyRules(0.33);

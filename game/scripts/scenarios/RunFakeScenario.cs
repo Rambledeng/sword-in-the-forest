@@ -76,7 +76,8 @@ public partial class RunFakeScenario : Scenario
                 if (_fake!.Current == Enemy.State.Grab) return;
                 var grabMs = GameClock.Instance.NowMs - _grabStartMs;
                 Check(_fake.Current == Enemy.State.Attack && !_fake.WeaponOnGround, $"after the grab the fake is {_fake.Current}");
-                Check(System.Math.Abs(grabMs - Tunables.Run.FakeGrabMs) < 40, $"the grab took {grabMs:0} ms, not {Tunables.Run.FakeGrabMs}");
+                // The run's first fake grabs slowly; later ones take the usual time.
+                Check(System.Math.Abs(grabMs - Tunables.Run.FirstFakeGrabMs) < 40, $"the first fake's grab took {grabMs:0} ms, not {Tunables.Run.FirstFakeGrabMs}");
                 GD.Print($"  frame {frame}: spared fake attacked after a {grabMs:0} ms grab");
                 _run.Mercy.ForceNext = BegKind.Fake;
                 _fake = null;
@@ -92,6 +93,7 @@ public partial class RunFakeScenario : Scenario
                 if (_betrayals >= 2)
                 {
                     Check(_fake!.Revealed, "the wrong enemy attacked");
+                    Check(System.Math.Abs(_fake.GrabMs - Tunables.Run.FakeGrabMs) < 1, $"the second fake's grab is {_fake.GrabMs:0} ms, not {Tunables.Run.FakeGrabMs}");
                     Check(_run.Voice.Spoken.Contains("sword.first_fake"), "the sword did not call out the fake at your back");
                     GD.Print($"  frame {frame}: the fake struck when the player turned away");
                     Pass();

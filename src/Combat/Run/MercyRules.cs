@@ -17,6 +17,14 @@ namespace SwordInTheForest.Run
         /// <summary>Beggars so far this run (genuine and fake).</summary>
         public int Begs { get; private set; }
         public int Fakes { get; private set; }
+        /// <summary>Fakes that have dropped the act this run.</summary>
+        public int Reveals { get; private set; }
+
+        /// <summary>
+        /// How long a fake that drops the act takes to grab its weapon: the run's first reveal gets
+        /// the longer <paramref name="firstMs"/> (the player has never seen one), later ones <paramref name="laterMs"/>.
+        /// </summary>
+        public int NextGrabMs(int firstMs, int laterMs) => Reveals++ == 0 ? Math.Max(firstMs, laterMs) : laterMs;
 
         /// <summary>
         /// One posture break. <paramref name="roll"/> gives uniform numbers in [0, 1); it is
