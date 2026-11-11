@@ -1,9 +1,85 @@
 # Progress
 
+## M5 follow-up · Polish after v0.1.0 (2026-11-05)
+
+Eight items, one commit each, on `claude/blissful-rubin-xy8iln` (pull request to main; no new
+tag). Unit tests: 183 pass (Combat 145, Director 35, Localization 3). Scenarios: 32 pass
+(new: `food_drop`, `flash_step`, `upgrade_extras`; `run_fake` and `settings` check more).
+
+### Done
+1. **Fixes from the itch.io test:** none reported.
+2. **The first fake's grab is slow.** The run's first fake to drop the act takes
+   `FirstFakeGrabMs` (1000 ms, run.tres) to reach for its weapon and rise, like the first red
+   attack's long lead; later fakes keep `FakeGrabMs` (380). `MercyRules.NextGrabMs` counts
+   reveals; `run_fake` checks both lengths.
+3. **Upgrade icons.** Every card shows a 16×16 icon: the HUD's heart (Vitality) and gourd (Deep
+   Gourd) from Ninja Adventure, the rest pixel maps drawn in code (`Ui/PixelIcons.cs`). CREDITS.
+4. **docs/itch_page.html**, the page text as HTML, one line per paragraph. itch_page.md says to
+   paste the HTML.
+5. **Food drops.** A defeated enemy (not the tutorial ghost or the boss) drops food 12% of the
+   time: 米饭 rice (60%, +1), 酱牛肉 braised beef (30%, +2), 烧鸡 roast chicken (10%, +3). It hops
+   out of the body and waits; walk over it while hurt to eat it, and its name floats up.
+   Everything in run.tres (`Food*`, `*Weight`, `*Heal`); names in en/nl/zh_CN; code-drawn
+   icons. The drops use their own seeded stream, so layouts and enemy rolls are unchanged.
+6. **Flash step (瞬步)**, the eighth upgrade. Shift / RT dashes 64 px in 130 ms along the
+   assisted aim, through enemies, cutting each near the path once (2 damage + Keen Edge, 30
+   posture) **past its guard**; then a 5 s cooldown (×0.6 if taken twice). It is not a dodge:
+   attacks still land, so the director's reaction data is untouched. A HUD icon beside the
+   gourd dims and refills while it recharges. Numbers in run.tres (`FlashStep*`).
+   Upgrade choices now draw from their own seeded stream, so adding upgrades never moves rooms
+   again (this one change moved layouts for every seed; all scenarios pass on the new ones).
+7. **Two more upgrades.** **Dread (余威):** a finisher adds 40 posture to every other enemy
+   within 80 px; a full bar breaks it (kneel or beg). **Still Water (止水):** your deflects cost
+   you 60% less of your own posture. Icons, text, numbers in run.tres. The upgrade cards now
+   centre above the sword's text box (four-line Dutch cards used to touch it). The
+   `RunUpgrade` screenshot uses seed 175, which offers all three new upgrades.
+8. This entry, and M5 item 7 marked done below.
+9. **Starter perks** (follow-up). Each new soul, on a fresh run or as "New soul", gets one
+   minor trait, seeded like its tint (run seed and souls fallen): **Hale** (体健, max health +1),
+   **Sturdy** (站稳, posture bar +15), **Even Breath** (匀息, posture recovers 25% faster),
+   **Spare Sip** (余酒, +1 gourd sip per area) or **Steady Hand** (稳手, deflects +15% posture
+   damage). Each is a weaker form of an upgrade and uses that upgrade's icon. It shows once under
+   the area title as the soul takes up the sword, and the run summary lists it ("Soul's gift").
+   Numbers in run.tres (`Perk*`); `StarterPerks` unit tests; `run_continue` checks both souls.
+
+### For your Chinese review (new lines)
+Starter perks: `upgrade.perk.*` (体健, 站稳, 匀息, 余酒, 稳手), `ui.hud.perk` (此魂：…),
+`summary.perk` (游魂天赋). `combat.food.{rice,braised_beef,roast_chicken,eaten}`, `upgrade.flash_step.*`
+(瞬步 / 一步穿敌而斩), `upgrade.dread.*` (余威 / 补刀震慑身旁敌人), `upgrade.still_water.*`
+(止水 / 弹反时自身架势少涨). Dutch: Flitsstap, Ontzag, Stil Water.
+
+### Known issues
+- Flash step is unblockable but not invulnerable; whether that is right needs your hands on it.
+- Food only drops in rooms; leaving a room leaves its food behind.
+- README GIFs and `docs/screens/` regenerated after review (`tools/gifs.sh`,
+  `tools/screens_all.sh`). The bot runs never happen to show food or a flash step, so
+  `screens_all.sh` now also captures `food_<locale>.png` and `flash_step_<locale>.png` from the
+  `food_drop` and `flash_step` scenarios. The rooms in the shots and GIFs are the new seed-7
+  layouts.
+- Fixed: the Dutch win summary's last line ran off the right edge. Every summary line now
+  wraps at 440 px, so long lines fit in any language (`summary_*` screens regenerated).
+- Gamepad RT for flash step is mapped as a trigger axis; I could not test a real pad here.
+
+### Playtest checklist
+1. Spare the first fake of a run and turn your back: is the 1 s grab clearly readable? Does a
+   later fake still feel quick?
+2. Kill a dozen enemies: does food show up about once per area, and is it visible on each floor?
+3. Take Flash Step: Shift and RT both dash; the HUD icon refills; it cuts a guarding bandit.
+4. Take Dread and finish one of two bandits standing together; take Still Water and deflect a
+   combo.
+
+### Questions for the playtest
+- Starter perks: noticeable enough to feel like a different soul, or too mild? Should the
+  sword comment on them?
+- Is 12% too rare or too common? Should food also heal posture?
+- Flash step: 64 px and 5 s right? Should it dodge too (then it must tell the director)?
+- Should the first fake's grab be even slower than 1 s, or slower only in the bamboo forest?
+
 ## M5 · Release (2026-11-04)
 
 Items 1–6 of the kickoff list, one commit each, on `claude/m5-release-25crbs`
-(pull request to main). Item 7 (tag v0.1.0) follows the merge. Unit tests: 174 pass
+(pull request to main). **Item 7 (tag v0.1.0): done.** v0.1.0 is released, with the Windows
+and Linux builds on GitHub and itch.io. Unit tests: 174 pass
 (Combat 136, Director 35, Localization 3). Scenarios: 29 pass (new: `dev_gate`; `run_fake`
 checks more).
 

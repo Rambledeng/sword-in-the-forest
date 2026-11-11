@@ -71,6 +71,11 @@ public partial class RunScene : Node2D
     public MercyRules Mercy { get; private set; } = null!;
     /// <summary>The run's first red attack gets a generous lead.</summary>
     public FirstRedLead FirstRed { get; private set; } = null!;
+    /// <summary>Defeated enemies sometimes drop food (rates in run.tres).</summary>
+    public FoodDrops FoodRules { get; private set; } = null!;
+    private Random _foodRng = null!;
+    /// <summary>Food dropped this run (tests watch it).</summary>
+    public event Action<FoodPickup>? FoodDropped;
 
     public event Action<Room>? RoomEntered;
 
@@ -82,11 +87,20 @@ public partial class RunScene : Node2D
         Plan = RunPlan.Build(seed);
         Mercy = new MercyRules(Tunables.Run.FakeBegChance);
         FirstRed = new FirstRedLead(() => CombatServices.LeadTimes, Tunables.Run.FirstRedLeadMs);
+        var rt = Tunables.Run;
+        FoodRules = new FoodDrops(rt.FoodDropChance, rt.RiceWeight, rt.BeefWeight, rt.ChickenWeight);
+        // Its own stream, so food never shifts the layout or the enemies' rolls.
+        _foodRng = new Random(unchecked(seed * 104_729 + 17));
         Telemetry.Instance.StartRun();
         GD.Print($"Run seed {seed}");
 
-        // Each new soul looks a little different: its tint is seeded by the run and the souls fallen.
-        Player = new Player { Invulnerable = Invulnerable, Tint = Player.SoulTint(unchecked(seed * 7919 + (DirectorService.Instance?.SoulsFallen ?? 0))) };
+        // Each new soul looks a little different and has one minor trait: both seeded by the run
+        // and the souls fallen.
+        var soulSeed = unchecked(seed * 7919 + (DirectorService.Instance?.SoulsFallen ?? 0));
+        Player = new Player { Invulnerable = Invulnerable, Tint = Player.SoulTint(soulSeed) };
+        Perk = StarterPerks.Pick(soulSeed);
+        ApplyPerk(Perk);
+        Stats.Perk = Perk;
         if (Controls != null) Player.Controls = Controls;
         Player.Died += _ => EndRun(false);
         Player.FinisherLanded += (_, e) => { if (e.IsGone) OnFinished(e); };
@@ -138,6 +152,29 @@ public partial class RunScene : Node2D
             Stats.Take(u);
         }
         if (ContinuedFrom != null) SwordVoice.Say("sword.new_soul");
+        // Shown once, as the soul takes up the sword.
+        Hud.ShowPerk(PerkText.Icon(Perk), Tr("ui.hud.perk").Replace("{perk}", PerkText.Name(Perk)).Replace("{desc}", PerkText.Describe(Perk)));
+    }
+
+    /// <summary>This soul's starter perk.</summary>
+    public StarterPerk Perk { get; private set; }
+
+    /// <summary>
+    /// A perk is a weaker upgrade, applied before the soul first stands in a room (so its health,
+    /// sips and posture bar start full).
+    /// </summary>
+    private void ApplyPerk(StarterPerk p)
+    {
+        var r = Tunables.Run;
+        var m = Player.Mods;
+        switch (p)
+        {
+            case StarterPerk.Hale: m.HealthBonus += r.PerkHealth; break;
+            case StarterPerk.Sturdy: m.PostureBonus += r.PerkPosture; break;
+            case StarterPerk.EvenBreath: m.PostureDrainFactor *= r.PerkBreathFactor; break;
+            case StarterPerk.SpareSip: m.SipsBonus += r.PerkSips; break;
+            case StarterPerk.SteadyHand: m.DeflectFactor *= r.PerkDeflectFactor; break;
+        }
     }
 
     public override void _ExitTree()
@@ -371,6 +408,8 @@ public partial class RunScene : Node2D
         e.LeadTimesOverride = FirstRed;
         if (e is Spearman) SayOnce("sword.first_spear");
         if (e is not TutorialGhost and not TavernBoss) e.BegRoll = en => Mercy.Decide(en.SurrenderChance, en.NextRoll);
+        e.GrabMsRoll = () => Mercy.NextGrabMs(Tunables.Run.FirstFakeGrabMs, Tunables.Run.FakeGrabMs);
+        if (e is not TutorialGhost and not TavernBoss) e.Died += DropFood;
         e.Surrendered += _ =>
         {
             // The sword wants every beggar dead, and never warns about fakes.
@@ -385,6 +424,20 @@ public partial class RunScene : Node2D
         // A spared fake attacks: scorn. A fake that strikes at your back: cut it down.
         e.Betrayed += en => SayOnce(en.BetrayedOnSpare ? "sword.spared_fake" : "sword.first_fake");
         if (e is TavernBoss boss) boss.PhaseChanged += _ => SwordVoice.Say("sword.boss.phase2");
+    }
+
+    /// <summary>A defeated enemy may drop food where it fell (F1 edits to the rates apply at once).</summary>
+    private void DropFood(Enemy e)
+    {
+        var r = Tunables.Run;
+        FoodRules.Chance = r.FoodDropChance;
+        FoodRules.RiceWeight = r.RiceWeight;
+        FoodRules.BeefWeight = r.BeefWeight;
+        FoodRules.ChickenWeight = r.ChickenWeight;
+        if (Room == null || FoodRules.Roll(_foodRng.NextDouble) is not Food kind) return;
+        var pickup = new FoodPickup(kind, e.GlobalPosition + new Vector2(0, -8), e.GlobalPosition) { Player = Player };
+        Room.Actors.AddChild(pickup);
+        FoodDropped?.Invoke(pickup);
     }
 
     /// <summary>Merit and karma are felt, not counted: glitter or smoke on the player.</summary>
@@ -460,6 +513,12 @@ public partial class RunScene : Node2D
             case Upgrade.DeepGourd: m.SipsBonus += r.DeepGourdSips; break;
             case Upgrade.IronDeflect: m.DeflectFactor *= r.IronDeflectFactor; break;
             case Upgrade.MercifulCut: m.FinisherHeal += r.MercifulCutHeal; break;
+            case Upgrade.Dread: m.DreadPosture += r.DreadPosture; break;
+            case Upgrade.StillWater: m.DeflectSelfPostureFactor *= r.StillWaterFactor; break;
+            case Upgrade.FlashStep:
+                if (m.FlashStep) m.FlashStepCooldownFactor *= r.FlashStepRepeatCooldownFactor;
+                m.FlashStep = true;
+                break;
         }
     }
 

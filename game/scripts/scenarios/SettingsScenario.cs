@@ -31,6 +31,8 @@ public partial class SettingsScenario : Scenario
                 {
                     var text = Ui.UpgradeScreen.Describe(u, Tr($"upgrade.{Ui.UpgradeScreen.Key(u)}.desc"));
                     Check(!text.Contains('{'), $"unfilled upgrade text: {text}");
+                    var icon = Ui.PixelIcons.For(u);
+                    Check(icon != null && icon.GetWidth() >= 12 && icon.GetHeight() >= 12, $"{u} has no icon");
                 }
                 Check(Ui.UpgradeScreen.Describe(Upgrade.IronDeflect, Tr("upgrade.iron_deflect.desc")).Contains(Mathf.RoundToInt((Tunables.Run.IronDeflectFactor - 1) * 100) + "%"), "Iron Deflect does not show its tuned number");
                 _title.LanguageButton.EmitSignal(BaseButton.SignalName.Pressed);

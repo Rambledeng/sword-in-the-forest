@@ -71,6 +71,8 @@ public partial class SummaryScreen : CanvasLayer
         Add(stack, Fill("summary.souls", ("deaths", _soulsFallen)));
         Add(stack, Fill("summary.rooms", ("rooms", _stats.RoomsCleared), ("total", _totalRooms))
             + "   " + Tr("summary.time").Replace("{time}", $"{(int)t.TotalMinutes}:{t.Seconds:00}"));
+        if (_stats.Perk is Run.StarterPerk perk)
+            Add(stack, Tr("summary.perk").Replace("{perk}", PerkText.Name(perk)));
         if (_stats.Upgrades.Count > 0)
             Add(stack, Tr("summary.upgrades").Replace("{list}", string.Join(", ", _stats.Upgrades.Select(u => Tr($"upgrade.{UpgradeScreen.Key(u)}.name")))));
         stack.AddChild(new Control { CustomMinimumSize = new Vector2(0, 4) });
@@ -131,6 +133,9 @@ public partial class SummaryScreen : CanvasLayer
         return s;
     }
 
+    /// <summary>Every line wraps at this width, so long lines in any language stay on the 480 px screen (layout, not tuning).</summary>
+    private const float LineWidthPx = 440;
+
     private Label Add(Container parent, string text, Color? color = null)
     {
         var l = new Label
@@ -139,6 +144,8 @@ public partial class SummaryScreen : CanvasLayer
             AutoTranslateMode = Node.AutoTranslateModeEnum.Disabled,
             HorizontalAlignment = HorizontalAlignment.Center,
             Modulate = color ?? Colors.White,
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
+            CustomMinimumSize = new Vector2(LineWidthPx, 0),
         };
         parent.AddChild(l);
         Lines.Add(text);

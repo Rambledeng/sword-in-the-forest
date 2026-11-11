@@ -136,4 +136,17 @@ public class RunPlanTests
             Assert.Equal(0, plan.AreaStart(Area.Tutorial));
         }
     }
+
+    [Fact]
+    public void UpgradeChoices_AreDistinct_AndEveryUpgradeIsOffered()
+    {
+        var seen = new HashSet<Upgrade>();
+        for (var seed = 1; seed <= 200; seed++)
+            foreach (var step in RunPlan.Build(seed).Steps.Where(s => s.Kind == RunStepKind.Upgrade))
+            {
+                Assert.Equal(RunPlan.UpgradeChoices, step.Choices.Distinct().Count());
+                seen.UnionWith(step.Choices);
+            }
+        Assert.Equal(Enum.GetValues(typeof(Upgrade)).Length, seen.Count);
+    }
 }

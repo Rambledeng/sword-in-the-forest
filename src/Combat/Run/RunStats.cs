@@ -21,6 +21,8 @@ namespace SwordInTheForest.Run
         public bool Won { get; private set; }
         public double ElapsedMs { get; set; }
         public IReadOnlyList<Upgrade> Upgrades => _upgrades;
+        /// <summary>This soul's starter perk (none in drills and test arenas).</summary>
+        public StarterPerk? Perk { get; set; }
 
         /// <summary>Merit was gained (the game shows a gold glitter instead of a counter).</summary>
         public event Action? MeritGained;

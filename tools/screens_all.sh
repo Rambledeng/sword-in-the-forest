@@ -17,6 +17,8 @@ shots=(
   "screens/MenuPauseSettings 30 pause_settings"
   "screens/MenuSummaryLoss 200 summary_loss"
   "screens/MenuSummaryWin 200 summary_win"
+  "scenarios/food_drop 62 food"
+  "scenarios/flash_step 26 flash_step"
 )
 for loc in "${locales[@]}"; do
   for s in "${shots[@]}"; do

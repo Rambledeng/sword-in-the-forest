@@ -34,6 +34,8 @@ public partial class RunTuning : Resource
     [Export(PropertyHint.Range, "0,1,0.05")] public float FakePostureAfter { get; set; }
     /// <summary>A fake that drops the act first picks its weapon back up, taking this long, then strikes.</summary>
     [Export(PropertyHint.Range, "0,1500,10")] public int FakeGrabMs { get; set; }
+    /// <summary>The run's first fake to drop the act grabs slowly, so it is clearly readable (like the first red attack's lead).</summary>
+    [Export(PropertyHint.Range, "0,2500,10")] public int FirstFakeGrabMs { get; set; }
     /// <summary>A spared enemy takes this long to stand up before it walks out.</summary>
     [Export(PropertyHint.Range, "0,3000,50")] public int SpareStandMs { get; set; }
     /// <summary>Its walking speed out of the room, as a fraction of its move speed.</summary>
@@ -49,6 +51,52 @@ public partial class RunTuning : Resource
     [Export(PropertyHint.Range, "0,5,1")] public int DeepGourdSips { get; set; }
     [Export(PropertyHint.Range, "1,4,0.05")] public float IronDeflectFactor { get; set; }
     [Export(PropertyHint.Range, "0,10,1")] public int MercifulCutHeal { get; set; }
+    /// <summary>瞬步: the dash covers this distance...</summary>
+    [Export(PropertyHint.Range, "10,160,1")] public float FlashStepDistancePx { get; set; }
+    /// <summary>...in this time...</summary>
+    [Export(PropertyHint.Range, "40,500,5")] public int FlashStepMs { get; set; }
+    /// <summary>...cutting every enemy within this distance of its path...</summary>
+    [Export(PropertyHint.Range, "0,40,1")] public float FlashStepWidthPx { get; set; }
+    /// <summary>...for this damage and posture damage...</summary>
+    [Export(PropertyHint.Range, "0,10,1")] public int FlashStepDamage { get; set; }
+    [Export(PropertyHint.Range, "0,100,1")] public int FlashStepPosture { get; set; }
+    /// <summary>...and is ready again after this long.</summary>
+    [Export(PropertyHint.Range, "500,20000,100")] public int FlashStepCooldownMs { get; set; }
+    /// <summary>余威: a finisher deals this much posture to every other enemy...</summary>
+    [Export(PropertyHint.Range, "0,100,1")] public float DreadPosture { get; set; }
+    /// <summary>...within this distance of you.</summary>
+    [Export(PropertyHint.Range, "0,240,1")] public float DreadRadiusPx { get; set; }
+    /// <summary>止水: your deflects cost you this fraction of the posture they used to.</summary>
+    [Export(PropertyHint.Range, "0,1,0.05")] public float StillWaterFactor { get; set; }
+    /// <summary>Taking it again multiplies the cooldown by this.</summary>
+    [Export(PropertyHint.Range, "0.1,1,0.05")] public float FlashStepRepeatCooldownFactor { get; set; }
+
+    [ExportGroup("Starter perks")]
+    /// <summary>Each new soul's minor trait, a weaker upgrade: Hale's health...</summary>
+    [Export(PropertyHint.Range, "0,10,1")] public int PerkHealth { get; set; }
+    /// <summary>...Sturdy's posture bar...</summary>
+    [Export(PropertyHint.Range, "0,100,1")] public float PerkPosture { get; set; }
+    /// <summary>...Even Breath's posture recovery factor...</summary>
+    [Export(PropertyHint.Range, "1,3,0.05")] public float PerkBreathFactor { get; set; }
+    /// <summary>...Spare Sip's gourd sips...</summary>
+    [Export(PropertyHint.Range, "0,5,1")] public int PerkSips { get; set; }
+    /// <summary>...and Steady Hand's deflect posture factor.</summary>
+    [Export(PropertyHint.Range, "1,3,0.05")] public float PerkDeflectFactor { get; set; }
+
+    [ExportGroup("Food")]
+    /// <summary>Chance that a defeated enemy (not the tutorial ghost or the boss) drops food.</summary>
+    [Export(PropertyHint.Range, "0,1,0.01")] public float FoodDropChance { get; set; }
+    /// <summary>Relative chances of each food when something drops: 米饭 rice...</summary>
+    [Export(PropertyHint.Range, "0,10,0.05")] public float RiceWeight { get; set; }
+    /// <summary>...酱牛肉 braised beef...</summary>
+    [Export(PropertyHint.Range, "0,10,0.05")] public float BeefWeight { get; set; }
+    /// <summary>...and 烧鸡 roast chicken.</summary>
+    [Export(PropertyHint.Range, "0,10,0.05")] public float ChickenWeight { get; set; }
+    [Export(PropertyHint.Range, "0,10,1")] public int RiceHeal { get; set; }
+    [Export(PropertyHint.Range, "0,10,1")] public int BeefHeal { get; set; }
+    [Export(PropertyHint.Range, "0,10,1")] public int ChickenHeal { get; set; }
+    /// <summary>You pick food up by walking this close to it, and only while hurt.</summary>
+    [Export(PropertyHint.Range, "2,60,1")] public float FoodPickupPx { get; set; }
 
     [ExportGroup("Sword's lines")]
     [Export(PropertyHint.Range, "500,10000,100")] public int SwordLineMs { get; set; }

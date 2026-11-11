@@ -16,6 +16,9 @@ public partial class UpgradeScreen : CanvasLayer
     private readonly List<Button> _buttons = new();
     private bool _done;
 
+    /// <summary>Height kept free at the bottom for the sword's lines (layout, not tuning).</summary>
+    private const float VoiceBoxClearancePx = 64;
+
     public UpgradeScreen(IReadOnlyList<Upgrade> choices) => _choices = choices;
     public UpgradeScreen() => _choices = Array.Empty<Upgrade>();
 
@@ -30,6 +33,9 @@ public partial class UpgradeScreen : CanvasLayer
         Upgrade.KeenEdge => "keen_edge",
         Upgrade.DeepGourd => "deep_gourd",
         Upgrade.IronDeflect => "iron_deflect",
+        Upgrade.FlashStep => "flash_step",
+        Upgrade.Dread => "dread",
+        Upgrade.StillWater => "still_water",
         _ => "merciful_cut",
     };
 
@@ -43,7 +49,11 @@ public partial class UpgradeScreen : CanvasLayer
             .Replace("{posture}", Mathf.RoundToInt(r.BroadStancePosture).ToString())
             .Replace("{pct}", Pct(u == Upgrade.SteadyBreath ? r.SteadyBreathFactor : r.IronDeflectFactor))
             .Replace("{damage}", r.KeenEdgeDamage.ToString())
-            .Replace("{sips}", r.DeepGourdSips.ToString());
+            .Replace("{sips}", r.DeepGourdSips.ToString())
+            .Replace("{seconds}", (r.FlashStepCooldownMs / 1000f).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture))
+            .Replace("{flash_damage}", r.FlashStepDamage.ToString())
+            .Replace("{dread}", Mathf.RoundToInt(r.DreadPosture).ToString())
+            .Replace("{calm}", Mathf.RoundToInt((1f - r.StillWaterFactor) * 100f).ToString());
     }
 
     public override void _Ready()
@@ -55,6 +65,8 @@ public partial class UpgradeScreen : CanvasLayer
         AddChild(dim);
         var center = new CenterContainer();
         center.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        // Centre in the space above the sword's text box, so tall cards never run into it.
+        center.OffsetBottom = -VoiceBoxClearancePx;
         AddChild(center);
         var stack = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
         stack.AddThemeConstantOverride("separation", 8);
@@ -75,6 +87,8 @@ public partial class UpgradeScreen : CanvasLayer
                 CustomMinimumSize = new Vector2(132, 92),
                 Alignment = HorizontalAlignment.Center,
                 VerticalIconAlignment = VerticalAlignment.Top,
+                IconAlignment = HorizontalAlignment.Center,
+                Icon = PixelIcons.For(u),
             };
             var index = i;
             b.Pressed += () => Choose(index);
