@@ -2,7 +2,7 @@ using SwordInTheForest.Director;
 
 namespace Combat.Tests;
 
-/// <summary>How telemetry becomes director evidence (M2 decisions in PROGRESS.md).</summary>
+/// <summary>How telemetry becomes director evidence (M2 decisions in docs/history/demo-progress.md).</summary>
 public class ThreatEvidenceTests
 {
     private const double Arc = 220;

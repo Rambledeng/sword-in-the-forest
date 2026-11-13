@@ -5,7 +5,7 @@ using SwordInTheForest.Director;
 namespace SwordInTheForest.Sim;
 
 /// <summary>
-/// The M5 evaluation (docs/SPEC.md, "Evaluation in M5"), on simulated players whose true values
+/// The M5 evaluation (docs/history/demo-spec.md, "Evaluation in M5"), on simulated players whose true values
 /// are known. Writes three tidy CSV files for analysis/:
 /// <list type="bullet">
 /// <item><c>runs.csv</c>: one row per run (experiment, population, reaction model, prior, calibration, challenge, timing).</item>

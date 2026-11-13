@@ -126,7 +126,9 @@ To play from source, open `game/project.godot` in Godot and press F5. To export,
 A `v*` tag runs `.github/workflows/release.yml`: it exports both builds, smoke-tests the Linux
 one, attaches them to a GitHub Release and pushes them to itch.io with butler.
 
-Design and progress notes: [docs/SPEC.md](docs/SPEC.md), [PROGRESS.md](PROGRESS.md).
+Where the project is and where it is going: [PROGRESS.md](PROGRESS.md) and
+[docs/ROADMAP.md](docs/ROADMAP.md). The demo's original spec and build log are in
+[docs/history/](docs/history/).
 
 ## Credits
 
