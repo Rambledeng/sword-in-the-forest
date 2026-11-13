@@ -68,8 +68,17 @@ Answer these from what players do (roadmap B2), then delete them.
 
 ## Playtest notes
 
-- One friend played v0.1.x in November 2026: largely positive, little detail because the demo
-  is short. No specific issues recorded.
+- One friend played v0.1.x in November 2026: largely positive, no specific issues. He said it
+  merges Sekiro, Undertale and Dead Cells well and is "already better than 60% of Steam
+  games", while noting how short the demo is.
+
+## Decisions
+
+- Hours: 3–4 a week (sometimes 8) until the thesis; 8–16 after.
+- The code stays public when the game is sold, source-available like Barotrauma; MIT is
+  replaced before v0.2 (roadmap A5).
+- Residence: orientation year after graduation, then a highly skilled migrant permit through a
+  job. Check the right to side income at each step before the game earns money (PLAN section 10).
 
 ## Log
 

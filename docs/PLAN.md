@@ -17,7 +17,8 @@ Each is short here and explained in its section.
 2. **Your right to earn money as a student, and tax.** Check it before the first euro arrives,
    not after (section 10).
 3. **AI art is not free of copyright questions**, and stores make you declare it (section 5).
-4. **The public repo and paid art do not mix** without a decision first (section 5).
+4. **Keeping the code public the way Barotrauma does means leaving MIT** before the first
+   sale (section 5).
 5. **A Steam page early is worth more than a better game late** (section 8).
 6. **A save file with a version number** before anything persists between runs (roadmap D1).
 7. **Watching a stranger play in silence** teaches more than any form (section 7).
@@ -44,12 +45,13 @@ and an interrupted march leaves nothing while an interrupted ladder leaves the l
 
 ## 2. Time
 
-- **Until the thesis is in (around March 2027): 3–4 hours a week, fixed.** Two sittings, for
-  example one weekday evening and one weekend morning. Phases A to C are sized for this: setup,
-  playtests, and design pages that are thinking more than building.
+- **Until the thesis is in (around March 2027): 3–4 hours a week, 8 in a good week.** Two
+  sittings, for example one weekday evening and one weekend morning. Phases A to C are sized
+  for this: setup, playtests, and design pages that are thinking more than building.
 - **In a crunch week, zero is fine.** The loop survives gaps because the state lives in the
   repo, not in your head.
-- **After the thesis: about 8 hours a week** if life allows. Phase D starts in earnest then.
+- **After the thesis: at least 8 hours a week, up to 16.** Phase D starts in earnest then. The
+  job search in the orientation year comes first when the two collide.
 - **One rule against drift:** every sitting ends with something merged or something written
   down. Half-finished branches are what kill part-time projects.
 
@@ -143,15 +145,32 @@ public repository. The day a commissioned, purchased or carefully made asset goe
 may take it unless you decide first (roadmap A5). The usual answers: keep art in a private
 repository pulled in as a submodule, or state in LICENSE that the MIT licence covers code only
 and the art is all rights reserved. Either works; the second is simpler but leaves the files
-downloadable. Also decide whether the code stays open once the game is for sale. Open code is
-good for your applications and harms sales little, since the build pipeline and the art are
-what a copier would need.
+downloadable.
+
+**Decided (13 November 2026): the code stays public when the game is sold, in the way
+Barotrauma does it.** The source is there to read and to mod, not to copy or resell the game.
+What that means in practice:
+
+- That model is "source-available", not open source. MIT allows anyone to sell the game, so
+  the licence has to change before the first paid release (roadmap A5).
+- You are the only copyright holder, so you may relicense future versions. The versions already
+  published under MIT stay MIT for whoever has them. The demo is small, so this costs little,
+  but it is a reason to switch before the roguelike core lands and not after.
+- Options, simplest first: an existing source-available licence such as PolyForm Noncommercial
+  (reading, modding and non-commercial sharing allowed, selling not); or a custom licence
+  modelled on Barotrauma's, which also says mods may be shared and that a bought copy is needed
+  to play. Do not copy their text without reading what it promises.
+- The `src/Director` library is the part with value for your applications. Consider leaving
+  it under MIT as its own piece, and putting the game under the new licence.
+- Art, music and the sword's text are "all rights reserved" either way, stated in LICENSE and
+  CREDITS.md, with CC0 pieces still marked CC0.
 
 ## 6. Funding
 
 In order of realism for a first game with no audience yet.
 
-1. **itch.io "pay what you want"** on the demo. Small sums, but it is on today and costs nothing.
+1. **itch.io "pay what you want"** on the demo. Small sums and no cost, but it is income, so
+   switch it on only after the check in section 10.
 2. **Dutch and European cultural funds.** The Creative Industries Fund NL (Stimuleringsfonds)
    has funded games under its digital culture grants. An application wants a playable prototype
    and a plan, both of which you have. Check the current rounds and whether a student or a
@@ -204,6 +223,10 @@ tell you what is missing, only what they did. So collect what they did.
   during the thesis.
 - **The hook in one sentence** for every page and post: "A wuxia roguelike where the sword
   learns how fast you react."
+- **Comparables.** Your first playtester described it unprompted as Sekiro, Undertale and Dead
+  Cells merged well. That is the store page's "for fans of" line: Sekiro for the deflects,
+  Undertale for sparing, Dead Cells for the runs. It also says which promise is thinnest today:
+  the Dead Cells part, which is phases D and E.
 - **Steam's waiting periods.** A new developer account waits about 30 days after paying the fee
   before a first release, and a page must be public for two weeks before launch. Neither is a
   problem if the page goes up early.
@@ -221,11 +244,23 @@ once.
 
 ## 10. Admin and legal
 
-- **Your right to earn.** If you study in the Netherlands on a residence permit, find out what
-  it allows for self-employment before the first payment. As far as I know, non-EU students
-  may work for themselves beside their studies if registered with the Chamber of Commerce
-  (KVK), but rules change and I do not know your situation. Ask the university's international
-  office or the IND.
+- **Your right to earn.** Your path is study permit, then the orientation year (zoekjaar),
+  then a highly skilled migrant (kennismigrant) permit through a job. Each treats side income
+  differently, so check these three with the IND or the university's international office
+  before the first payment. What I believe, without certainty:
+  - *Study permit:* self-employment beside your studies is allowed if you register with the
+    Chamber of Commerce (KVK).
+  - *Orientation year:* work is free, including for yourself. This is the easiest year to open
+    the Steam account and take first revenue.
+  - *Highly skilled migrant:* the permit rests on the job with your sponsor. Whether a small
+    business beside it is allowed, and on what terms, is the one to ask about explicitly.
+- **Your future employment contract.** Many Dutch contracts ask permission for side activities
+  (nevenwerkzaamheden), and software employers often claim what you make. Name the game when
+  you negotiate, and get a line in writing that it stays yours. This matters most if the job
+  is at a game studio.
+- **Free until then.** While the game earns nothing (free demo, no donations switched on),
+  none of the above bites. Pay-what-you-want on itch.io counts as income, so leave it off
+  until you have checked.
 - **Tax.** Selling a game is a business activity. Below a turnover threshold, Dutch small
   businesses can be exempt from charging VAT, and on Steam Valve is the seller to the customer
   anyway. Steam asks for tax and bank details when you open the account, including a form for

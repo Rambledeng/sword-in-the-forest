@@ -34,7 +34,8 @@ consequence of merit and karma beyond the closing line.
 ## The version ladder
 
 Each rung is a release you could stop at and still have something whole. The windows assume
-3–4 hours a week until the thesis is handed in and about 8 a week after; they are guesses.
+3–4 hours a week until the thesis is handed in and 8 a week after. They are guesses; at 16
+hours a week the later rungs come about a third sooner.
 
 | Version | Name | A player can | Phases | Rough window |
 | --- | --- | --- | --- | --- |
@@ -66,10 +67,12 @@ Make the laptop the main workplace. Nothing here changes the game.
   the eight questions from PLAN section 7. No data leaves the machine unless the player sends it.
 - [ ] **A4 · Key rebinding (M).** Keyboard, mouse and gamepad, saved in `settings.cfg`. Steam
   players expect it and it is the first accessibility request you will get.
-- [ ] **A5 · Decide the asset and licence policy (decision, no code).** The repo is public and the
-  code is MIT. Before the first asset that is not CC0 goes in, pick one: keep art in a private
-  repository or Git submodule, or keep everything public under a licence that reserves the
-  art. See PLAN section 5.
+- [ ] **A5 · Change the licence (S, your decision on the text).** Decided: the code stays public
+  after the game goes on sale, as Barotrauma's does, for reading and modding and not for
+  reselling. MIT does not say that. Before v0.2: pick the source-available licence (PLAN
+  section 5 lists the options), decide whether `src/Director` stays MIT, state that art, music
+  and text are all rights reserved except the CC0 pieces, and update LICENSE, CREDITS.md and
+  the README.
 
 ## Phase B · Listen (November 2026 – January 2027)
 
