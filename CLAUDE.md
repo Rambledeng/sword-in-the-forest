@@ -1,43 +1,63 @@
 # Sword in the Forest: working rules
 
-Read docs/SPEC.md and PROGRESS.md before anything else. Work only on the
-milestone named in the kickoff message, and stop at its "Done when" list.
+A Godot 4.7.2 .NET wuxia roguelike. The demo (v0.1.1) is released; work now follows
+`docs/ROADMAP.md`, mostly in local sessions on Windows.
+
+## Start of a session
+1. Read `PROGRESS.md` (one page).
+2. Read only the roadmap item you were given: `grep -n -A8 "\*\*<ID> ·" docs/ROADMAP.md`.
+   If it is marked `[design: X]`, read `docs/design/X.md`; if that file is missing, stop and ask.
+3. Give a short plan and wait for approval before writing code, unless told to go ahead.
+Do not read `docs/history/`, `docs/PLAN.md` or `docs/report.md` unless the task is about them.
+
+## Where things are
+- `src/Combat` (attack timeline, response window, posture, telemetry; `Run/` has the run plan,
+  room templates, mercy, upgrades, perks, food) and `src/Director` (the reaction-time filter).
+  Both are .NET Standard 2.1, C# 9, and never reference Godot. Rules belong here, with unit tests.
+- `game/scripts`: `Actors` (player, enemies), `Run` (RunScene, Room), `Ui`, `Core` (autoloads:
+  settings, director service, telemetry, tunables), `Fx`, `Bots`, `scenarios`.
+- `game/tuning/*.tres` numbers; `game/localization/strings.csv` text; `game/scenes/scenarios/` tests.
+- `sim/` and `analysis/` produce `docs/report.md` (`tools/report.sh`; edit the template, not the report).
 
 ## Build and test
-- `dotnet build` and `dotnet test` (repo root, SwordInTheForest.sln) pass before every commit.
-  The solution includes the Godot game project, so `dotnet build` also compiles the game.
-- Scenario tests run headless: `tools/scenario.sh [name ...]` (no name = all in
-  game/scenes/scenarios/). It builds, imports on first run, then for each runs
-  `godot --headless --path game -- --scenario <name>`. Pass = exit 0 AND a final
-  `SCENARIO PASS <name>` line. Logs go to .logs/scenario-<name>.log.
-- New scenario: a scene in game/scenes/scenarios/<name>.tscn whose root script
-  derives from `SwordInTheForest.Scenarios.Scenario` (override `Step(frame)`, use `Check`).
-- Screenshots (this cloud machine can render via Xvfb + Mesa):
-  `tools/screenshot.sh <scene> [locale] [frames] [name]` -> docs/screens/<name or scene>.png
-  (scene path is relative to game/scenes without .tscn; output is the 480x270 viewport).
-  `tools/screenshot.sh screens/Showcase "" 6000 x` stages a seeded fight and saves combat_*.png.
-  Viewport readback lags one frame: capture one frame after the moment you want.
-- Other CLI flags after `--`: `--locale en|nl|zh_CN`.
-- Toolchain here: Godot 4.7.2 .NET at `godot`, .NET SDK 8. Godot.NET.Sdk 4.7.2 targets net8.0.
+- `dotnet build` and `dotnet test` (repo root) pass before every commit. The solution includes
+  the game project.
+- Scenarios, headless: `tools/scenario.sh [name ...]` (no name = all). Pass = exit 0 and a final
+  `SCENARIO PASS <name>` line. Logs in `.logs/scenario-<name>.log`. Run the ones your change
+  touches while working, and all of them before the pull request.
+- New scenario: `game/scenes/scenarios/<name>.tscn` whose root script derives from
+  `SwordInTheForest.Scenarios.Scenario` (override `Step(frame)`, use `Check`).
+- Screenshots: `tools/screenshot.sh <scene> [locale] [frames] [name]` → `docs/screens/`.
+  Readback lags one frame: capture one frame after the moment you want.
+- The scripts are bash and read the Godot binary from `GODOT` (default `godot`).
+- CLI flags after `--`: `--locale en|nl|zh_CN`, `--scenario <name>`, `--dev`.
+
+### Local commands (Windows)
+Not set up yet: roadmap item A1 fills this in (Git Bash, `GODOT=<path to the console .exe>`).
+Until then CI on Linux is the referee for scenarios.
 
 ## Conventions
 - C# with nullable reference types on; one public type per file.
-- src/Director and src/Combat target .NET Standard 2.1 (C# 9) and never reference Godot.
-  Combat rules (response window, roll frames, AttackRunner, telemetry format) live in src/Combat.
-- Player-facing text is a key in game/localization/strings.csv (en, nl, zh_CN).
-  tests/Localization.Tests fails on missing languages, mismatched placeholders,
-  bad key prefixes, or scene text that is not a key.
-- Tunable numbers live in game/tuning/*.tres, never as literals in code.
-- Assets come from game/assets/third_party/ or are drawn in code;
-  every new one goes in CREDITS.md.
+- Every feature gets a unit test or a scenario.
+- Player-facing text is a key in `strings.csv` (en, nl, zh_CN). Ranbao writes the sword's
+  Chinese first; English and Dutch follow it. List new Chinese lines for review in the pull request.
+- Tunable numbers live in `game/tuning/*.tres`, never as literals in code.
+- Everything random in a run uses a seeded stream; a new feature gets its own stream so old
+  seeds keep their layouts.
+- Anything that changes what the player's answers mean (auto-deflects, slow motion, a loss of
+  control) must tell the director, or its estimate is polluted.
+- Assets come from `game/assets/third_party/` or are drawn in code; each new one goes in
+  CREDITS.md with its source and licence, including the tool and terms for AI-made ones.
 
 ## Keep sessions cheap
-- Never list or read game/assets/ recursively; find files by name.
+- Never list or read `game/assets/` or `docs/screens/` recursively; find files by name.
+- Use grep to find a symbol before opening a file, and read the part you need.
 - Send long output to a file and read its tail; tests print one-line summaries.
 - Don't re-read a file you just wrote. Don't start subagents unless asked.
-- If one error survives three fix attempts, stop, log it in PROGRESS.md, and ask.
+- If one error survives three fix attempts, stop, note it in PROGRESS.md, and ask.
 
-## End of every session
+## End of a session
 1. All tests green.
-2. PROGRESS.md updated: done, next, known issues, questions for the playtest.
-3. Commit, push the milestone branch, open a pull request to main.
+2. PROGRESS.md: update "Now", add at most three lines to the log, and fix the known issues and
+   open questions your change touched. Tick the item in `docs/ROADMAP.md`.
+3. Commit on a branch, push, open a pull request to main.

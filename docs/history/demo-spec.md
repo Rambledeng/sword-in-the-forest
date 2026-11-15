@@ -1,4 +1,6 @@
-# Sword in the Forest (林中剑): Demo Spec & Cloud Build Plan
+# Sword in the Forest (林中剑): Demo Spec & Cloud Build Plan (archive)
+
+Archived on 2026-11-11. The demo this describes shipped as v0.1.1. What comes next is in `docs/ROADMAP.md`.
 
 Oct 31, 2026 · @Ranbao
 
