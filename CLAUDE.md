@@ -33,8 +33,18 @@ Do not read `docs/history/`, `docs/PLAN.md` or `docs/report.md` unless the task 
 - CLI flags after `--`: `--locale en|nl|zh_CN`, `--scenario <name>`, `--dev`.
 
 ### Local commands (Windows)
-Not set up yet: roadmap item A1 fills this in (Git Bash, `GODOT=<path to the console .exe>`).
-Until then CI on Linux is the referee for scenarios.
+Run the bash scripts in Git Bash (Git for Windows brings `timeout` and `grep`). From PowerShell
+or cmd, a bare `bash` may start WSL instead, so call `"C:\Program Files\Git\bin\bash.exe"`.
+Point `GODOT` at the **console** exe of Godot 4.7.2 .NET (the plain exe sends no output, so no
+PASS line). On Ranbao's laptop, in Git Bash from the repo root:
+```bash
+export GODOT=/d/Tools/Godot_v4.7.2-stable_mono_win64/Godot_v4.7.2-stable_mono_win64_console.exe
+dotnet build && dotnet test            # 183 unit tests, about 15 s
+tools/scenario.sh                      # all 32 scenarios, about 50 s; or name some
+```
+Put the `export` line in `~/.bashrc` to keep it. .NET SDK 8 is at `C:\Program Files\dotnet`.
+Checked on 2026-11-15 (Windows 11): everything passes with no script changes. dotnet prints
+its output in Chinese on this machine; that is the system locale, not an error.
 
 ## Conventions
 - C# with nullable reference types on; one public type per file.
