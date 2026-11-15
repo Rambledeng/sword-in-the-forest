@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Records the README GIFs with Godot's Movie Maker (seeded, bot-played runs) -> docs/gifs/*.gif.
-# Needs xvfb-run (or a display) and ffmpeg. About a minute.
+# Needs xvfb-run and ffmpeg, so it runs in a Linux cloud session, not on Windows. About a minute.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 GODOT="${GODOT:-godot}"

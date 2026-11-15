@@ -41,10 +41,11 @@ PASS line). On Ranbao's laptop, in Git Bash from the repo root:
 export GODOT=/d/Tools/Godot_v4.7.2-stable_mono_win64/Godot_v4.7.2-stable_mono_win64_console.exe
 dotnet build && dotnet test            # 183 unit tests, about 15 s
 tools/scenario.sh                      # all 32 scenarios, about 50 s; or name some
+tools/screenshot.sh Title zh_CN 10 x   # about 20 s; a game window flashes up (no xvfb)
 ```
 Put the `export` line in `~/.bashrc` to keep it. .NET SDK 8 is at `C:\Program Files\dotnet`.
-Checked on 2026-11-15 (Windows 11): everything passes with no script changes. dotnet prints
-its output in Chinese on this machine; that is the system locale, not an error.
+Checked on 2026-11-15 (Windows 11): tests, scenarios and screenshots work with no script
+changes. `tools/gifs.sh` stays a cloud job (it needs xvfb and ffmpeg). dotnet prints its output in Chinese on this machine; that is the system locale, not an error.
 
 ## Conventions
 - C# with nullable reference types on; one public type per file.

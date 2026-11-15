@@ -118,7 +118,7 @@ tools/report.sh                  # simulation study → docs/figures/*.png and d
 ```
 
 ```bash
-tools/gifs.sh                    # README GIFs with Godot's Movie Maker (needs xvfb and ffmpeg)
+tools/gifs.sh                    # README GIFs with Godot's Movie Maker (Linux: needs xvfb and ffmpeg)
 ```
 
 To play from source, open `game/project.godot` in Godot and press F5. To export, install the
