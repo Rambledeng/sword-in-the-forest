@@ -111,7 +111,30 @@ one page in `docs/design/`. They are listed in the order the code will need them
   madness (疯魔) states, and how the three clears decide an ending.
 - [ ] **C8 · `story.md`.** What the player learns and when: the sword's hints per level, the first
   soul, 鹤箬子, and the three endings as scenes. You write this one in Chinese first.
-- [ ] **C9 · `art-direction.md`.** Written after the spike in E1.
+- [ ] **C9 · `art-direction.md`.** Drafted in S2, finished after the spike in E1.
+
+## Track S · Assets (between coding items, any time after A5)
+
+How art, music and sound get made: AI drafts finished by hand, free tools first. The rules are
+in `docs/design/asset-pipeline.md`. These items need no game code from phase D, so they suit an
+evening when code does not appeal. Before the thesis is handed in, do S1 to S3 and E1 and stop.
+
+- [ ] **S1 · Asset scaffolding (S), with A5.** `game/assets/own/`, `ASSETS.csv` with one row per
+  file, a unit test that fails on a file without a row, and an "Own assets" section in
+  CREDITS.md. Check the AI Disclosure section of the itch.io page.
+- [ ] **S2 · Style page draft and conform script (S).** About fifteen references, a palette of
+  about 32 colours in `game/tuning/` with the signal colours reserved, a first
+  `docs/design/art-direction.md`, and `tools/art/conform` (snap to the grid, reduce to the
+  palette, pack a character sheet) with its test.
+- [ ] **S3 · Generation setup (S–M).** ComfyUI with Z-Image on the OMEN 17 and ACE-Step 1.5 on
+  both laptops; the Ubuntu laptop takes queued batches over Tailscale. Write the commands into
+  CLAUDE.md under "Local commands". If the GTX 1070 cannot run a tool, it does audio only.
+- [ ] **S4 · Scene player for moved stills (M) [design: cutscenes].** After E1. A cutscene is a
+  data file: layers, pans, zooms, fades, the game's own particles, lines from `strings.csv`.
+  One scenario plays a two-shot scene.
+- [ ] **S5 · Asset batches per level (L, split per level).** After the thesis. Each level's
+  design page lists its assets; make them by kind (characters, tiles, stills, music, sound),
+  one kind per sitting, each file recorded.
 
 ## Phase D · Roguelike core (v0.2)
 
@@ -145,8 +168,11 @@ one page in `docs/design/`. They are listed in the order the code will need them
 
 - [ ] **E1 · Art-direction spike (M).** Before any new level is drawn: restyle the player, one
   enemy and one bamboo room three ways (the current pack with a palette pass, hand-edited pixel
-  art, AI-assisted and then cleaned by hand) and compare screenshots. Write `art-direction.md`.
-  It comes first here because every room built before the decision is a room to redo.
+  art, AI-assisted and then cleaned by hand) and compare screenshots. Also make one portrait of
+  the sword, one cutscene still moved by code and the same still as a short generated clip, one
+  area track and five sounds. Time every step, show the results to playtesters, and finish
+  `art-direction.md`. It needs S1 to S3 and nothing from phase D, so it may be done early;
+  every room built before the decision is a room to redo.
 - [ ] **E2 · Choose a direction (M) [design: run-map].** After a room, two or three exits, each
   marked with what lies beyond. `RunPlan` becomes a small graph; the seed tests grow with it.
 - [ ] **E3 · Elite rooms (M).** A stronger variant of each enemy with one extra move; drops a relic.

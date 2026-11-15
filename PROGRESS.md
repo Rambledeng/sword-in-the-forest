@@ -79,11 +79,16 @@ Answer these from what players do (roadmap B2), then delete them.
   replaced before v0.2 (roadmap A5).
 - Residence: orientation year after graduation, then a highly skilled migrant permit through a
   job. Check the right to side income at each step before the game earns money (PLAN section 10).
+- Assets: AI drafts finished by hand, free tools first, every file recorded, honest disclosure
+  without advertising it. Rules in `docs/design/asset-pipeline.md`; steps in roadmap track S.
 
 ## Log
 
 Newest first. Three lines per merged pull request: what changed, what to play, what is open.
 
+- **2026-11-15 · Asset plan.** `docs/design/asset-pipeline.md` and roadmap track S (S1–S5) added;
+  E1 widened to cover a portrait, a still, a clip, a track and sounds. No game changes.
+  Open: when to run the test; whether a video model runs in 16 GB.
 - **2026-11-15 · A1 Windows toolchain.** `dotnet test` and `tools/scenario.sh` pass in Git Bash
   on the laptop with `GODOT` set to the console exe; no script changes needed. Commands are in
   CLAUDE.md under "Local commands". No game changes.
