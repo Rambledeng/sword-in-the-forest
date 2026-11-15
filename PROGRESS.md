@@ -9,9 +9,9 @@ milestone, is in `docs/history/demo-progress.md`.
 - **Released:** v0.1.1 (November 2026) on GitHub Releases and
   <https://rambledeng.itch.io/sword-in-the-forest>, Windows and Linux.
 - **Phase:** A, "Move home" (see `docs/ROADMAP.md`). Development is now local on Windows.
-- **Next item:** A1, the Windows toolchain.
+- **Next item:** A2, screenshots on Windows.
 - **Tests:** 183 unit tests (Combat 145, Director 35, Localization 3) and 32 headless scenarios,
-  all passing in CI on Linux. Not yet run on Windows.
+  all passing in CI on Linux and on the Windows laptop (Git Bash).
 
 ## What exists
 
@@ -84,6 +84,9 @@ Answer these from what players do (roadmap B2), then delete them.
 
 Newest first. Three lines per merged pull request: what changed, what to play, what is open.
 
+- **2026-11-15 · A1 Windows toolchain.** `dotnet test` and `tools/scenario.sh` pass in Git Bash
+  on the laptop with `GODOT` set to the console exe; no script changes needed. Commands are in
+  CLAUDE.md under "Local commands". No game changes.
 - **2026-11-11 · Post-demo housekeeping.** The demo spec and the milestone log moved to
   `docs/history/`; `docs/ROADMAP.md`, `docs/PLAN.md` and `docs/design/` added; CLAUDE.md
   rewritten for local work; `tools/screenshot.sh` no longer requires xvfb. No game changes.

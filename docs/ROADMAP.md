@@ -54,7 +54,7 @@ levels with all three endings, and levels 3 and 4 become a free update or never.
 
 Make the laptop the main workplace. Nothing here changes the game.
 
-- [ ] **A1 · Windows toolchain (S).** `dotnet test` and `tools/scenario.sh` run in Git Bash with
+- [x] **A1 · Windows toolchain (S).** `dotnet test` and `tools/scenario.sh` run in Git Bash with
   `GODOT` pointing at the console `.exe`. Record the exact commands in CLAUDE.md under "Local
   commands". The scripts already take `GODOT` from the environment; `timeout` and `grep` come
   with Git for Windows. If Git Bash cannot be made to work, write `tools/scenario.ps1` with the
