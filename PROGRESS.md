@@ -84,6 +84,10 @@ Answer these from what players do (roadmap B2), then delete them.
 
 Newest first. Three lines per merged pull request: what changed, what to play, what is open.
 
+- **2026-11-15 · Design pages drafted (C1–C5, C7).** `docs/design/` has economy, sword-qi, save,
+  loot, run-map, level-2 and merit-karma, each ending in "Decisions for Ranbao" (21 in all).
+  No game changes. Open: answer the decisions; awareness (C6) and story (C8) are not written.
+
 - **2026-11-15 · A1 Windows toolchain.** `dotnet test` and `tools/scenario.sh` pass in Git Bash
   on the laptop with `GODOT` set to the console exe; no script changes needed. Commands are in
   CLAUDE.md under "Local commands". No game changes.
