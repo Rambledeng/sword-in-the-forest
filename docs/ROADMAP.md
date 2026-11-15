@@ -59,7 +59,7 @@ Make the laptop the main workplace. Nothing here changes the game.
   commands". The scripts already take `GODOT` from the environment; `timeout` and `grep` come
   with Git for Windows. If Git Bash cannot be made to work, write `tools/scenario.ps1` with the
   same pass rule (exit 0 and a `SCENARIO PASS` line).
-- [ ] **A2 · Screenshots on Windows (S).** `tools/screenshot.sh` now skips `xvfb-run` when it is
+- [x] **A2 · Screenshots on Windows (S).** `tools/screenshot.sh` now skips `xvfb-run` when it is
   not installed (prepared in the cloud, not yet run on Windows). Check one screenshot, then decide
   whether `tools/gifs.sh` is worth porting (it needs ffmpeg) or stays a cloud and CI job.
 - [ ] **A3 · Playtest kit (S).** A Settings button that opens the log folder (planned in the demo
