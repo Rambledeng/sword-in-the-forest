@@ -94,20 +94,21 @@ The demo has had one outside player. Every later phase is cheaper if this one is
 ## Phase C · Design pages (during the thesis months)
 
 Thinking, not code, so it fits short sittings and costs few tokens. Each is a chat that ends in
-one page in `docs/design/`. They are listed in the order the code will need them.
+one page in `docs/design/`. They are listed in the order the code will need them. A page is ticked when its "Decisions for Ranbao"
+are answered and it says "approved".
 
-- [ ] **C1 · `economy.md`.** What sword-intent (剑意) is earned from and spent on, what is lost on
+- [ ] **C1 · (drafted 2026-11-15, decisions open) `economy.md`.** What sword-intent (剑意) is earned from and spent on, what is lost on
   death, and what carries between runs (剑鸣). Whether upgrades stay "pick one of three" or become
   purchases. One currency or two.
-- [ ] **C2 · `sword-qi.md`.** The 剑气 bar: what fills it (deflects), what spends it, and the three
+- [ ] **C2 · (drafted 2026-11-15, decisions open) `sword-qi.md`.** The 剑气 bar: what fills it (deflects), what spends it, and the three
   skills 瞬步, 无懈 and 乾坤. Whether the flash step keeps its cooldown or moves to qi.
-- [ ] **C3 · `save.md`.** What the profile stores, where, and how old saves are upgraded.
-- [ ] **C4 · `loot.md`.** Relics (遗物), food, and whether the three equipment slots (冠, 衣, 履)
+- [ ] **C3 · (drafted 2026-11-15, decisions open) `save.md`.** What the profile stores, where, and how old saves are upgraded.
+- [ ] **C4 · (drafted 2026-11-15, decisions open) `loot.md`.** Relics (遗物), food, and whether the three equipment slots (冠, 衣, 履)
   are worth having beside relics.
-- [ ] **C5 · `run-map.md`.** How the player chooses a direction, the room types, how long a level
+- [ ] **C5 · (drafted 2026-11-15, decisions open) `run-map.md` and `level-2.md`.** How the player chooses a direction, the room types, how long a level
   and a run should be, and how level 2 differs from level 1.
 - [ ] **C6 · `awareness.md`.** Hostile, neutral and passive enemies, and backstab (背刺).
-- [ ] **C7 · `merit-karma.md`.** What rising merit and karma change in play, the peace (和平) and
+- [ ] **C7 · (drafted 2026-11-15, decisions open) `merit-karma.md`.** What rising merit and karma change in play, the peace (和平) and
   madness (疯魔) states, and how the three clears decide an ending.
 - [ ] **C8 · `story.md`.** What the player learns and when: the sword's hints per level, the first
   soul, 鹤箬子, and the three endings as scenes. You write this one in Chinese first.

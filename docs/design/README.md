@@ -5,9 +5,26 @@ input of a build session: "Read docs/design/economy.md and do roadmap item D2."
 
 The pages to write, in order, are items C1–C9 in `docs/ROADMAP.md`.
 
+## Pages
+
+| Page | Roadmap | Status |
+| --- | --- | --- |
+| `economy.md` | C1 → D2, D3, D7, D9 | draft, 3 decisions open |
+| `sword-qi.md` | C2 → D4, D5, D6 | draft, 3 decisions open |
+| `save.md` | C3 → D1 | draft, 2 decisions open |
+| `loot.md` | C4 → D8 | draft, 3 decisions open |
+| `run-map.md` | C5 → E2–E5, E7, E11 | draft, 3 decisions open |
+| `level-2.md` | C5 → E10 | draft, 3 decisions open |
+| `merit-karma.md` | C7 → F1–F3 | draft, 4 decisions open |
+| `awareness.md`, `story.md`, `art-direction.md` | C6, C8, C9 | not written |
+
+A draft becomes "approved on <date>" when its "Decisions for Ranbao" are answered and the
+answers are written into its rules. Only then is it input for a build session.
+
 ## Rules
 
-- One page, about 60 lines. If it needs more, it is two systems.
+- One page, about 60 lines of rules and reasons (the decisions and tests come on top). If it
+  needs more, it is two systems.
 - Chinese terms keep their characters (剑意, 剑气) with the English beside them once.
 - Numbers are starting values and say which tuning file they will live in.
 - When the code and the page disagree after playtesting, fix the page in the same pull request.
@@ -33,6 +50,10 @@ Existing systems that change (director, mercy, save file, HUD, summary) and how.
 
 ## Not in this version
 What was discussed and left out, so it is not built by accident.
+
+## Decisions for Ranbao
+Choices about story, tone or the shape of the game, each with a recommendation. Removed once
+answered.
 
 ## Open questions
 For the playtest to answer.
