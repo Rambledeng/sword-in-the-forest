@@ -108,6 +108,15 @@ Assumption: as close to zero as possible, with money spent only where nothing fr
 free and legal to sell. Its weakness is that other games use the same pack, so the game does
 not yet look like itself.
 
+**Decided (15 November 2026): AI makes drafts and you finish them by hand.** The rules are in
+`docs/design/asset-pipeline.md` and the steps are roadmap track S. In short: free and open
+tools first on your two laptops (the 16 GB one as the workbench, the Ubuntu one for overnight
+batches), small payments only after the test shows what is needed, every file recorded with its
+tool and terms, stills moved by code for cutscenes with one fair trial of generated video, and
+no generated voice. AI use in art and code is declared wherever a store asks and in the
+credits; it is not advertised and never denied. The demo already needs that declaration,
+because its translations and code-drawn icons were made with Claude.
+
 **The decision comes at roadmap item E1, by experiment.** Restyle one small slice three ways
 and look at the screenshots: a palette and lighting pass on the current pack, pixel art edited
 by hand, and AI-assisted art cleaned by hand. Until then, keep drawing effects in code and keep
