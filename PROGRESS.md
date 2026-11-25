@@ -86,6 +86,13 @@ Answer these from what players do (roadmap B2), then delete them.
 
 Newest first. Three lines per merged pull request: what changed, what to play, what is open.
 
+- **2026-11-25 · Design pages updated with Ranbao's answers.** A fall ends the run; no extra 剑意
+  for cruelty, liars come back instead (new `mercy.md`, roadmap E7b); the sword learns to finish
+  beggars; level 2 story proposed; the true ending is home in the Bitter Bamboo.
+- **2026-11-15 · Design pages drafted (C1–C5, C7).** `docs/design/` has economy, sword-qi, save,
+  loot, run-map, level-2 and merit-karma, each ending in "Decisions for Ranbao" (21 in all).
+  No game changes. Open: answer the decisions; awareness (C6) and story (C8) are not written.
+
 - **2026-11-15 · Asset plan.** `docs/design/asset-pipeline.md` and roadmap track S (S1–S5) added;
   E1 widened to cover a portrait, a still, a clip, a track and sounds. No game changes.
   Open: when to run the test; whether a video model runs in 16 GB.
