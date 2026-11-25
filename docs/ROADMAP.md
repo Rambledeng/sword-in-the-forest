@@ -183,6 +183,9 @@ evening when code does not appeal. Before the thesis is handed in, do S1 to S3 a
   passive; a cut from behind on an unaware one is a backstab that earns karma.
 - [ ] **E7 · The wine seller 卖酒人 (M).** An event room. Honest sellers heal; false ones drug the
   wine and spring an ambush. Striking an honest one is karma.
+- [ ] **E7b · Liars who come back (M) [design: mercy].** A spared false beggar may strike the
+  soul from behind on its way out, or leave and return rooms later with two friends. Cruelty
+  pays in safety, not in 剑意.
 - [ ] **E8 · More level 1 rooms (S, repeats).** From 10 templates to about 20, a few at a time.
 - [ ] **E9 · Three new enemies (M each).** Chosen for a new thing to read, not a new sprite: the
   staff (棍, a chain of quick whites to deflect in rhythm), hidden weapons (暗器, small fast
@@ -243,6 +246,7 @@ In the original design but not planned. Each needs a reason to come back.
 - Darts and thrown weapons (飞镖) for the player: a second combat system beside deflecting.
 - Money beside sword-intent: one currency until the economy page says otherwise.
 - Other weapons for the player.
-- Levels 3 (大院) and 4 (衙门): see the scope rule.
+- Levels 3 (大院) and 4 (衙门): see the scope rule. They may change; the journey only has to
+  start and end in the Bitter Bamboo (`level-2.md`, "The journey").
 - The remaining enemy weapons (剑, 斧, 弩, 鞭) beyond the three in E9.
 - macOS and web builds; voice acting; online features.

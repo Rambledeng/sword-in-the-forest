@@ -1,6 +1,6 @@
 # Economy: 剑意 and 剑鸣 (roadmap items: D2, D3, D7, D9)
 
-Status: draft, written 2026-11-15, waiting for Ranbao's answers below
+Status: draft, written 2026-11-15; Ranbao's answers of 2026-11-25 are in; one decision open
 
 ## Why
 Nothing a soul does today outlasts it except the sword's closing line, and nothing in a run is
@@ -26,13 +26,13 @@ Numbers start in a new `game/tuning/economy.tres`; the rules live in `src/Combat
    defeated: finished, spared, or killed.
 3. **Posture pays.** An enemy whose health ran out without a posture break pays half, rounded
    down. Breaking posture comes from deflecting, so the core skill is also the best income.
-4. **Sparing is not punished.** A spared beggar pays the full yield.
-5. **Cruelty pays (your decision 2).** Cutting down a genuine beggar pays double. The sword
-   says so, once.
+4. **Mercy and cruelty pay the same.** A spared beggar and one cut down both pay the normal
+   yield. Cruelty pays in safety, not in 剑意: a spared liar can come back (`mercy.md`).
+5. A liar that comes back pays again when it is defeated, like any enemy.
 6. **The free pick stays.** After it, one more of the remaining upgrades can be bought for 20,
    and each purchase in a run raises the price by 10. A reroll costs 5 and doubles each time on
    the same screen.
-7. **A fall ends the run (your decision 1).** Upgrades, relics and carried 剑意 go with the soul.
+7. **A fall ends the run** (decided 2026-11-25). Upgrades, relics and carried 剑意 go with the soul.
    The next soul starts at level 1. The tutorial stays shortened for returning players.
 8. **The sword's share.** At the end of a run, won or lost, 25% of all 剑意 earned in it
    (spent or not) is banked. Spending in a run therefore never costs anything later, and there
@@ -56,7 +56,7 @@ Numbers start in a new `game/tuning/economy.tres`; the rules live in `src/Combat
 - **Death and restart.** "The next soul continues where the last one fell and keeps its
   upgrades" is replaced by rule 7. `run_continue` is rewritten.
 - **Upgrade screen:** a price row and a reroll. **HUD and summary:** the count, earned and kept.
-- **Save file:** bank, boost ranks, 仇, 怨 (`save.md`). **Mercy:** rules 4 and 5.
+- **Save file:** bank, boost ranks, 仇, 怨 (`save.md`). **Mercy:** rules 4 and 5, `mercy.md`.
 - **Director:** none. Nothing here changes what an answer means.
 - **Later:** shops (E4) and purses on the road (`run-map.md`) are more places to earn and spend.
 
@@ -67,19 +67,16 @@ Numbers start in a new `game/tuning/economy.tres`; the rules live in `src/Combat
 - Boosts that unlock new upgrades or relics. Add them when the pools are larger (D7, D8).
 
 ## Decisions for Ranbao
-1. **Does a fall end the run?** I recommend yes (rule 7). Without it a 剑意 economy has no
-   stakes, and the director already keeps the difficulty near the player. The alternative keeps
-   today's "continue where the last one fell", with the bank as the only loss.
-2. **Should cruelty pay?** I recommend yes (rule 5). It makes sparing cost something, which is
-   what makes it a choice. It also means the sword tempts the player, which is a matter of tone.
-3. **Names.** The five boosts and the banked share need Chinese names in the sword's voice.
+Answered 2026-11-25: a fall ends the run; cutting down a beggar pays no extra.
+
+1. **Names.** The five boosts and the banked share need Chinese names in the sword's voice.
 
 ## Open questions
 For the playtest: does anyone buy the second pick, or only reroll? Is a boost every one to
 three runs too slow at 12 minutes a run? Do players notice that a health kill pays less?
 
 ## Tests
-- Unit: yield per kind and per way of defeat (rules 2 to 5); price steps (6); the share (8);
+- Unit: yield per kind and per way of defeat, the same for spared and cut down (rules 2 to 5); price steps (6); the share (8);
   boost prices and effects (9); a run's totals from a fixed seed.
 - Scenario `run_intent`: kill, spare and cut down a beggar; check the count and the summary.
 - Scenario `upgrade_buy`: free pick, paid pick, reroll, and a refusal when the soul is short.

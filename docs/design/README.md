@@ -9,13 +9,14 @@ The pages to write, in order, are items C1–C9 in `docs/ROADMAP.md`.
 
 | Page | Roadmap | Status |
 | --- | --- | --- |
-| `economy.md` | C1 → D2, D3, D7, D9 | draft, 3 decisions open |
+| `economy.md` | C1 → D2, D3, D7, D9 | draft, 1 decision open (names) |
 | `sword-qi.md` | C2 → D4, D5, D6 | draft, 3 decisions open |
 | `save.md` | C3 → D1 | draft, 2 decisions open |
 | `loot.md` | C4 → D8 | draft, 3 decisions open |
 | `run-map.md` | C5 → E2–E5, E7, E11 | draft, 3 decisions open |
-| `level-2.md` | C5 → E10 | draft, 3 decisions open |
-| `merit-karma.md` | C7 → F1–F3 | draft, 4 decisions open |
+| `level-2.md` | C5 → E10 | draft, story proposed, 3 decisions open |
+| `merit-karma.md` | C7 → F1–F3 | draft, 3 decisions open |
+| `mercy.md` | E7b | draft, from Ranbao's answers; no decisions open |
 | `awareness.md`, `story.md`, `art-direction.md` | C6, C8, C9 | not written |
 
 A draft becomes "approved on <date>" when its "Decisions for Ranbao" are answered and the
